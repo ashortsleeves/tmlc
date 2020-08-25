@@ -1,0 +1,127 @@
+.hamburger {
+  display: block;
+  float: right;
+  position: relative;
+  z-index: 1000;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  width: $button_width;
+  height: $button_height;
+  font-size: 0;
+  text-indent: -9999px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  box-shadow: none;
+  border-radius: 0;
+  border: none;
+  cursor: pointer;
+  -webkit-transition: background $button_transistion_duration;
+  -moz-transition: background $button_transistion_duration;
+  -o-transition: background $button_transistion_duration;
+  transition: background $button_transistion_duration;
+
+  &:focus {
+    outline: none;
+  }
+
+  span {
+    display: block;
+    position: absolute;
+    top: ($button_height / 2) - ($bar_thickness / 2);
+    left: $button_pad;
+    right: $button_pad;
+    border-radius: $bar_roundness;
+    height: $bar_thickness;
+    background-color: $hamburger_normal;
+    -webkit-transition: background $button_transistion_duration;
+    -moz-transition: background $button_transistion_duration;
+    -o-transition: background $button_transistion_duration;
+    transition: background $button_transistion_duration;
+
+    &::before,
+    &::after {
+      position: absolute;
+      display: block;
+      left: 0;
+      width: 100%;
+      border-radius: $bar_roundness;
+      height: $bar_thickness;
+      background-color: $hamburger_normal;
+      content: "";
+      -webkit-transition-duration: $button_transistion_duration, $button_transistion_duration;
+      -moz-transition-duration: $button_transistion_duration, $button_transistion_duration;
+      -o-transition-duration: $button_transistion_duration, $button_transistion_duration;
+      transition-duration: $button_transistion_duration, $button_transistion_duration;
+      -webkit-transition-delay: $button_transistion_duration, 0s;
+      -moz-transition-delay: $button_transistion_duration, 0s;
+      -o-transition-delay: $button_transistion_duration, 0s;
+      transition-delay: $button_transistion_duration, 0s;
+    }
+
+    &::before {
+      top: -$bar_thickness - $button_bar_space;
+      -webkit-transition-property: top, -webkit-transform;
+      -moz-transition-property: top, -moz-transform;
+      -o-transition-property: top, -o-transform;
+      transition-property: top, transform;
+    }
+
+    &::after {
+      bottom: -$bar_thickness - $button_bar_space;
+      -webkit-transition-property: bottom, -webkit-transform;
+      -moz-transition-property: bottom, -moz-transform;
+      -o-transition-property: bottom, -o-transform;
+      transition-property: bottom, transform;
+    }
+  }
+
+  @include laptop {
+    display: none;
+  }
+}
+
+button.hamburger,
+button.hamburger:hover,
+button.hamburger:focus {
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.hamburger.is-active span::before {
+  background-color: $hamburger_active;
+  top: 0;
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.hamburger.is-active span::after {
+  background-color: $hamburger_active;
+  bottom: 0;
+  -webkit-transform: rotate(-45deg);
+  -moz-transform: rotate(-45deg);
+  -ms-transform: rotate(-45deg);
+  -o-transform: rotate(-45deg);
+  transform: rotate(-45deg);
+}
+
+.hamburger.is-active span::before,
+.hamburger.is-active span::after {
+  -webkit-transition-delay: 0s, $button_transistion_duration;
+  -moz-transition-delay: 0s, $button_transistion_duration;
+  -o-transition-delay: 0s, $button_transistion_duration;
+  transition-delay: 0s, $button_transistion_duration;
+}
+
+button.hamburger.is-active {
+  background-color: transparent;
+}
+
+button.hamburger.is-active span {
+  background: none;
+}

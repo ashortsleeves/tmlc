@@ -16,33 +16,25 @@
 }
 
 // Colors
-$black:                 #333;
+$black:                 #000;
 $white:                 #fff;
-$offwhite:              #eef0fc;
-$brand-primary:         #cf5537;
-$brand-secondary:       #e39242;
-$brand-blue:            #66909c;
-$brand-blue-l:          #a6d5df;
-$brand-green-1:         #acb43d;
-$brand-green-2:         #6a8c40;
-$brand-green-3:         #274426;
+$offwhite:              #f2fbfd;
+$offblue:               #daf3f9;
+$brand-primary:         #00a7cf;
+$brand-secondary:       #1f295c;
+$brand-orange:          #ff6a35;
 $brand-hover:           lighten($brand-primary, 15%);
-
-$theme-colors: (
-  primary:              $brand-primary,
-);
 
 // Fonts
 $primary-font:          "Antique-Olive-Std-Roman_3869", sans-serif;
 $secondary-font:        "Antique-Olive-Std-Compact_3864", sans-serif;
 
 $body-font-size:        16px;
-$body-font-size-lg:     18px;
 $body-font-weight:      400;
 $body-font:             $primary-font;
-$body-color:            $black;
+$body-color:            $brand-secondary;
 $heading-font:          $secondary-font;
-$heading-color:         $black;
+$heading-color:         $brand-secondary;
 $h1-weight:             900;
 $h1-size:               48px;
 $h2-weight:             900;

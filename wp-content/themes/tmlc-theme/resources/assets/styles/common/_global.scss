@@ -30,27 +30,13 @@ img {
   max-width: 100%;
   height: auto;
 }
-h1,
-.h1,
-h2,
-.h2,
-h3,
-.h3,
-p {
-  margin-bottom: 15px;
-}
-
 
 h1,
 .h1 {
   color: $heading-color;
   font-family: $heading-font;
   font-weight: $h1-weight;
-  font-size: $h2-size;
-
-  @include laptop {
-    font-size: $h1-size;
-  }
+  font-size: $h1-size;
 }
 
 h2,
@@ -58,11 +44,7 @@ h2,
   color: $heading-color;
   font-family: $heading-font;
   font-weight: $h2-weight;
-  font-size: $h3-size;
-
-  @include laptop {
-    font-size: $h2-size;
-  }
+  font-size: $h2-size;
 }
 
 h3,
@@ -70,11 +52,7 @@ h3,
   color: $heading-color;
   font-family: $heading-font;
   font-weight: $h3-weight;
-  font-size: $body-font-size;
-
-  @include laptop {
-    font-size: $h3-size;
-  }
+  font-size: $h3-size;
 }
 
 p,
@@ -82,10 +60,6 @@ li {
   font-family: $body-font;
   font-size: $body-font-size;
   font-weight: $body-font-weight;
-
-  @include laptop {
-    font-size: $body-font-size-lg;
-  }
 }
 
 a {
@@ -117,27 +91,18 @@ ul.nav a {
   }
 }
 
+.container {
+  @include wide {
+    max-width: 1170px;
+  }
+
+  @include hd {
+    max-width: 1170px;
+  }
+}
+
 .jumbo-bg {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
-}
-
-.container {
-  @include wide {
-    max-width: 1170px !important;
-  }
-
-  @include hd {
-    max-width: 1170px !important;
-  }
-}
-
-.cardstyle {
-  padding: 15px;
-  background-color: $offwhite;
-
-  @include laptop {
-    padding: 25px;
-  }
 }

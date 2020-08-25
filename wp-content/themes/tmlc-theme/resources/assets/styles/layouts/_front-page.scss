@@ -1,0 +1,69 @@
+section.fp-hero {
+  background-color: #fff;
+  position: relative;
+  height: calc(100vh - 70px);
+
+  @include phablet {
+    height: calc(100vh - 110px);
+  }
+
+  .container {
+    height: 100%;
+
+    .cta {
+      max-width: 460px;
+    }
+
+    span.title,
+    span.subtitle {
+      display: block;
+    }
+
+    span.title {
+      color: $brand-primary;
+      font-family: $secondary-font;
+      font-size: 72px;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+    }
+
+    span.subtitle {
+      font-size: 36px;
+      line-height: 36px;
+    }
+  }
+
+  .svg-container {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 150px;
+    left: 50%;
+    overflow: hidden;
+
+    @include laptop {
+      bottom: 150px;
+    }
+
+    svg {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      display: none;
+
+      @include phablet {
+        display: block;
+      }
+    }
+  }
+
+  .fp-strapline {
+    height: 150px;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    background-color: $brand-primary;
+  }
+}

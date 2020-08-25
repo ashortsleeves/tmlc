@@ -1,19 +1,37 @@
-/** Search form */
-.search-form {
-  @extend .form-inline;
-}
+.gform_wrapper {
+  ul {
+    list-style: none;
+    padding: 0;
+  }
 
-.search-form label {
-  @extend .form-group;
+  .gfield {
+    margin-bottom: 15px;
 
-  font-weight: normal;
-}
+    input,
+    textarea {
+      border: none;
+      padding: 12px 10px;
+      width: 100%;
+      font-size: 16px;
+    }
 
-.search-form .search-field {
-  @extend .form-control;
-}
+    textarea {
+      height: 180px;
+    }
+  }
 
-.search-form .search-submit {
-  @extend .btn;
-  @extend .btn-secondary;
+  .gform_footer {
+    input[type=submit] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      cursor: pointer;
+
+      @extend .btn;
+      @extend .btn-primary;
+    }
+  }
+
+  .g-recaptcha label {
+    @extend .sr-only;
+  }
 }

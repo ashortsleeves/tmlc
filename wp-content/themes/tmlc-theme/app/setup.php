@@ -47,6 +47,9 @@ add_action('after_setup_theme', function () {
         'primary_navigation' => __('Primary Navigation', 'sage')
     ]);
 
+    // Register Custom Navigation Walker
+    require_once('wp-bootstrap-navwalker.php');
+
     /**
      * Enable post thumbnails
      * @link https://developer.wordpress.org/themes/functionality/featured-images-post-thumbnails/

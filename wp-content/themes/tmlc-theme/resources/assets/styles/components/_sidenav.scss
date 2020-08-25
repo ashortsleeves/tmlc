@@ -1,0 +1,45 @@
+.sideNav {
+  width: $sideNavWidth;
+  #{$sideNavDirection}: -$sideNavWidth;
+  // box-shadow: inset 7px 0 9px -7px rgba(0, 0, 0, 0.4);
+  position: fixed;
+  z-index: 1000;
+  height: 100%;
+  top: 0;
+  background: $brand-primary;
+  transition: all 0.3s ease;
+  overflow-y: auto;
+  padding: 10px 0;
+
+  a,
+  span {
+    display: block;
+    color: $white;
+    font-size: 16px;
+    padding: 12px 20px;
+  }
+
+  &.sideNav-open {
+    #{$sideNavDirection}: 0;
+
+    @include desktop {
+      #{$sideNavDirection}: -$sideNavWidth;
+    }
+  }
+}
+
+/* classes applied to the body */
+.sideNavBody {
+  overflow-x: hidden;
+  position: relative;
+  #{$sideNavDirection}: 0;
+  transition: all 0.3s ease;
+}
+
+.sideNavBody-push {
+  #{$sideNavDirection}: $sideNavWidth;
+
+  @include desktop {
+    #{$sideNavDirection}: 0;
+  }
+}

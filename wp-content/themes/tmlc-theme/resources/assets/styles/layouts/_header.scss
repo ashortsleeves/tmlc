@@ -1,7 +1,63 @@
-.banner .nav li {
-  @extend .nav-item;
-}
+header.banner {
+  background-color: $white;
 
-.banner .nav a {
-  @extend .nav-link;
+  .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 15px;
+    height: auto;
+    position: relative;
+
+    @include phablet {
+      padding: 15px;
+      height: 110px;
+    }
+  }
+
+  a.brand {
+    display: inline-block;
+    width: 120px;
+
+    @include phablet {
+      width: 140px;
+    }
+
+    @include tablet {
+      &.brand-lg {
+        img {
+          position: absolute;
+          left: 15px;
+          top: 15px;
+          max-width: none;
+          z-index: 999;
+        }
+      }
+    }
+  }
+
+  ul.nav {
+    display: none;
+
+    @include laptop {
+      display: flex;
+    }
+
+    li {
+      @extend .nav-item;
+
+      &:last-of-type {
+        a {
+          padding-right: 0;
+        }
+      }
+
+      a {
+        @extend .nav-link;
+
+        color: $brand-secondary;
+        text-transform: lowercase;
+      }
+    }
+  }
 }
