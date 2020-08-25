@@ -30,4 +30,21 @@ class App extends Controller
         }
         return get_the_title();
     }
+    
+    public function siteLogo()
+    {
+      return get_field('logo', 'option');
+    }
+
+    public function footer()
+    {
+      $data = [
+        'form'       => get_field('contact_form_footer','option'),
+        'content'    => get_field('contact_footer_content','option'),
+        'background' => get_field('contact_footer_background', 'option'),
+        'site_info'  => get_field('site_info', 'option'),
+      ];
+
+      return $data;
+    }
 }

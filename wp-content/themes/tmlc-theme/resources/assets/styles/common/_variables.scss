@@ -1,10 +1,176 @@
 /** Import Bootstrap functions */
 @import "~bootstrap/scss/functions";
 
+@font-face {
+  font-family: 'Antique-Olive-Std-Compact_3864';
+  src: url('../fonts/Antique-Olive-Std-Compact_3864.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Antique-Olive-Std-Roman_3869';
+  src: url('../fonts/Antique-Olive-Std-Roman_3869.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+// Colors
+$black:                 #333;
+$white:                 #fff;
+$offwhite:              #eef0fc;
+$brand-primary:         #cf5537;
+$brand-secondary:       #e39242;
+$brand-blue:            #66909c;
+$brand-blue-l:          #a6d5df;
+$brand-green-1:         #acb43d;
+$brand-green-2:         #6a8c40;
+$brand-green-3:         #274426;
+$brand-hover:           lighten($brand-primary, 15%);
+
 $theme-colors: (
-  primary: #525ddc
+  primary:              $brand-primary,
 );
 
-/** Bootstrap navbar fix (https://git.io/fADqW) */
+// Fonts
+$primary-font:          "Antique-Olive-Std-Roman_3869", sans-serif;
+$secondary-font:        "Antique-Olive-Std-Compact_3864", sans-serif;
+
+$body-font-size:        16px;
+$body-font-size-lg:     18px;
+$body-font-weight:      400;
+$body-font:             $primary-font;
+$body-color:            $black;
+$heading-font:          $secondary-font;
+$heading-color:         $black;
+$h1-weight:             900;
+$h1-size:               48px;
+$h2-weight:             900;
+$h2-size:               30px;
+$h3-weight:             900;
+$h3-size:               24px;
+
+// Base Styles
+$base-transition:       0.3s ease-in-out;
+$section-padding:       30px;
+
+//Side-Nav
+$sideNavWidth: 260px;
+$sideNavDirection: (right);
+
+$button_width: 40px;     // width of button area
+$button_height: 60px;     // height of button area
+$bar_thickness: 6px;     // thickness of button bars
+$bar_roundness: 0;
+$button_pad: 0;      // left/right padding between button area and bars.
+$button_bar_space: 8px;     // spacing between button bars
+$button_transistion_duration: 0.3s;  // transition duration
+$hamburger_normal: $brand-primary;
+$hamburger_active: $brand-primary;
+
+// Bootstrap Variables
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  wd: 1440px,
+  hd: 1600px
+);
+
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1170px,
+  wd: 1400px,
+  hd: 1560px
+);
+
+// Breakpoint variables
+$width_mobile:          480px;
+$width_phablet:         576px;
+$width_tablet:          768px;
+$width_laptop:          992px;
+$width_desktop:         1200px;
+$width_wide:            1440px;
+$width_hd:              1600px;
+
+/*
+ * Mixins
+ */
+// Media query mixins
+@mixin mobile { @media (min-width: #{$width_mobile}) { @content; } }
+
+@mixin phablet { @media (min-width: #{$width_phablet}) { @content; } }
+
+@mixin tablet { @media (min-width: #{$width_tablet}) { @content; } }
+
+@mixin laptop { @media (min-width: #{$width_laptop}) { @content; } }
+
+@mixin desktop { @media (min-width: #{$width_desktop}) { @content; } }
+
+@mixin wide { @media (min-width: #{$width_wide}) { @content; } }
+
+@mixin hd { @media (min-width: #{$width_hd}) { @content; } }
+
+@mixin aspect-ratio($width, $height) {
+  position: relative;
+
+  &::before {
+    display: block;
+    content: "";
+    width: 100%;
+    padding-top: ($height / $width) * 100%;
+  }
+
+  > .content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+}
+
+@mixin stretch($offset: 0) {
+  position: absolute;
+  top: #{$offset};
+  right: #{$offset};
+  left: #{$offset};
+  bottom: #{$offset};
+  z-index: 99;
+}
+
+@mixin smooth-fonts() {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@mixin letter-spacing($letter-spacing: 0) {
+  letter-spacing: calc(#{$letter-spacing} * 0.001em);
+}
+
+// Flexbox mixin - prevents most IE 11 issues
+@mixin flex($grow: 0, $shrink: 0, $basis: 100%) {
+  flex: #{$grow} #{$shrink} #{$basis};
+  width: #{$basis};
+  max-width: #{$basis};
+}
+
+// Padding Offset Mixin
+@mixin padding-offset($parent: 0, $selector: "", $child: $parent) {
+  margin-left: -#{$parent};
+  margin-right: -#{$parent};
+
+  #{$selector} {
+    padding-left: #{$child};
+    padding-right: #{$child};
+  }
+}
 $navbar-dark-toggler-icon-bg: none;
 $navbar-light-toggler-icon-bg: none;
+// //Slick
+$slick-loader-path:     '~slick-carousel/slick/';
+$slick-font-path:       '#{$slick-loader-path}fonts/';

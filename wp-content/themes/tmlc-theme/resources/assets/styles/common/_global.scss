@@ -1,0 +1,143 @@
+html {
+  display: flex;
+}
+
+body.sideNavBody { // any body class found on every page can be used here, this keeps styles from effecting the Wordpress editor
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  flex: 1 1 auto;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.wrap {
+  flex: 1 1 auto;
+}
+
+html,
+body {
+  font-size: $body-font-size;
+  font-weight: $body-font-weight;
+  font-family: $body-font;
+  color: $body-color;
+  line-height: 1.6;
+
+  @include smooth-fonts;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3,
+p {
+  margin-bottom: 15px;
+}
+
+
+h1,
+.h1 {
+  color: $heading-color;
+  font-family: $heading-font;
+  font-weight: $h1-weight;
+  font-size: $h2-size;
+
+  @include laptop {
+    font-size: $h1-size;
+  }
+}
+
+h2,
+.h2 {
+  color: $heading-color;
+  font-family: $heading-font;
+  font-weight: $h2-weight;
+  font-size: $h3-size;
+
+  @include laptop {
+    font-size: $h2-size;
+  }
+}
+
+h3,
+.h3 {
+  color: $heading-color;
+  font-family: $heading-font;
+  font-weight: $h3-weight;
+  font-size: $body-font-size;
+
+  @include laptop {
+    font-size: $h3-size;
+  }
+}
+
+p,
+li {
+  font-family: $body-font;
+  font-size: $body-font-size;
+  font-weight: $body-font-weight;
+
+  @include laptop {
+    font-size: $body-font-size-lg;
+  }
+}
+
+a {
+  transition: $base-transition;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+}
+
+ul.nav a {
+  display: block;
+}
+
+.panel {
+  padding: $section-padding 0;
+
+  @include tablet {
+    padding: ($section-padding + 10px) 0;
+  }
+
+  @include laptop {
+    padding: ($section-padding + 20px) 0;
+  }
+
+  @include desktop {
+    padding: ($section-padding + 30px) 0;
+  }
+}
+
+.jumbo-bg {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.container {
+  @include wide {
+    max-width: 1170px !important;
+  }
+
+  @include hd {
+    max-width: 1170px !important;
+  }
+}
+
+.cardstyle {
+  padding: 15px;
+  background-color: $offwhite;
+
+  @include laptop {
+    padding: 25px;
+  }
+}
