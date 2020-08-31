@@ -1,0 +1,39 @@
+@mixin btn {
+  $btn-color: $brand-orange;
+  color: #fff;
+  background-color: $brand-orange;
+  transition: 0.3s;
+  font-size: $body-font-size;
+  padding: 11px 13px;
+  display: inline-block;
+  border-radius: 45px;
+  line-height: 1;
+
+  @include mobile {
+    letter-spacing: 0.05em;
+    padding: 11px 15px;
+  }
+
+  @include tablet {
+    padding: 18px 22px;
+  }
+
+  &:hover,
+  &:focus {
+    color: #fff;
+    background-color: lighten($brand-orange, 10%);
+  }
+
+  &-blue {
+    background-color: $brand-secondary;
+
+    &:hover,
+    &:focus {
+      background-color: lighten($brand-secondary, 15%);
+    }
+  }
+}
+
+.btn {
+  @include btn;
+}
