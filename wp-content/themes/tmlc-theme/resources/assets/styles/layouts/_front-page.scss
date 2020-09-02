@@ -2,6 +2,7 @@ section.fp-hero {
   background-color: #fff;
   position: relative;
   height: calc(100vh - 70px);
+  min-height: 600px;
 
   @include tablet {
     height: calc(100vh - 110px);
@@ -13,35 +14,17 @@ section.fp-hero {
     position: relative;
     z-index: 9;
     padding-bottom: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     .cta {
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
-      padding-top: 15px;
-
-      span.title,
-      span.subtitle,
-      .btn-container {
-        position: relative;
-      }
-
-      .btn-container {
-        padding-top: 15px;
-
-        @include tablet {
-          padding-top: 30px;
-        }
-
-        a.btn-blue {
-          margin-left: 5px;
-
-          @include mobile {
-            margin-left: 10px;
-          }
-        }
-      }
+      position: absolute;
+      left: calc(50% - 160px);
+      top: calc(50% - 210px);
 
       i.fa-lock {
         position: absolute;
@@ -55,74 +38,124 @@ section.fp-hero {
         //   left: calc(50% - 180px);
         // }
       }
-    }
 
-    span.title,
-    span.subtitle {
-      display: block;
-    }
-
-    span.title {
-      color: $brand-primary;
-      font-family: $secondary-font;
-      font-size: 36px;
-      letter-spacing: -0.04em;
-      text-transform: uppercase;
-
-      @include mobile {
-        font-size: 48px;
+      span.title,
+      span.subtitle {
+        display: block;
+        text-align: center;
+        text-shadow: 0 0 5px rgba(255, 255, 254, 0.7), 0 0 10px rgba(255, 255, 254, 0.7), 0 0 15px rgba(255, 255, 254, 0.7), 0 0 20px rgba(255, 255, 254, 0.7), 0 0 30px rgba(255, 255, 254, 0.7), 0 0 40px rgba(255, 255, 254, 0.7), 0 0 55px rgba(255, 255, 254, 0.7), 0 0 75px rgba(255, 255, 254, 0.7);
       }
 
-      @include tablet {
-        font-size: 72px;
+      span.title {
+        color: $brand-primary;
+        font-family: $secondary-font;
+        font-size: 47px;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+
+        // @include mobile {
+        //   font-size: 48px;
+        // }
+
+        @include tablet {
+          font-size: 72px;
+        }
+      }
+
+      span.subtitle {
+        font-size: 24px;
+        line-height: 24px;
+        max-width: 320px;
+        display: inline-block;
+
+        @include tablet {
+          font-size: 36px;
+          line-height: 36px;
+          padding: 0;
+          max-width: none;
+          text-align: left;
+        }
       }
     }
 
-    span.subtitle {
-      font-size: 24px;
-      line-height: 24px;
-      max-width: 320px;
-      display: inline-block;
-      text-align: center;
+    .btn-container {
+      // padding-top: 15px;
+      position: absolute;
+      width: 284px;
+      left: calc(50% - 142px);
+      top: calc(50% + 114px);
 
       @include tablet {
-        font-size: 36px;
-        line-height: 36px;
-        padding: 0;
-        max-width: none;
-        text-align: left;
+        padding-top: 30px;
+      }
+
+      a.btn {
+        padding: 15px 15px;
+        &:nth-of-type(1) {
+          border-bottom-right-radius: 0;
+          border-top-right-radius: 0;
+        }
+
+        &:nth-of-type(2){
+          border-bottom-left-radius: 0;
+          border-top-left-radius: 0;
+          margin-left: 0;
+
+          @include mobile {
+            margin-left: 10px;
+          }
+        }
+
+        @include mobile {
+          &:nth-of-type(1),
+          &:nth-of-type(2) {
+            border-bottom-left-radius: 45px;
+            border-top-left-radius: 45px;
+            border-bottom-right-radius: 45px;
+            border-top-right-radius: 45px;
+          }
+        }
       }
     }
   }
 
-  .svg-container {
+  // .svg-container {
+  //   position: absolute;
+  //   right: 0;
+  //   top: calc(50% - 50px);
+  //   left: 0;
+  //   overflow: hidden;
+  //   bottom: 100px;
+  //
+  //
+  //   @include tablet {
+  //     top: 0;
+  //     left: calc(50% - 100px);
+  //     bottom: 150px;
+  //   }
+  //
+  //   @include laptop {
+  //     bottom: 150px;
+  //     left: 50%;
+  //     opacity: 1;
+  //   }
+  //
+  //   svg {
+  //     position: absolute;
+  //     left: -55px;
+  //     top: calc(50% - 1354px);
+  //     // height: 100%;
+  //     // transform: rotate(90deg);
+  //   }
+  // }
+
+  svg.mobile-svg {
     position: absolute;
-    right: 0;
-    top: calc(50% - 50px);
-    left: 0;
-    overflow: hidden;
-    bottom: 100px;
-
-
-    @include tablet {
-      top: 0;
-      left: calc(50% - 100px);
-      bottom: 150px;
-    }
-
-    @include laptop {
-      bottom: 150px;
-      left: 50%;
-      opacity: 1;
-    }
-
-    svg {
-      position: absolute;
-      left: -55px;
-      top: calc(50% - 1354px);
-      // height: 100%;
-      transform: rotate(90deg);
-    }
+    top: calc(50% - 244px);
+    left: calc(50% - 150px);
+    width: 300px;
   }
 
   .fp-strapline {

@@ -8,6 +8,8 @@
   display: inline-block;
   border-radius: 45px;
   line-height: 1;
+  border: 0 transparent;
+  box-sizing: border-box;
 
   @include mobile {
     letter-spacing: 0.05em;
