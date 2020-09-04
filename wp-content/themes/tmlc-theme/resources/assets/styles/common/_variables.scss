@@ -166,3 +166,8 @@ $navbar-light-toggler-icon-bg: none;
 // //Slick
 $slick-loader-path:     '~slick-carousel/slick/';
 $slick-font-path:       '#{$slick-loader-path}fonts/';
+
+@mixin pseudo {
+  content: " ";
+  display: block;
+}
