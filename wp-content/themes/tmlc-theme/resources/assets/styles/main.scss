@@ -17,6 +17,9 @@
 @import "~@fortawesome/fontawesome-pro/css/solid.css";
 @import "~@fortawesome/fontawesome-pro/css/duotone.css";
 
+// Import Slick from node_modules
+@import "~slick-carousel/slick/slick.scss";
+@import "~slick-carousel/slick/slick-theme.scss";
 
 /** Import theme styles */
 @import "common/global";

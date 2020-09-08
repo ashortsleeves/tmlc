@@ -10,7 +10,7 @@ section.fp-hero {
     max-height: 1000px;
   }
 
-  .container {
+  .hero-container {
     height: 100%;
     position: relative;
     padding-top: 60px;
@@ -196,36 +196,6 @@ section.fp-hero {
     }
   }
 
-  // .svg-container {
-  //   position: absolute;
-  //   right: 0;
-  //   top: calc(50% - 50px);
-  //   left: 0;
-  //   overflow: hidden;
-  //   bottom: 100px;
-  //
-  //
-  //   @include tablet {
-  //     top: 0;
-  //     left: calc(50% - 100px);
-  //     bottom: 150px;
-  //   }
-  //
-  //   @include laptop {
-  //     bottom: 150px;
-  //     left: 50%;
-  //     opacity: 1;
-  //   }
-  //
-  //   svg {
-  //     position: absolute;
-  //     left: -55px;
-  //     top: calc(50% - 1354px);
-  //     // height: 100%;
-  //     // transform: rotate(90deg);
-  //   }
-  // }
-
   svg.mobile-svg {
     position: absolute;
     top: calc(50% - 244px);
@@ -240,9 +210,83 @@ section.fp-hero {
     left: 0;
     bottom: 0;
     background-color: $brand-primary;
+    display: flex;
+    align-items: center;
 
     @include tablet {
       height: 150px;
+    }
+  }
+
+  .fp-strapline {
+    .strapline-container {
+      display: block;
+
+      .fas {
+        color: #fff;
+        position: absolute;
+        top: calc(50% - 12px);
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .fa-chevron-left {
+        left: -15px;
+      }
+
+      .fa-chevron-right {
+        right: -15px;
+      }
+    }
+
+    .affiliate-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .affiliate {
+        height: 75px;
+        width: 75px;
+        background-size: contain;
+
+        @include tablet {
+          height: 90px;
+          width: 90px;
+        }
+
+        &.affiliate-title {
+          border-radius: 45px;
+          font-family: $secondary-font;
+          color: #fff;
+          text-align: center;
+          line-height: 0.8;
+          font-size: 18px;
+          letter-spacing: -0.05em;
+          padding-top: 45px;
+          position: relative;
+
+          @include tablet {
+            font-size: 22px;
+          }
+
+          span {
+            display: block;
+            position: relative;
+            z-index: 999;
+          }
+
+          &::before {
+            @include pseudo;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 45px;
+            background: linear-gradient(0deg, rgba(0,0,0,0.6727065826330532) 10%, rgba(0,212,255,0) 100%);
+          }
+        }
+      }
     }
   }
 }

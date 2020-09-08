@@ -3,7 +3,7 @@
 @section('content')
   @while(have_posts()) @php the_post() @endphp
     <section class="fp-hero">
-      <div class="container">
+      <div class="container hero-container">
         <div class="fp-hero-image jumbo-bg" style="background-image: url({{$fp_hero['hero_image']['url']}})">
 
           <svg xmlns="http://www.w3.org/2000/svg" height="100%" viewBox="0 0 306 694">
@@ -36,7 +36,18 @@
 
       </div>
       <div class="fp-strapline">
+        <div class="container strapline-container">
 
+            @foreach($fp_strapline as $affiliate)
+              <div class="affiliate-wrap">
+                <div class="jumbo-bg affiliate @if(!$affiliate['logo']) affiliate-title @endif" style="background-image: url({{$affiliate['image']['url']}})">
+                  @if(!$affiliate['logo'])
+                    <span>{!!$affiliate['title']!!}</span>
+                  @endif
+                </div>
+              </div>
+            @endforeach
+        </div>
       </div>
     </section>
   @endwhile
