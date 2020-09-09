@@ -290,3 +290,207 @@ section.fp-hero {
     }
   }
 }
+
+section.fp-services {
+  position: relative;
+
+  .background-wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+
+    img.section-background {
+      position: absolute;
+      left: 0;
+      top: 0;
+      min-width: 100%;
+      max-width: none;
+
+      @include laptop {
+        top: auto;
+        bottom: 0;
+        width: 1428px;
+      }
+    }
+
+    @include laptop {
+      bottom: -380px;
+
+      &:before {
+        @include pseudo;
+
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 420px;
+        background-color: #d4f1f7;
+      }
+    }
+  }
+
+  .container {
+    position: relative;
+  }
+
+  h1,
+  h2,
+  span.subtitle {
+    text-align: center;
+    display: block;
+  }
+
+  .title-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 15px;
+
+    @include tablet {
+      padding: 90px 15px 60px;
+
+      h1 {
+        max-width: 700px;
+      }
+
+      span.subtitle {
+        max-width: 550px;
+      }
+    }
+
+    @include desktop {
+      padding-top: 120px;
+    }
+  }
+
+  .container-services {
+    @media only screen and (max-width: 990px) {
+      max-width: none;
+
+      .col-12 {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    .service {
+      padding: 60px 15px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+
+      .jumbo-bg {
+        display: block;
+        left: -15px;
+        right: -15px;
+        top: -15px;
+        bottom: -15px;
+        position: absolute;
+        filter: blur(5px);
+
+        &::before {
+          @include pseudo;
+
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.2);
+        }
+      }
+
+      h2,
+      span.subtitle {
+        color: #fff;
+        position: relative;
+        max-width: 400px;
+      }
+
+      a.btn {
+        position: relative;
+        margin-top: 15px;
+      }
+
+      @include phablet {
+        padding: 90px 15px;
+      }
+
+      @include tablet {
+        height: 100%;
+        padding: 70px 15px;
+
+        h2 {
+          font-size: 26px;
+        }
+
+        .jumbo-bg {
+          filter: none;
+
+          &::before {
+            background-color: rgba(0, 0, 0, 0.35);
+          }
+        }
+      }
+
+      @include laptop {
+        border-radius: 20px;
+
+        h2 {
+          font-size: $h2-size;
+          margin-bottom: 15px;
+        }
+
+        a.btn {
+          margin-top: 25px;
+        }
+      }
+
+      @include desktop {
+        padding: 70px 45px;
+      }
+    }
+  }
+}
+
+section.fp-works {
+  @include tablet {
+    padding: 90px 0;
+  }
+
+  .work-row {
+
+    @include laptop {
+      padding: 60px 0;
+    }
+
+    &:nth-of-type(even) {
+      flex-direction: row-reverse;
+    }
+  }
+
+  span.subtitle {
+    text-transform: uppercase;
+    color: $brand-primary;
+  }
+
+  span.subtitle,
+  h1,
+  p {
+    display: block;
+    padding-bottom: 15px;
+  }
+
+  h1.h2 {
+    @include tablet {
+      font-size: 36px;
+    }
+  }
+}

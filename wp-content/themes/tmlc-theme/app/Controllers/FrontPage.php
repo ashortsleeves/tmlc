@@ -15,4 +15,14 @@ class FrontPage extends Controller
   {
     return get_field('fp_affiliate_strapline');
   }
+
+  public function fpServices()
+  {
+    return get_field('fp_services');
+  }
+
+  public function fpWorks()
+  {
+    return get_field('fp_how_it_works');
+  }
 }

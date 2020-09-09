@@ -9,6 +9,10 @@ body.sideNavBody { // any body class found on every page can be used here, this 
   flex: 1 1 auto;
   display: flex;
   flex-flow: column nowrap;
+
+  @include hd {
+    max-width: 2540px;
+  }
 }
 
 .wrap {
@@ -36,7 +40,12 @@ h1,
   color: $heading-color;
   font-family: $heading-font;
   font-weight: $h1-weight;
-  font-size: $h1-size;
+  font-size: $h2-size;
+  text-transform: uppercase;
+
+  @include tablet {
+    font-size: $h1-size;
+  }
 }
 
 h2,
@@ -44,7 +53,12 @@ h2,
   color: $heading-color;
   font-family: $heading-font;
   font-weight: $h2-weight;
-  font-size: $h2-size;
+  font-size: $h3-size;
+  text-transform: uppercase;
+
+  @include tablet {
+    font-size: $h2-size;
+  }
 }
 
 h3,
@@ -52,7 +66,11 @@ h3,
   color: $heading-color;
   font-family: $heading-font;
   font-weight: $h3-weight;
-  font-size: $h3-size;
+  font-size: $body-font-size;
+
+  @include tablet {
+    font-size: $h3-size;
+  }
 }
 
 p,
