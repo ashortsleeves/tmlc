@@ -89,3 +89,30 @@ add_filter('comments_template', function ($comments_template) {
 
     return $comments_template;
 }, 100);
+//
+// add_filter( 'woocommerce_register_post_type_product',  function( $args ){
+//  $labels = nk_get_cpt_labels('Event','Events');
+//     $args['labels'] = $labels;
+//     return $args;
+//  });
+//
+//
+// function nk_get_cpt_labels($single,$plural){
+//    $arr = array(
+//       'name' => $plural,
+//       'singular_name' => $single,
+//       'menu_name' => $plural,
+//       'add_new' => 'Add '.$single,
+//       'add_new_item' => 'Add New '.$single,
+//       'edit' => 'Edit',
+//       'edit_item' => 'Edit '.$single,
+//       'new_item' => 'New '.$single,
+//       'view' => 'View '.$plural,
+//       'view_item' => 'View '.$single,
+//       'search_items' => 'Search '.$plural,
+//       'not_found' => 'No '.$plural.' Found',
+//       'not_found_in_trash' => 'No '.$plural.' Found in Trash',
+//       'parent' => 'Parent '.$single
+//    );
+//    return $arr;
+// }
