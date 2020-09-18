@@ -96,5 +96,31 @@
         @endforeach
       </div>
     </section>
+
+
+    <section class="insert-post-test">
+      @php
+      if(isset($_POST['new_post']) == '1') {
+
+        $new_post = array(
+            'ID' => '',
+            'post_type'   => 'tribe_events', // Custom Post Type Slug
+            'post_status' => 'draft',
+            'post_title'  => $_POST['post_title'],
+            'meta_input' => array(
+                '_EventURL' => 'www.google.com',
+            ),
+          );
+
+        $post_id = wp_insert_post($new_post);
+        $post = get_post($post_id);
+      }
+      @endphp
+      <form method="post" action="">
+        <input name="post_title" type="text" />
+        <input type="hidden" name="new_post" value="1" />
+        <input type="submit" name="submit" value="Post" />
+      </form>
+    </section>
   @endwhile
 @endsection
