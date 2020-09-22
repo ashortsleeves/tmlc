@@ -111,8 +111,15 @@
             ),
           );
 
+          $new_ticket = array(
+            'ID' => '',
+            'post_type' => 'tribe_tpp_tickets',
+            'post_title'  => $_POST['post_title'],
+          );
+
         $event_id = wp_insert_post($new_event);
-        $post = get_post($event_id);
+        $ticket_id = wp_insert_post($new_ticket);
+        $post = get_posts($event_id, $ticket_id);
       }
       @endphp
       <form method="post" action="">
