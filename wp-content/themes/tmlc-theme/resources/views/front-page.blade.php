@@ -111,13 +111,19 @@
             ),
           );
 
-          $new_ticket = array(
-            'ID' => '',
-            'post_type' => 'tribe_tpp_tickets',
-            'post_title'  => $_POST['post_title'],
-          );
-
         $event_id = wp_insert_post($new_event);
+
+        $new_ticket = array(
+          'ID' => '',
+          'post_type' => 'tribe_tpp_tickets',
+          'post_title'  => $_POST['post_title'],
+          'post_status' => 'publish',
+          'meta_input' => array(
+              '_tribe_tpp_for_event' => $event_id,
+          ),
+        );
+
+
         $ticket_id = wp_insert_post($new_ticket);
         $post = get_posts($event_id, $ticket_id);
       }
