@@ -98,41 +98,7 @@
 
 
     <section class="insert-post-test">
-      @php
-      if(isset($_POST['new_event']) == '1') {
-
-        $new_event = array(
-            'ID' => '',
-            'post_type'   => 'tribe_events', // Custom Post Type Slug
-            'post_status' => 'draft',
-            'post_title'  => $_POST['post_title'],
-            'meta_input' => array(
-                '_EventURL' => 'www.google.com',
-            ),
-          );
-
-        $event_id = wp_insert_post($new_event);
-
-        $new_ticket = array(
-          'ID' => '',
-          'post_type' => 'tribe_tpp_tickets',
-          'post_title'  => $_POST['post_title'],
-          'post_status' => 'publish',
-          'meta_input' => array(
-              '_tribe_tpp_for_event' => $event_id,
-          ),
-        );
-
-
-        $ticket_id = wp_insert_post($new_ticket);
-        $post = get_posts($event_id, $ticket_id);
-      }
-      @endphp
-      <form method="post" action="">
-        <input name="post_title" type="text" />
-        <input type="hidden" name="new_event" value="1" />
-        <input type="submit" name="submit" value="Post" />
-      </form>
+      @php ci_event_template(); @endphp
     </section>
   @endwhile
 @endsection
