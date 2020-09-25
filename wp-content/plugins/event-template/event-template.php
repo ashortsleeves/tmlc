@@ -20,6 +20,12 @@
  * @license    GPL-2.0+
  */
 
+
+//  // Ensure we are in wp-admin before performing any additional actions
+ if( is_admin() ) {
+     add_action( 'admin_head', 'ci_event_init' );
+ }
+
  function ci_event_template() {
    if(isset($_POST['new_event']) == '1') {
 
@@ -38,10 +44,11 @@
      $new_ticket = array(
        'ID' => '',
        'post_type' => 'tribe_tpp_tickets',
-       'post_title'  => $_POST['post_title'],
+       'post_title'  => 'Small Locker',
        'post_status' => 'publish',
        'meta_input' => array(
            '_tribe_tpp_for_event' => $event_id,
+           '_price'               => 10,
        ),
      );
 
@@ -49,10 +56,19 @@
      $ticket_id = wp_insert_post($new_ticket);
      $post = get_posts($event_id, $ticket_id);
    }
+ }
 
-   echo '<form method="post" action="">
-           <input name="post_title" type="text" />
-           <input type="hidden" name="new_event" value="1" />
-           <input type="submit" name="submit" value="Post" />
-         </form>';
+ function ci_event_init($post) {
+   // Ensure the TEC plugin exists
+   if( class_exists('TribeEventsAPI')) {
+     ci_event_template();
+     ?>
+     <script>
+     // Adds button to the events list page
+     jQuery(function(){
+         jQuery("body.post-type-tribe_events .wrap").prepend('<form method="post" action=""><input name="post_title" type="text" /><input type="hidden" name="new_event" value="1" /><input type="submit" name="submit" value="Create Post With Tickets" /></form>');
+     });
+     </script>
+     <?php
+   }
  }
