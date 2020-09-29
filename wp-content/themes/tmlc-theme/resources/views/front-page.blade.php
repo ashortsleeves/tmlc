@@ -96,6 +96,26 @@
       </div>
     </section>
 
+    @if($fp_events)
+      <section class="fp-events">
+        <div class="container">
+          <div class="events-wrapper">
+            @foreach( $fp_events as $featured_post )
+              @php
+                $permalink = get_permalink( $featured_post->ID );
+                $title = get_the_title( $featured_post->ID );
+              @endphp
+              <div class="event-grid" style="background-image: url({!! get_the_post_thumbnail_url($featured_post->ID) !!});" >
+                <a href="{!!esc_url( $permalink )!!}">{!! esc_html( $title ) !!}</a>
+              </div>
+            @endforeach
+            <div class="event-grid jumbo-bg" style="background-color: green;">
+
+            </div>
+          </div>
+        </div>
+      </section>
+    @endif
 
     <section class="insert-post-test">
       @php ci_event_template(); @endphp
