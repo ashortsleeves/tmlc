@@ -41,7 +41,7 @@
 
      $event_id = wp_insert_post($new_event);
 
-     $new_ticket = array(
+     $small_ticket = array(
        'ID' => '',
        'post_type' => 'tribe_tpp_tickets',
        'post_title'  => 'Small Locker',
@@ -52,9 +52,32 @@
        ),
      );
 
+     $medium_ticket = array(
+       'ID' => '',
+       'post_type' => 'tribe_tpp_tickets',
+       'post_title'  => 'Medium Locker',
+       'post_status' => 'publish',
+       'meta_input' => array(
+           '_tribe_tpp_for_event' => $event_id,
+           '_price'               => 15,
+       ),
+     );
 
-     $ticket_id = wp_insert_post($new_ticket);
-     $post = get_posts($event_id, $ticket_id);
+     $large_ticket = array(
+       'ID' => '',
+       'post_type' => 'tribe_tpp_tickets',
+       'post_title'  => 'Large Locker',
+       'post_status' => 'publish',
+       'meta_input' => array(
+           '_tribe_tpp_for_event' => $event_id,
+           '_price'               => 20,
+       ),
+     );
+
+     $small_id = wp_insert_post($small_ticket);
+     $medium_id = wp_insert_post($medium_ticket);
+     $large_id = wp_insert_post($large_ticket);
+     $post = get_posts($event_id, $small_id, $medium_id, $large_id);
    }
  }
 
@@ -67,6 +90,7 @@
      // Adds button to the events list page
      jQuery(function(){
          jQuery("body.post-type-tribe_events .wrap").prepend('<form method="post" action=""><input name="post_title" type="text" /><input type="hidden" name="new_event" value="1" /><input type="submit" name="submit" value="Create Post With Tickets" /></form>');
+         //Still need to add refresh functionality
      });
      </script>
      <?php

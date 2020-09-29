@@ -354,7 +354,7 @@ section.fp-services {
       padding: 90px 15px 60px;
 
       h1 {
-        max-width: 700px;
+        max-width: 800px;
       }
 
       span.subtitle {
@@ -444,7 +444,7 @@ section.fp-services {
         border-radius: 20px;
 
         h2 {
-          font-size: $h2-size;
+          // font-size: $h2-size;
           margin-bottom: 15px;
         }
 
@@ -454,7 +454,7 @@ section.fp-services {
       }
 
       @include desktop {
-        padding: 70px 45px;
+        padding: 70px 20px;
       }
     }
   }

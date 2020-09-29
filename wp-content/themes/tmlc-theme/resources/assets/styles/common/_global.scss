@@ -124,3 +124,49 @@ ul.nav a {
   background-repeat: no-repeat;
   background-position: center;
 }
+
+br {
+  &.mobile {
+    display: none;
+
+    @include mobile {
+      display: inline;
+    }
+  }
+
+  &.phablet {
+    display: none;
+
+    @include phablet {
+      display: inline;
+    }
+  }
+
+  &.tablet {
+    display: none;
+
+    @include tablet {
+      display: inline;
+    }
+  }
+
+  &.laptop {
+    display: none;
+
+    @include laptop {
+      display: inline;
+    }
+  }
+
+  &.desktop {
+    display: none;
+
+    @include desktop {
+      display: inline;
+    }
+  }
+}
+
+.orange {
+  color: $brand-orange;
+}

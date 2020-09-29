@@ -88,7 +88,7 @@
             <div class="col-md-6">
               <span class="subtitle">{{$work['subtitle']}}</span>
               <h1 class="h2">{!!$work['title']!!}</h1>
-              <p>{{$work['content']}}</p>
+              <p>{!!$work['content']!!}</p>
               <a class="btn" href="{{$work['button']['url']}}">{{$work['button']['title']}}</a>
             </div>
           </div>
