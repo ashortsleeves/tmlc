@@ -461,11 +461,14 @@ section.fp-services {
 }
 
 section.fp-works {
-  @include tablet {
+  padding: 15px 0;
+
+  @include laptop {
     padding: 90px 0;
   }
 
   .work-row {
+    padding: 15px 0;
 
     @include laptop {
       padding: 60px 0;
@@ -473,6 +476,10 @@ section.fp-works {
 
     &:nth-of-type(even) {
       flex-direction: row-reverse;
+    }
+
+    .interior-row {
+      padding: 15px 0;
     }
   }
 
@@ -499,6 +506,19 @@ section.fp-events {
   border-radius: 20px;
   overflow: hidden;
 
+  .title {
+    text-align: center;
+    margin-bottom: 15px;
+
+    @include phablet {
+      margin-bottom: 30px;
+    }
+
+    @include laptop {
+      margin-bottom: 60px;
+    }
+  }
+
   .event-wrapper {
     overflow: hidden;
     border-radius: 20px;
@@ -507,47 +527,151 @@ section.fp-events {
   .events-grid {
     display: grid;
     grid-template-columns: 8.333% 8.333% 8.333% 8.333% 8.333% 8.333% 8.333% 8.333% 8.333% 8.333% 8.333% 8.333%;
-    grid-template-rows: 240px 240px 360px;
+    grid-template-rows: 240px 240px 240px;
     margin: -5px;
+
+    @include phablet {
+      grid-template-rows: 150px 150px 240px;
+    }
+
+    @include laptop {
+      grid-template-rows: 240px 240px 360px;
+    }
 
     .event-single {
       border: solid 5px #fff;
+      position: relative;
+
+      a.event-link {
+        display: block;
+        position: absolute;
+        left:0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+
+        span.title {
+          display: block;
+          position: absolute;
+          left: 15px;
+          bottom: 30px;
+
+          @include laptop {
+            left: 30px;
+            bottom: 45px;
+          }
+
+          span {
+            position: absolute;
+            top: calc(100% - 10px);
+          }
+        }
+
+        span.title,
+        h2 {
+          color: #fff;
+          text-transform: capitalize;
+        }
+      }
 
       &:nth-of-type(1) {
         grid-column-start: 1;
-        grid-column-end: 9;
+        grid-column-end: 8;
         grid-row-start: 1;
-        grid-row-end: 3;
+        grid-row-end: 2;
       }
 
       &:nth-of-type(2) {
-        grid-column-start: 9;
+        grid-column-start: 8;
         grid-column-end: 13;
         grid-row-start: 1;
         grid-row-end: 2;
       }
 
       &:nth-of-type(3) {
-        grid-column-start: 9;
-        grid-column-end: 13;
+        grid-column-start: 1;
+        grid-column-end: 7;
         grid-row-start: 2;
         grid-row-end: 3;
       }
 
       &:nth-of-type(4) {
-        grid-column-start: 1;
-        grid-column-end: 6;
+        grid-column-start: 7;
+        grid-column-end: 13;
       }
 
       &:nth-of-type(5) {
-        grid-column-start: 6;
-        grid-column-end: 11;
+        grid-column-start: 1;
+        grid-column-end: 9;
       }
 
       &:nth-of-type(6) {
-        grid-column-start: 11;
+        grid-column-start: 9;
         grid-column-end: 13;
         background-color: green;
+      }
+
+      @include phablet {
+        &:nth-of-type(1) {
+          grid-column-start: 1;
+          grid-column-end: 9;
+          grid-row-start: 1;
+          grid-row-end: 3;
+
+          @include laptop {
+            h2 {
+              font-size: 36px;
+            }
+          }
+        }
+
+        &:nth-of-type(2) {
+          grid-column-start: 9;
+          grid-column-end: 13;
+          grid-row-start: 1;
+          grid-row-end: 2;
+        }
+
+        &:nth-of-type(3) {
+          grid-column-start: 9;
+          grid-column-end: 13;
+          grid-row-start: 2;
+          grid-row-end: 3;
+        }
+
+        &:nth-of-type(4) {
+          grid-column-start: 1;
+          grid-column-end: 5;
+        }
+
+        &:nth-of-type(5) {
+          grid-column-start: 5;
+          grid-column-end: 10;
+        }
+
+        &:nth-of-type(6) {
+          grid-column-start: 10;
+          grid-column-end: 13;
+          background-color: green;
+        }
+      }
+
+      @include laptop {
+        &:nth-of-type(4) {
+          grid-column-start: 1;
+          grid-column-end: 6;
+        }
+
+        &:nth-of-type(5) {
+          grid-column-start: 6;
+          grid-column-end: 11;
+        }
+
+        &:nth-of-type(6) {
+          grid-column-start: 11;
+          grid-column-end: 13;
+          background-color: green;
+        }
       }
     }
   }

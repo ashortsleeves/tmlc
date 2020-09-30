@@ -26,6 +26,11 @@ class FrontPage extends Controller
     return get_field('fp_how_it_works');
   }
 
+  public function fpEventstitle()
+  {
+    return get_field("featured_event_title");
+  }
+
   public function fpEvents()
   {
     return get_field('fp_featured_events');

@@ -88,7 +88,7 @@
             <div class="col-md-6">
               <span class="subtitle">{{$work['subtitle']}}</span>
               <h1 class="h2">{!!$work['title']!!}</h1>
-              <p>{!!$work['content']!!}</p>
+              {!!$work['content']!!}
               <a class="btn" href="{{$work['button']['url']}}">{{$work['button']['title']}}</a>
             </div>
           </div>
@@ -99,17 +99,24 @@
     @if($fp_events)
       <section class="fp-events">
         <div class="container">
+          <div class="title">
+            <h1>{!! $fp_eventstitle['title'] !!}</h1>
+            <span class="subtitle">{!! $fp_eventstitle['subtitle'] !!}</span>
+          </div>
           <div class="event-wrapper">
             <div class="events-grid">
+              @php $i = 0; @endphp
               @foreach( $fp_events as $featured_post )
                 @php
                   $permalink = get_permalink( $featured_post->ID );
                   $title = get_the_title( $featured_post->ID );
+                  $i++;
                 @endphp
-                <div class="event-single jumbo-bg" style="background-image: url({!! get_the_post_thumbnail_url($featured_post->ID) !!});" >
-                  <a class="event-link" href="{!!esc_url( $permalink )!!}">{!! esc_html( $title ) !!}<br />{{tribe_get_venue($featured_post->ID)}}</a>
-
-                </div>
+                @if($i < 6)
+                  <div class="event-single jumbo-bg" style="background-image: url({!! get_the_post_thumbnail_url($featured_post->ID) !!});" >
+                    <a class="event-link" href="{!!esc_url( $permalink )!!}"><span class="title"><h2>{!! esc_html( $title ) !!}</h2><span>{{tribe_get_venue($featured_post->ID)}}</span></span></a>
+                  </div>
+                @endif
               @endforeach
               <div class="event-single">
 
