@@ -1,6 +1,7 @@
 {
   "fonts/Antique-Olive-Std-Compact_3864.woff": "fonts/Antique-Olive-Std-Compact_3864_5078ff91.woff",
   "fonts/Antique-Olive-Std-Roman_3869.woff": "fonts/Antique-Olive-Std-Roman_3869_f2b9cb7c.woff",
+  "images/view-more.jpg": "images/view-more_08506a41.jpg",
   "vendor/ajax-loader.gif": "vendor/ajax-loader_c5cd7f53.gif",
   "vendor/fa-brands-400.eot": "vendor/fa-brands-400_05c475fa.eot",
   "vendor/fa-brands-400.svg": "vendor/fa-brands-400_6c6d2066.svg",
@@ -27,7 +28,7 @@
   "vendor/fa-solid-900.ttf": "vendor/fa-solid-900_749dd365.ttf",
   "vendor/fa-solid-900.woff": "vendor/fa-solid-900_fb2f4531.woff",
   "vendor/fa-solid-900.woff2": "vendor/fa-solid-900_150120b3.woff2",
-  "scripts/customizer.js": "scripts/customizer_5e9fc0ae.js",
-  "styles/main.css": "styles/main_5e9fc0ae.css",
-  "scripts/main.js": "scripts/main_5e9fc0ae.js"
+  "scripts/customizer.js": "scripts/customizer_e411550f.js",
+  "styles/main.css": "styles/main_e411550f.css",
+  "scripts/main.js": "scripts/main_e411550f.js"
 }

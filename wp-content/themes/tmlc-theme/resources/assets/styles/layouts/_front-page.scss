@@ -293,6 +293,7 @@ section.fp-hero {
 
 section.fp-services {
   position: relative;
+  overflow: hidden;
 
   .background-wrap {
     position: absolute;
@@ -463,6 +464,10 @@ section.fp-services {
 section.fp-works {
   padding: 15px 0;
 
+  @include mobile {
+    padding: 45px 0;
+  }
+
   @include laptop {
     padding: 90px 0;
   }
@@ -503,8 +508,16 @@ section.fp-works {
 }
 
 section.fp-events {
-  border-radius: 20px;
   overflow: hidden;
+  padding: 15px 0;
+
+  @include mobile {
+    padding: 30px 0;
+  }
+
+  @include laptop {
+    padding: 90px 0;
+  }
 
   .title {
     text-align: center;
@@ -521,14 +534,24 @@ section.fp-events {
 
   .event-wrapper {
     overflow: hidden;
-    border-radius: 20px;
+    margin: 0 -15px;
+
+    @include mobile {
+      border-radius: 20px;
+      margin: 0;
+    }
   }
 
   .events-grid {
     display: grid;
     grid-template-columns: 8.333% 8.333% 8.333% 8.333% 8.333% 8.333% 8.333% 8.333% 8.333% 8.333% 8.333% 8.333%;
-    grid-template-rows: 240px 240px 240px;
-    margin: -5px;
+    grid-template-rows: 150px 150px 150px;
+    margin: -2px;
+
+    @include mobile {
+      grid-template-rows: 240px 240px 240px;
+      margin: -5px;
+    }
 
     @include phablet {
       grid-template-rows: 150px 150px 240px;
@@ -539,31 +562,66 @@ section.fp-events {
     }
 
     .event-single {
-      border: solid 5px #fff;
+      border: solid 2px #fff;
       position: relative;
+      transition: 0.3s;
+      opacity: 1;
+
+      &:hover,
+      &:focus {
+        opacity: 0.8;
+
+        a.event-link::before {
+          opacity: 0;
+        }
+      }
+
+      @include phablet {
+        border: solid 5px #fff;
+      }
 
       a.event-link {
-        display: block;
+        display: flex;
+        align-items: flex-end;
         position: absolute;
         left:0;
         right: 0;
         top: 0;
         bottom: 0;
 
-        span.title {
-          display: block;
+        &::before {
+          @include pseudo;
           position: absolute;
-          left: 15px;
-          bottom: 30px;
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          background: linear-gradient(0deg, rgba(0,0,0, 1) 0%, rgba(255,255,254,0) 50%, rgba(255,255,254,0) 100%);
+          transition: 0.3s;
+          opacity: 0.7;
+        }
+
+        span.event-title {
+          display: block;
+          width: 100%;
+          text-align: center;
+          padding: 15px 15px 35px;
+          position: relative;
 
           @include laptop {
-            left: 30px;
-            bottom: 45px;
+            text-align: left;
+            padding: 15px 30px 45px;
           }
 
           span {
-            position: absolute;
-            top: calc(100% - 10px);
+            font-size: 13px;
+            color: #fff;
+            margin-bottom: -19px;
+            display: block;
+
+            @include laptop {
+              font-size: 16px;
+            }
           }
         }
 
@@ -571,6 +629,62 @@ section.fp-events {
         h2 {
           color: #fff;
           text-transform: capitalize;
+        }
+
+        h2 {
+          font-size: 18px;
+          font-weight: 400;
+          margin-bottom: 0;
+
+          @include laptop {
+            font-size: $h3-size;
+          }
+        }
+      }
+
+      a.view-more {
+        color: #fff;
+        font-family: $secondary-font;
+        font-size: 13px;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        text-align: center;
+        line-height: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        transition: 0.3s;
+
+        &:hover,
+        &:focus {
+          background-color: rgba(255,255,254, 0.2);
+        }
+
+        span {
+          display: block;
+          font-size: 20px;
+        }
+
+        i.fas {
+          font-size: 48px;
+        }
+
+        @include laptop {
+          font-size: 18px;
+
+          span {
+            font-size: 28px;
+            margin-top: 3px;
+          }
+
+          i.fas {
+            font-size: 82px;
+            margin-top: 30px;
+          }
         }
       }
 
@@ -608,7 +722,7 @@ section.fp-events {
       &:nth-of-type(6) {
         grid-column-start: 9;
         grid-column-end: 13;
-        background-color: green;
+        background-image: url('../images/view-more.jpg');
       }
 
       @include phablet {
@@ -618,9 +732,19 @@ section.fp-events {
           grid-row-start: 1;
           grid-row-end: 3;
 
-          @include laptop {
-            h2 {
-              font-size: 36px;
+          a.event-link {
+            .event-title {
+              h2 {
+                font-size: 24px;
+              }
+
+              @include laptop {
+                h2 {
+                  font-size: 36px;
+                }
+
+                padding: 0 60px 45px;
+              }
             }
           }
         }
@@ -652,11 +776,27 @@ section.fp-events {
         &:nth-of-type(6) {
           grid-column-start: 10;
           grid-column-end: 13;
-          background-color: green;
         }
       }
 
       @include laptop {
+        &:nth-of-type(2),
+        &:nth-of-type(3) {
+          a.event-link {
+            h2 {
+              font-size: 18px;
+            }
+
+            span.event-title {
+              padding: 30px;
+
+              span {
+                margin-bottom: 0;
+              }
+            }
+          }
+        }
+
         &:nth-of-type(4) {
           grid-column-start: 1;
           grid-column-end: 6;
@@ -670,7 +810,6 @@ section.fp-events {
         &:nth-of-type(6) {
           grid-column-start: 11;
           grid-column-end: 13;
-          background-color: green;
         }
       }
     }

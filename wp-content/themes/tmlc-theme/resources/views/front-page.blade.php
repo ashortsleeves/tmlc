@@ -114,12 +114,19 @@
                 @endphp
                 @if($i < 6)
                   <div class="event-single jumbo-bg" style="background-image: url({!! get_the_post_thumbnail_url($featured_post->ID) !!});" >
-                    <a class="event-link" href="{!!esc_url( $permalink )!!}"><span class="title"><h2>{!! esc_html( $title ) !!}</h2><span>{{tribe_get_venue($featured_post->ID)}}</span></span></a>
+                    <a class="event-link" href="{!!esc_url( $permalink )!!}">
+                      <span class="event-title">
+                        <h2>{!! esc_html( $title ) !!}</h2>
+                        @if(tribe_get_venue($featured_post->ID))
+                          <span>{{tribe_get_venue($featured_post->ID)}}</span>
+                        @endif
+                      </span>
+                    </a>
                   </div>
                 @endif
               @endforeach
-              <div class="event-single">
-
+              <div class="event-single jumbo-bg">
+                <a class="view-more" href="/events">View More<span>Events</span><i class="fas fa-arrow-alt-right"></i></a>
               </div>
             </div>
           </div>

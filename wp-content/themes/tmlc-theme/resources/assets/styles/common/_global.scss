@@ -17,6 +17,7 @@ body.sideNavBody { // any body class found on every page can be used here, this 
 
 .wrap {
   flex: 1 1 auto;
+  overflow: hidden;
 }
 
 html,
