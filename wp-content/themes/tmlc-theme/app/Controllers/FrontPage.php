@@ -35,4 +35,9 @@ class FrontPage extends Controller
   {
     return get_field('fp_featured_events');
   }
+
+  public function fpTeam()
+  {
+    return get_field('team_section');
+  }
 }

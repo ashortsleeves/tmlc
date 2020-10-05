@@ -1,3 +1,7 @@
+// body.home .main {
+//   background-color: $offwhite;
+// }
+
 section.fp-hero {
   background-color: #fff;
   position: relative;
@@ -293,7 +297,6 @@ section.fp-hero {
 
 section.fp-services {
   position: relative;
-  overflow: hidden;
 
   .background-wrap {
     position: absolute;
@@ -307,13 +310,18 @@ section.fp-services {
       position: absolute;
       left: 0;
       top: 0;
-      min-width: 100%;
-      max-width: none;
+      max-width: 100%;
+      min-width: 900px;
 
       @include laptop {
         top: auto;
-        bottom: 0;
+        bottom: 230px;
         width: 1428px;
+        min-width: 100%;
+      }
+
+      @include hd {
+        bottom: 0;
       }
     }
 
@@ -460,8 +468,14 @@ section.fp-services {
     }
   }
 }
+.fp-background {
+  background-color: $offwhite;
+  background-color: red;
+}
 
 section.fp-works {
+  position: relative;
+  z-index: 999;
   padding: 15px 0;
 
   @include mobile {
@@ -508,20 +522,21 @@ section.fp-works {
 }
 
 section.fp-events {
-  overflow: hidden;
-  padding: 15px 0;
+  padding: 15px 0 60px;
+  position: relative;
 
   @include mobile {
-    padding: 30px 0;
+    padding: 30px 0 60px;
   }
 
   @include laptop {
-    padding: 90px 0;
+    padding: 90px 0 260px;
   }
 
   .title {
     text-align: center;
     margin-bottom: 15px;
+    position: relative;
 
     @include phablet {
       margin-bottom: 30px;
@@ -529,6 +544,26 @@ section.fp-events {
 
     @include laptop {
       margin-bottom: 60px;
+    }
+  }
+
+  img.section-background {
+    position: absolute;
+    left: 0;
+    // top: -180px;
+    min-width: 100%;
+    max-width: none;
+    width: 800px;
+    bottom: -200px;
+
+    @include laptop {
+      bottom: 0;
+      width: 1428px;
+    }
+
+    @include hd {
+      top: -400px;
+      bottom: auto;
     }
   }
 
@@ -562,7 +597,6 @@ section.fp-events {
     }
 
     .event-single {
-      border: solid 2px #fff;
       position: relative;
       transition: 0.3s;
       opacity: 1;
@@ -576,29 +610,37 @@ section.fp-events {
         }
       }
 
-      @include phablet {
-        border: solid 5px #fff;
+      span.event-bg,
+      a.event-link,
+      a.view-more {
+        position: absolute;
+        left: 3px;
+        right: 3px;
+        top: 3px;
+        bottom: 3px;
+
+        @include phablet {
+          left: 5px;
+          right: 5px;
+          top: 5px;
+          bottom: 5px;
+        }
       }
 
       a.event-link {
         display: flex;
         align-items: flex-end;
-        position: absolute;
-        left:0;
-        right: 0;
-        top: 0;
-        bottom: 0;
 
         &::before {
           @include pseudo;
+          background: linear-gradient(0deg, rgba(0,0,0, 1) 0%, rgba(255,255,254,0) 50%, rgba(255,255,254,0) 100%);
+          transition: 0.3s;
+          opacity: 0.7;
           position: absolute;
           left: 0;
           right: 0;
           top: 0;
           bottom: 0;
-          background: linear-gradient(0deg, rgba(0,0,0, 1) 0%, rgba(255,255,254,0) 50%, rgba(255,255,254,0) 100%);
-          transition: 0.3s;
-          opacity: 0.7;
         }
 
         span.event-title {
@@ -646,11 +688,6 @@ section.fp-events {
         color: #fff;
         font-family: $secondary-font;
         font-size: 13px;
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
         text-align: center;
         line-height: 1;
         display: flex;
@@ -722,7 +759,10 @@ section.fp-events {
       &:nth-of-type(6) {
         grid-column-start: 9;
         grid-column-end: 13;
-        background-image: url('../images/view-more.jpg');
+
+        span.event-bg {
+          background-image: url('../images/view-more.jpg');
+        }
       }
 
       @include phablet {
@@ -811,6 +851,66 @@ section.fp-events {
           grid-column-start: 11;
           grid-column-end: 13;
         }
+      }
+    }
+  }
+}
+
+section.fp-team {
+  position: relative;
+  padding-top: 0;
+  position: relative;
+  // background-color: #fff;
+
+  .team-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  h1 {
+    @include laptop {
+      margin-top: -60px;
+    }
+  }
+
+  h1,
+  span.subtitle {
+    text-align: center;
+  }
+
+  span.subtitle {
+    max-width: 560px;
+    color: $brand-primary;
+    display: block;
+  }
+
+  .content {
+    a.email,
+    a.linkedin {
+      display: block;
+      color: $brand-secondary;
+
+      &:before {
+        @include pseudo;
+
+        font-family: "Font Awesome 5 Pro";
+        content: "\f0e0";
+        display: inline-block;
+        margin-right: 10px;
+        color: $brand-primary;
+        font-weight: 800;
+      }
+    }
+
+    a.linkedin {
+      color: $brand-primary;
+      text-decoration: underline;
+
+      &:before {
+        font-family: "Font Awesome 5 Brands";
+        content: "\f08c";
       }
     }
   }
