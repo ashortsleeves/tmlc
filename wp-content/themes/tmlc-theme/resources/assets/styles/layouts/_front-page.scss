@@ -314,10 +314,15 @@ section.fp-services {
       min-width: 900px;
 
       @include laptop {
-        top: auto;
-        bottom: 230px;
+        top: 0;
+
         width: 1428px;
         min-width: 100%;
+      }
+
+      @include desktop {
+        top: auto;
+        bottom: 230px;
       }
 
       @include hd {
@@ -328,16 +333,16 @@ section.fp-services {
     @include laptop {
       bottom: -380px;
 
-      &:before {
-        @include pseudo;
-
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        height: 420px;
-        background-color: #d4f1f7;
-      }
+      // &:before {
+      //   @include pseudo;
+      //
+      //   position: absolute;
+      //   left: 0;
+      //   right: 0;
+      //   top: 0;
+      //   height: 420px;
+      //   background-color: #d4f1f7;
+      // }
     }
   }
 
@@ -467,10 +472,6 @@ section.fp-services {
       }
     }
   }
-}
-.fp-background {
-  background-color: $offwhite;
-  background-color: red;
 }
 
 section.fp-works {
@@ -859,14 +860,30 @@ section.fp-events {
 section.fp-team {
   position: relative;
   padding-top: 0;
-  position: relative;
-  // background-color: #fff;
+  padding-bottom: 60px;
+
+    @include laptop {
+      padding-bottom: 120px;
+    }
+
+  img.section-background {
+    position: absolute;
+    bottom: 0;
+    width: 2761px;
+    left: calc(50% - 1250px);
+    max-width: none;
+    min-width: 100%;
+  }
 
   .team-container {
+    position: relative;
     display: flex;
     justify-content: center;
-    align-items: center;
     flex-direction: column;
+
+    a.btn-blue {
+      align-self: center;
+    }
   }
 
   h1 {
@@ -878,17 +895,104 @@ section.fp-team {
   h1,
   span.subtitle {
     text-align: center;
+    align-self: center;
   }
 
   span.subtitle {
     max-width: 560px;
     color: $brand-primary;
     display: block;
+    margin-bottom: 15px;
+
+    @include laptop {
+      margin-bottom: 45px;
+    }
+  }
+
+  .team-member {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 15px 0;
+
+    @include phablet {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 30px 0;
+
+      &:nth-of-type(even) {
+        flex-direction: row-reverse;
+      }
+    }
+
+    @include laptop {
+      padding: 45px 0;
+      justify-content: center;
+    }
+  }
+
+  .image-wrap {
+    border-radius: 180px;
+    overflow: hidden;
+    max-width: 180px;
+
+    @include mobile {
+      max-width: 250px;
+    }
+
+    @include phablet {
+      max-width: 180px;
+    }
+
+    @include tablet {
+      max-width: 250px;
+    }
+
+    @include laptop {
+      max-width: 360px;
+    }
   }
 
   .content {
+    padding: 15px 0 0;
+
+    @include phablet {
+      padding: 0;
+      max-width: 300px;
+    }
+
+    @include tablet {
+      max-width: 400px;
+    }
+
+    @include laptop {
+      padding: 30px 60px;
+      max-width: 595px;
+    }
+
+    h2 {
+      line-height: 1;
+      margin-bottom: 0;
+
+      @include laptop {
+        font-size: 36px;
+      }
+    }
+
+    span.jobtitle {
+      display: block;
+      color: $brand-primary;
+      text-transform: uppercase;
+      font-size: 24px;
+      letter-spacing: 0.025em;
+      margin-bottom: 15px;
+    }
+
     a.email,
     a.linkedin {
+      margin-top: 15px;
       display: block;
       color: $brand-secondary;
 

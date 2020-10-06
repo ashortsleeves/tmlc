@@ -49,107 +49,104 @@
         </div>
       </div>
     </section>
-    <div class="fp-background">
-
-
-      <section class="fp-services jumbo-bg">
-        <div class="background-wrap">
-          <img class="section-background" src="{{$fp_services['background']['url']}}" />
-        </div>
-        <div class="container title-container">
-          <h1>{{$fp_services['title']}}</h1>
-          @if($fp_services['subtitle'])
-            <span class="subtitle">{!!$fp_services['subtitle']!!}</span>
-          @endif
-        </div>
-        <div class="container container-services">
-          <div class="row">
-            @foreach($fp_services['services'] as $service)
-              <div class="col-md-4 col-12">
-                <div class="service jumbo-bg">
-                  <div class="jumbo-bg" style="background-image: url({!!$service['image']['url']!!})"></div>
-                  <h2>{!!$service['title']!!}</h2>
-                  @if($service['subtitle'])
-                    <span class="subtitle">{!! $service['subtitle'] !!}</span>
-                  @endif
-                  @if($service['button'])
-                    <a class="btn" href="{{$service['button']['url']}}">{{$service['button']['title']}}</a>
-                  @endif
-                </div>
-              </div>
-            @endforeach
-          </div>
-        </div>
-      </section>
-      <section class="fp-works">
-        <div class="container">
-          @foreach($fp_works as $work)
-            <div class="row work-row">
-              <div class="col-md-6">
-                <img src="{{$work['image']['url']}}" />
-              </div>
-              <div class="col-md-6">
-                <span class="subtitle">{{$work['subtitle']}}</span>
-                <h1 class="h2">{!!$work['title']!!}</h1>
-                {!!$work['content']!!}
-                <a class="btn" href="{{$work['button']['url']}}">{{$work['button']['title']}}</a>
+    <section class="fp-services jumbo-bg">
+      <div class="background-wrap">
+        <img class="section-background" src="{{$fp_services['background']['url']}}" />
+      </div>
+      <div class="container title-container">
+        <h1>{{$fp_services['title']}}</h1>
+        @if($fp_services['subtitle'])
+          <span class="subtitle">{!!$fp_services['subtitle']!!}</span>
+        @endif
+      </div>
+      <div class="container container-services">
+        <div class="row">
+          @foreach($fp_services['services'] as $service)
+            <div class="col-md-4 col-12">
+              <div class="service jumbo-bg">
+                <div class="jumbo-bg" style="background-image: url({!!$service['image']['url']!!})"></div>
+                <h2>{!!$service['title']!!}</h2>
+                @if($service['subtitle'])
+                  <span class="subtitle">{!! $service['subtitle'] !!}</span>
+                @endif
+                @if($service['button'])
+                  <a class="btn" href="{{$service['button']['url']}}">{{$service['button']['title']}}</a>
+                @endif
               </div>
             </div>
           @endforeach
         </div>
-      </section>
-
-      @if($fp_events)
-        <section class="fp-events">
-          <div class="background-wrap">
-            <img class="section-background" src="{{$fp_eventstitle['background']['url']}}" />
-          </div>
-          <div class="container">
-            <div class="title">
-              <h1>{!! $fp_eventstitle['title'] !!}</h1>
-              <span class="subtitle">{!! $fp_eventstitle['subtitle'] !!}</span>
+      </div>
+    </section>
+    <section class="fp-works">
+      <div class="container">
+        @foreach($fp_works as $work)
+          <div class="row work-row">
+            <div class="col-md-6">
+              <img src="{{$work['image']['url']}}" />
             </div>
-            <div class="event-wrapper">
-              <div class="events-grid">
-                @php $i = 0; @endphp
-                @foreach( $fp_events as $featured_post )
-                  @php
-                    $permalink = get_permalink( $featured_post->ID );
-                    $title = get_the_title( $featured_post->ID );
-                    $i++;
-                  @endphp
-                  @if($i < 6)
-                    <div class="event-single">
-                      <span class="event-bg jumbo-bg" style="background-image: url({!! get_the_post_thumbnail_url($featured_post->ID) !!});"></span>
-                      <a class="event-link" href="{!!esc_url( $permalink )!!}">
-                        <span class="event-title">
-                          <h2>{!! esc_html( $title ) !!}</h2>
-                          @if(tribe_get_venue($featured_post->ID))
-                            <span>{{tribe_get_venue($featured_post->ID)}}</span>
-                          @endif
-                        </span>
-                      </a>
-                    </div>
-                  @endif
-                @endforeach
-                <div class="event-single jumbo-bg">
-                  <span class="event-bg jumbo-bg"></span>
-                  <a class="view-more" href="/events">
-                    View More
-                    <span>Events</span>
-                    <i class="fas fa-arrow-alt-right"></i>
-                  </a>
-                </div>
+            <div class="col-md-6">
+              <span class="subtitle">{{$work['subtitle']}}</span>
+              <h1 class="h2">{!!$work['title']!!}</h1>
+              {!!$work['content']!!}
+              <a class="btn" href="{{$work['button']['url']}}">{{$work['button']['title']}}</a>
+            </div>
+          </div>
+        @endforeach
+      </div>
+    </section>
+
+    @if($fp_events)
+      <section class="fp-events">
+        <div class="background-wrap">
+          <img class="section-background" src="{{$fp_eventstitle['background']['url']}}" />
+        </div>
+        <div class="container">
+          <div class="title">
+            <h1>{!! $fp_eventstitle['title'] !!}</h1>
+            <span class="subtitle">{!! $fp_eventstitle['subtitle'] !!}</span>
+          </div>
+          <div class="event-wrapper">
+            <div class="events-grid">
+              @php $i = 0; @endphp
+              @foreach( $fp_events as $featured_post )
+                @php
+                  $permalink = get_permalink( $featured_post->ID );
+                  $title = get_the_title( $featured_post->ID );
+                  $i++;
+                @endphp
+                @if($i < 6)
+                  <div class="event-single">
+                    <span class="event-bg jumbo-bg" style="background-image: url({!! get_the_post_thumbnail_url($featured_post->ID) !!});"></span>
+                    <a class="event-link" href="{!!esc_url( $permalink )!!}">
+                      <span class="event-title">
+                        <h2>{!! esc_html( $title ) !!}</h2>
+                        @if(tribe_get_venue($featured_post->ID))
+                          <span>{{tribe_get_venue($featured_post->ID)}}</span>
+                        @endif
+                      </span>
+                    </a>
+                  </div>
+                @endif
+              @endforeach
+              <div class="event-single jumbo-bg">
+                <span class="event-bg jumbo-bg"></span>
+                <a class="view-more" href="/events">
+                  View More
+                  <span>Events</span>
+                  <i class="fas fa-arrow-alt-right"></i>
+                </a>
               </div>
             </div>
           </div>
-        </section>
-      @endif
-    </div>
+        </div>
+      </section>
+    @endif
+
     @if($fp_team)
       <section class="fp-team">
+        <img class="section-background" src="{!!$fp_team['image']['url']!!}"/>
         <div class="container team-container">
-
           <h1>{{$fp_team['title']}}</h1>
           <span class="subtitle">{{$fp_team['subtitle']}}</span>
           @foreach($fp_team['team_members'] as $team)
@@ -166,10 +163,11 @@
               </div>
             </div>
           @endforeach
+          @if($fp_team['button'])
+            <a href="{{$fp_team['button']['url']}}" class="btn btn-blue">{{$fp_team['button']['title']}}</a>
+          @endif
         </div>
       </section>
-    @else
-      <h1>test</h1>
     @endif
   @endwhile
 @endsection
