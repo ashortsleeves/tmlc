@@ -40,4 +40,9 @@ class FrontPage extends Controller
   {
     return get_field('team_section');
   }
+
+  public function fpTestimonial()
+  {
+    return get_field('testimonial_section');
+  }
 }
