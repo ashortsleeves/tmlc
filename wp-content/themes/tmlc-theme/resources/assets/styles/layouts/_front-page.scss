@@ -1037,14 +1037,29 @@ section.fp-testimonials {
   }
 
   i.bg-quote {
-    font-size: 300px;
+    left: calc(50% - 100px);
+    top: calc(50% - 235px);
+    font-size: 200px;
     color: #e5f7fb;
     position: absolute;
+
+
+    @include laptop {
     left: calc(50% - 150px);
+    font-size: 300px;
+    }
+  }
+
+  .container {
+    position: relative;
   }
 
   h1 {
     text-align: center;
+
+    @include phablet {
+      margin-bottom: 60px;
+    }
   }
 
   .slick-quotes,
@@ -1062,10 +1077,21 @@ section.fp-testimonials {
   }
 
   .slick-quotes {
+    margin-bottom: 15px;
+
+    @include laptop {
+      margin-bottom: 60px;
+    }
+
     .testimonial-single {
-      font-size: 24px;
+      font-size: 16px;
       font-style: italic;
       max-width: 800px;
+      margin-bottom: 15px;
+
+      @include phablet {
+        font-size: 24px;
+      }
     }
   }
 
@@ -1085,7 +1111,31 @@ section.fp-testimonials {
   }
 
   .slick-images {
-    height: 275px;
+    position: relative;
+    height: 135px;
+    margin-bottom: 30px;
+
+    &::before,
+    &::after {
+      @include pseudo;
+
+      position: absolute;
+      bottom: 0;
+    }
+
+    &::before {
+      left: -100vw;
+      right: -100vw;
+      height: 4px;
+      background-color: #daf3f9;
+    }
+
+    &::after {
+      height: 10px;
+      width: 116px;
+      left: calc(50% - 58px);
+      background-color: $brand-primary;
+    }
 
     .testimonial-single {
       display: flex;
@@ -1100,9 +1150,9 @@ section.fp-testimonials {
       transition: all 300ms ease;
     }
 
-    // .slick-center .image-wrap {
-    //   height: 100px;
-    //   width: 100px;
-    // }
+    .slick-current .image-wrap {
+      height: 100px;
+      width: 100px;
+    }
   }
 }

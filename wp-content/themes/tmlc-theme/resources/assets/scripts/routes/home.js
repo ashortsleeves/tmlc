@@ -39,29 +39,36 @@ export default {
       slidesToScroll: 1,
       infinite: true,
       arrows: false,
+      dots: false,
       asNavFor: '.slick-images, .slick-names',
       fade: true,
       cssEase: 'linear',
       speed: 200,
-      dots: true,
-      customPaging: function(slider, i) {
-        return '<div class="pager__item" id=' + i + '> __ </div>';
-      },
+
     });
 
-    // $('.slick-images').slick({
-    //   slidesToShow: 3,
-    //   slidesToScroll: 1,
-    //   infinite: true,
-    //   arrows: false,
-    //   dots: false,
-    //   asNavFor: '.slick-quotes, .slick-names',
-    //   centerMode: true,
-    //   autoplay: true,
-    //   autoplaySpeed: 10000,
-    //   speed: 200,
-    //   variableWidth: true,
-    // });
+    $('.slick-images').slick({
+      slidesToShow: 3,
+      slidesToScroll: 1,
+      infinite: true,
+      arrows: false,
+      dots: false,
+      asNavFor: '.slick-quotes, .slick-names',
+      centerMode: true,
+      autoplay: true,
+      autoplaySpeed: 5000,
+      speed: 200,
+      responsive: [
+        {
+          breakpoint: 480,
+          settings: {
+            slidesToShow: 1,
+            // centerMode: false,
+          },
+        },
+      ],
+
+    });
 
     $('.slick-names').slick({
       slidesToShow: 1,

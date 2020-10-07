@@ -1,0 +1,140 @@
+section.contact-footer {
+  position: relative;
+  padding: 30px 0;
+
+  @include mobile {
+    padding: 60px 0;
+  }
+
+  @include laptop {
+    padding: 90px 0;
+  }
+
+  @include desktop {
+    padding: 120px 0;
+  }
+
+  img.section-background {
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    max-width: 100%;
+    min-width: 1428px;
+
+    @include laptop {
+      top: 0;
+
+      width: 1428px;
+      min-width: 100%;
+    }
+  }
+
+  .container {
+    position: relative;
+  }
+
+  .contact-content {
+    span.pretitle {
+      color: $brand-primary;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      @include tablet {
+        font-size: 36px;
+      }
+    }
+
+    p:last-of-type {
+      margin-bottom: 30px;
+
+      @include tablet {
+        margin-bottom: 60px;
+      }
+    }
+  }
+
+  .contact-wrap {
+    display: flex;
+    flex-direction: row;
+
+    @include tablet {
+      flex-direction: column;
+    }
+
+    ul.footer-details {
+      list-style-type: none;
+      padding-left: 0;
+      margin-bottom: 0;
+
+      li {
+        position: relative;
+        padding-left: 35px;
+
+        &::before {
+          @include pseudo;
+
+          position: absolute;
+          left: 0;
+          font-family: "Font Awesome 5 Pro";
+
+          display: inline-block;
+          color: $brand-primary;
+          font-weight: 800;
+        }
+
+        &.email::before {
+          content: "\f0e0";
+        }
+
+        &.phone::before {
+          content: "\f095";
+        }
+
+        &.address::before {
+          content: "\f3c5";
+        }
+
+        &:last-of-type {
+          margin-bottom: 0;
+        }
+      }
+
+      a {
+        color: $brand-secondary;
+
+        &:hover,
+        &:focus {
+          color: $brand-primary;
+          text-decoration: underline;
+        }
+      }
+    }
+
+    img.contact-logo,
+    ul.footer-details li {
+      margin-bottom: 15px;
+
+      @include laptop {
+        margin-bottom: 25px;
+      }
+    }
+
+    img.contact-logo {
+      display: none;
+
+      @include mobile {
+        display: block;
+        width: 125px;
+        margin-right: 15px;
+        align-self: flex-start;
+      }
+
+      @include tablet {
+        margin-right: 0;
+        width: auto;
+      }
+    }
+  }
+}

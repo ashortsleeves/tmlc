@@ -171,11 +171,9 @@
     @endif
     @if($fp_testimonial['testimonials'])
       <section class="fp-testimonials">
-        {{-- <i class="fas fa-quote-left bg-quote"></i> --}}
+        <i class="fas fa-quote-left bg-quote"></i>
         <div class="container">
           <h1>{{$fp_testimonial['title']}}</h1>
-
-
           <div class="slick-quotes">
             @foreach($fp_testimonial['testimonials'] as $testimonial)
               <div class="slick-wrap">
@@ -188,9 +186,12 @@
           <div class="slick-images">
             @foreach($fp_testimonial['testimonials'] as $testimonial)
 
-              <div class="image-wrap jumbo-bg" style="background-image: url('{{$testimonial['image']['sizes']['thumbnail']}}')">
+              <div class="testimonial-wrap">
+                <div class="testimonial-single">
+                  <div class="image-wrap jumbo-bg" style="background-image: url('{{$testimonial['image']['sizes']['thumbnail']}}')">
+                  </div>
+                </div>
               </div>
-
             @endforeach
           </div>
           <div class="slick-names">
