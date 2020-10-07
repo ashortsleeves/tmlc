@@ -30,7 +30,7 @@ class App extends Controller
         }
         return get_the_title();
     }
-    
+
     public function siteLogo()
     {
       return get_field('logo', 'option');
@@ -43,6 +43,7 @@ class App extends Controller
         'content'    => get_field('contact_footer_content','option'),
         'background' => get_field('contact_footer_background', 'option'),
         'site_info'  => get_field('site_info', 'option'),
+        'logo'       => get_field('footer_logo', 'option'),
       ];
 
       return $data;

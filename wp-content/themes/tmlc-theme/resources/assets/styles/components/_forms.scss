@@ -20,7 +20,7 @@
 
 .gform_wrapper {
   h3.gform_title {
-    margin: 0 0 6px;
+    margin-bottom: 25px;
   }
 
   ul {
@@ -28,81 +28,85 @@
     padding: 0;
   }
 
-  li.gfield select {
-    height: 37px;
-    border: 0;
-    background-color: #efefef;
-  }
-
-  ul.gfield_checkbox {
-    @include mobile {
-      column-count: 2;
-    }
-  }
-
-  table.gpnf-nested-entries {
-    width: 100%;
-  }
-
-  li.recaptcha {
-    label {
-      display: none !important;
-    }
-  }
-
-  li.gsection {
-    position: relative;
-
-    h2 {
-      margin-top: 60px !important;
-
-      &::before {
-        display: block;
-        position: absolute;
-        content: " ";
-        height: 15px;
-        width: calc(100% + 70px);
-        top: -30px;
-        left: -25px;
-        background-color: #ececec;
-      }
-    }
-  }
-
   .gfield {
-    margin-bottom: 15px;
+    margin-bottom: 25px;
 
     input,
     textarea {
       border: none;
-      padding: 12px 10px;
+      padding: 15px 25px;
       width: 100%;
       font-size: 16px;
-      background-color: #efefef;
-    }
-
-    select {
-      appearance: none;
-      border-radius: 0 !important;
-      position: relative;
+      background-color: #fff;
+      box-shadow: 7px 6px 27px -14px rgba(0,0,0,0.2);
     }
 
     textarea {
       height: 180px;
     }
+
+    .ginput_container_name,
+    .ginput_container_email {
+      display: flex;
+      flex-direction: row;
+
+      span:first-of-type {
+        margin-right: 25px;
+      }
+    }
+
+    .ginput_full input {
+      margin-bottom: 15px;
+    }
+
+    // .address_state select {
+    //   // height: 40px;
+    // }
+
+    .ginput_complex {
+      label {
+        font-size: 14px;
+      }
+
+      .name_first,
+      .name_last,
+      .address_city,
+      .address_state,
+      .address_zip,
+      .address_country {
+        display: inline-flex;
+        flex-direction: column;
+        width: calc(50% - 13px);
+      }
+
+      .address_city,
+      .address_zip {
+        margin-right: 25px;
+      }
+    }
   }
 
-  input[type=radio] {
-    margin-top: 0 !important;
+  li.gfield select {
+    border: 0;
+    background-color: #989bac;
+    appearance: none;
+    border-radius: 0 !important;
+    position: relative;
+    padding: 12px 10px;
+    width: 100%;
   }
 
-  #field_1_9 label {
-    display: none;
+  li.date-start,
+  li.date-end {
+    display: inline-block;
+    width: calc(50% - 13px);
+  }
+
+  li.date-start {
+    margin-right: 25px;
   }
 
   .gform_footer {
-    margin-top: 0;
-
     input[type=submit] {
       -webkit-appearance: none;
       -moz-appearance: none;
@@ -115,5 +119,84 @@
 
   .g-recaptcha label {
     @extend .sr-only;
+  }
+
+  .hide-label,
+  .hidden_label {
+    > label.gfield_label {
+      display: none;
+    }
+  }
+}
+
+.form-container {
+  .mobile-hide {
+    display: none;
+
+    @include laptop {
+      display: block;
+    }
+  }
+
+  .desktop-hide {
+    @include laptop {
+      display: none;
+    }
+  }
+
+  .col-content {
+    margin-bottom: 15px;
+  }
+}
+
+#field_2_9 {
+  padding: 20px 25px;
+  background-color: #fff;
+  box-shadow: 7px 6px 27px -14px rgba(0,0,0,0.2);
+
+  ul.gfield_checkbox {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    max-width: 360px;
+    margin-top: 15px;
+
+    li {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      input {
+        width: 20px!important;
+        margin-right: 10px;
+      }
+
+      label {
+        margin-bottom: 0;
+        line-height: 0.9;
+      }
+    }
+  }
+}
+
+.ui-datepicker {
+  background-color: #fff;
+  z-index: 999;
+  padding: 15px;
+  box-shadow: 7px 6px 27px -14px rgba(0,0,0,0.5);
+
+  a.ui-datepicker-prev,
+  select.ui-datepicker-month {
+    margin-right: 15px;
+  }
+
+  a.ui-datepicker-prev,
+  a.ui-datepicker-next {
+
+  }
+
+  td,
+  .ui-datepicker-title {
+    padding: 5px;
   }
 }
