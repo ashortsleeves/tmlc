@@ -1,6 +1,7 @@
 section.contact-footer {
   position: relative;
   padding: 30px 0;
+  overflow: hidden;
 
   @include mobile {
     padding: 60px 0;
@@ -17,13 +18,13 @@ section.contact-footer {
   img.section-background {
     position: absolute;
     right: 0;
-    top: 0;
+    top: -2px;
 
     max-width: 100%;
     min-width: 1428px;
 
     @include laptop {
-      top: 0;
+      top: -2px;
 
       width: 1428px;
       min-width: 100%;

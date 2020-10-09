@@ -38,7 +38,7 @@
       width: 100%;
       font-size: 16px;
       background-color: #fff;
-      box-shadow: 7px 6px 27px -14px rgba(0,0,0,0.4);
+      box-shadow: 0 0 15px 0 rgba(0,0,0,0.1);
 
       @include mobile {
         padding: 15px 25px;
@@ -156,7 +156,7 @@
 #field_2_9 {
   padding: 15px;
   background-color: #fff;
-  box-shadow: 7px 6px 27px -10px rgba(0,0,0,0.4);
+  box-shadow: 0 0 15px 0 rgba(0,0,0,0.1);
 
   @include mobile {
     padding: 20px 25px;

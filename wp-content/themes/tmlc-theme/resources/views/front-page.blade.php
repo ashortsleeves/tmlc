@@ -36,7 +36,6 @@
       </div>
       <div class="fp-strapline">
         <div class="container strapline-container">
-
             @foreach($fp_strapline as $affiliate)
               <div class="affiliate-wrap">
                 <div class="jumbo-bg affiliate @if(!$affiliate['logo']) affiliate-title @endif" style="background-image: url({{$affiliate['image']['url']}})">

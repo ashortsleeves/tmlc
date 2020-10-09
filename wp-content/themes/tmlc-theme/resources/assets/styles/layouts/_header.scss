@@ -57,6 +57,32 @@ header.banner {
 
         color: $brand-secondary;
         text-transform: lowercase;
+
+        &:hover,
+        &:focus {
+          color: $brand-primary;
+        }
+      }
+
+      ul.dropdown-menu {
+        border: transparent;
+        box-shadow: 7px 6px 27px -10px rgba(0,0,0,0.4);
+      }
+
+      &.current_page_item,
+      &.current-menu-parent {
+        position: relative;
+
+        > a::before {
+          @include pseudo;
+
+          position: absolute;
+          left: 1rem;
+          right: 1rem;
+          top: calc(100% - 0.5rem);
+          height: 2px;
+          background-color: $brand-primary;
+        }
       }
     }
   }
