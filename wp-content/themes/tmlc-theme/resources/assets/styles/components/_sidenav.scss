@@ -19,6 +19,18 @@
     padding: 12px 20px;
   }
 
+  ul.nav {
+    flex-direction: column;
+
+    ul.dropdown-menu.show {
+      position: relative!important;
+      transform: none!important;
+      width: 100%;
+      border: transparent;
+      background-color: lighten($brand-primary, 7%);
+    }
+  }
+
   &.sideNav-open {
     #{$sideNavDirection}: 0;
 

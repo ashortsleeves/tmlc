@@ -60,7 +60,7 @@ export default {
       speed: 200,
       responsive: [
         {
-          breakpoint: 480,
+          breakpoint: 768,
           settings: {
             slidesToShow: 1,
             // centerMode: false,

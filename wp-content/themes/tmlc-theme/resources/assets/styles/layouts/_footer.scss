@@ -32,6 +32,16 @@ section.contact-footer {
 
   .container {
     position: relative;
+
+    .col-md-6 {
+      &:nth-of-type(even) {
+        padding-top: 30px;
+
+        @include tablet {
+          padding-top: 0;
+        }
+      }
+    }
   }
 
   .contact-content {

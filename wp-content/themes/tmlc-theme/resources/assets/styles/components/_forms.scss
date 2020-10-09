@@ -34,11 +34,15 @@
     input,
     textarea {
       border: none;
-      padding: 15px 25px;
+      padding: 15px;
       width: 100%;
       font-size: 16px;
       background-color: #fff;
-      box-shadow: 7px 6px 27px -14px rgba(0,0,0,0.2);
+      box-shadow: 7px 6px 27px -14px rgba(0,0,0,0.4);
+
+      @include mobile {
+        padding: 15px 25px;
+      }
     }
 
     textarea {
@@ -150,9 +154,13 @@
 }
 
 #field_2_9 {
-  padding: 20px 25px;
+  padding: 15px;
   background-color: #fff;
-  box-shadow: 7px 6px 27px -14px rgba(0,0,0,0.2);
+  box-shadow: 7px 6px 27px -10px rgba(0,0,0,0.4);
+
+  @include mobile {
+    padding: 20px 25px;
+  }
 
   ul.gfield_checkbox {
     display: flex;
@@ -180,10 +188,11 @@
 }
 
 .ui-datepicker {
+  display: none;
   background-color: #fff;
   z-index: 999;
   padding: 15px;
-  box-shadow: 7px 6px 27px -14px rgba(0,0,0,0.5);
+  box-shadow: 7px 6px 27px -10px rgba(0,0,0,0.5);
 
   a.ui-datepicker-prev,
   select.ui-datepicker-month {
@@ -198,5 +207,12 @@
   td,
   .ui-datepicker-title {
     padding: 5px;
+  }
+}
+
+@media only screen and (max-width: 380px) {
+  .ginput_recaptcha {
+    transform: scale(.9);
+    transform-origin: 0 0;
   }
 }
