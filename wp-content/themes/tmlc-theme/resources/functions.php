@@ -90,3 +90,8 @@ Container::getInstance()
             'view' => require dirname(__DIR__).'/config/view.php',
         ]);
     }, true);
+
+    /**
+    * Set the The Events Calendar default template to our Sage-friendly template.
+    **/
+    Tribe__Settings_Manager::set_option( 'tribeEventsTemplate', 'views/template-events.blade.php' );

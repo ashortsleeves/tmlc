@@ -89,30 +89,58 @@ add_filter('comments_template', function ($comments_template) {
 
     return $comments_template;
 }, 100);
-//
-// add_filter( 'woocommerce_register_post_type_product',  function( $args ){
-//  $labels = nk_get_cpt_labels('Event','Events');
-//     $args['labels'] = $labels;
-//     return $args;
-//  });
-//
-//
-// function nk_get_cpt_labels($single,$plural){
-//    $arr = array(
-//       'name' => $plural,
-//       'singular_name' => $single,
-//       'menu_name' => $plural,
-//       'add_new' => 'Add '.$single,
-//       'add_new_item' => 'Add New '.$single,
-//       'edit' => 'Edit',
-//       'edit_item' => 'Edit '.$single,
-//       'new_item' => 'New '.$single,
-//       'view' => 'View '.$plural,
-//       'view_item' => 'View '.$single,
-//       'search_items' => 'Search '.$plural,
-//       'not_found' => 'No '.$plural.' Found',
-//       'not_found_in_trash' => 'No '.$plural.' Found in Trash',
-//       'parent' => 'Parent '.$single
-//    );
-//    return $arr;
-// }
+
+//Tribe Events Calendar
+add_filter('tribe_get_template_part_path', 'App\tribe_render_detault_blade', PHP_INT_MAX, 2);
+function tribe_render_detault_blade($file, $template) {
+    $theme_template = locate_template(["views/tribe-events/{$template}"]);
+
+    if ($theme_template) {
+
+        $data = collect(get_body_class())->reduce(function ($data, $class) use ($template) {
+            return apply_filters("sage/template/{$class}/data", $data, $template);
+        }, []);
+
+        echo template($theme_template, $data);
+
+        return get_stylesheet_directory().'/index.php';
+    }
+    return $file;
+}
+
+add_filter('tribe_get_current_template', function( $template ){
+    $theme_template = locate_template(["views/tribe-events/{$template}"]);
+
+    if ($theme_template)
+        return $theme_template;
+
+    return $template;
+}, PHP_INT_MAX, 2);
+
+add_filter('tribe_events_template', 'App\\tribe_add_blade_templates', PHP_INT_MAX, 2);
+function tribe_add_blade_templates($file, $template) {
+    $theme_template = locate_template(["views/tribe-events/{$template}"]);
+
+    if ($theme_template)
+        return $theme_template;
+
+    return $file;
+}
+
+add_action( 'tribe_events_before_view', function($file) {
+    ob_start();
+} );
+
+add_action( 'tribe_events_after_view', function($file) {
+    $html = ob_get_clean();
+
+    if(strpos($file, '.blade.php') !== false) {
+
+        $data = collect(get_body_class())->reduce(function ($data, $class) use ($file) {
+            return apply_filters("sage/template/{$class}/data", $data, $file);
+        }, []);
+
+        echo template($file, $data);
+
+    } else echo $html;
+} );
