@@ -21,6 +21,10 @@
  * @var string   $breakpoint_pointer   String we use as pointer to the current view we are setting up with breakpoints.
  */
 
+if($events) {
+
+
+
 $header_classes = [ 'tribe-events-header' ];
 if ( empty( $disable_event_search ) ) {
 	$header_classes[] = 'tribe-events-header--has-event-search';
@@ -75,7 +79,9 @@ if ( empty( $disable_event_search ) ) {
 
 		<?php $this->template( 'list/nav' ); ?>
 
-		<?php $this->template( 'components/ical-link' ); ?>
+		<?php
+		$this->template( 'components/ical-link' );
+		?>
 
 		<?php $this->template( 'components/after' ); ?>
 
@@ -83,3 +89,5 @@ if ( empty( $disable_event_search ) ) {
 </div>
 
 <?php $this->template( 'components/breakpoints' ); ?>
+
+<?php }; //Ending bracket for if($events) ?>

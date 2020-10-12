@@ -181,4 +181,8 @@ br {
   @include tablet {
     padding: 25px;
   }
+
+  &-no-padding {
+    padding: 0;
+  }
 }
