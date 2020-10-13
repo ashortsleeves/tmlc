@@ -83,9 +83,11 @@ li {
 
 a {
   transition: $base-transition;
+  color: $brand-primary;
 
   &:hover,
   &:focus {
+    color: $brand-hover;
     text-decoration: none;
   }
 }
@@ -184,5 +186,15 @@ br {
 
   &-no-padding {
     padding: 0;
+  }
+
+  &-top {
+    padding-bottom: 0;
+    margin-bottom: 0;
+
+  }
+
+  &-bottom {
+    padding-top: 0;
   }
 }

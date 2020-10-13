@@ -19,10 +19,3 @@ if ( empty( $ical->display_link ) ) {
 }
 
 ?>
-<div class="tribe-events-c-ical tribe-common-b2 tribe-common-b3--min-medium">
-	<a
-		class="tribe-events-c-ical__link"
-		title="<?php echo esc_attr( $ical->link->title ); ?>"
-		href="<?php echo esc_url( $ical->link->url ); ?>"
-	><?php echo esc_html( $ical->link->text ); ?></a>
-</div>

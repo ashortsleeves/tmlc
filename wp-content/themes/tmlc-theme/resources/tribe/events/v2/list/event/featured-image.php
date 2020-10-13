@@ -26,20 +26,8 @@ if ( ! $event->thumbnail->exists ) {
 		href="<?php echo esc_url( $event->permalink ); ?>"
 		title="<?php echo esc_attr( $event->title ); ?>"
 		rel="bookmark"
-		class="tribe-events-calendar-list__event-featured-image-link"
+		class="tribe-events-calendar-list__event-featured-image-link jumbo-bg"
+		style="background-image: url(<?php echo esc_url( $event->thumbnail->full->url ); ?>)"
 	>
-		<img
-			src="<?php echo esc_url( $event->thumbnail->full->url ); ?>"
-			<?php if ( ! empty( $event->thumbnail->srcset ) ) : ?>
-				srcset="<?php echo esc_attr( $event->thumbnail->srcset ); ?>"
-			<?php endif; ?>
-			<?php if ( ! empty( $event->thumbnail->alt ) ) : ?>
-				alt="<?php echo esc_attr( $event->thumbnail->alt ); ?>"
-			<?php endif; ?>
-			<?php if ( ! empty( $event->thumbnail->title ) ) : ?>
-				title="<?php echo esc_attr( $event->thumbnail->title ); ?>"
-			<?php endif; ?>
-			class="tribe-events-calendar-list__event-featured-image"
-		/>
 	</a>
 </div>

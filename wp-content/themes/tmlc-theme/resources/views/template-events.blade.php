@@ -5,8 +5,6 @@
 @extends('layouts.app')
 
 @section('content')
-  @include('partials.page-header')
-
   @if (!have_posts())
     <div class="alert alert-warning">
       {{ __('Sorry, no results were found.', 'sage') }}
@@ -15,12 +13,10 @@
   @endif
   @while (have_posts()) @php the_post() @endphp
 
-    <section class="content-section">
+    <section class="content-section content-section-events">
       <img class="content-section-background" src="{{$footer['background']['url']}}" />
       <div class="container container-sm content-container">
-        <div class="cardstyle cardstyle-no-padding">
-          @php the_content() @endphp
-        </div>
+        @php the_content() @endphp
       </div>
     </section>
 
@@ -41,5 +37,4 @@
 
   wp_reset_postdata();
   @endphp
-  {!! get_the_posts_navigation() !!}
 @endsection
