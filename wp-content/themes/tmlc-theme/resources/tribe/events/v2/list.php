@@ -21,7 +21,6 @@
  * @var string   $breakpoint_pointer   String we use as pointer to the current view we are setting up with breakpoints.
  */
 
-if($events) {
 
 
 
@@ -89,5 +88,3 @@ if ( empty( $disable_event_search ) ) {
 </div>
 
 <?php $this->template( 'components/breakpoints' ); ?>
-
-<?php }; //Ending bracket for if($events) ?>

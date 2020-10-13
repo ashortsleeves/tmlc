@@ -19,22 +19,26 @@
         @php the_content() @endphp
       </div>
     </section>
+    {{-- @php
 
+    $args = array(
+      'post_type' => 'tribe_events',
+      'post_status' => 'publish',
+    );
+
+    $loop = new WP_Query( $args );
+    @endphp
+    <div class="event-slick">
+      @php
+        while ( $loop->have_posts() ) : $loop->the_post();
+      @endphp
+        <div class="jumbo-bg" style="background-image: url({{get_the_post_thumbnail_url()}})">
+          {{the_title()}}
+          {{the_excerpt()}}
+        </div>
+      @endwhile
+    </div>
+    @php wp_reset_postdata(); @endphp --}}
   @endwhile
-  @php
 
-  $args = array(
-    'post_type' => 'tribe_events',
-    'post_status' => 'publish',
-  );
-
-  $loop = new WP_Query( $args );
-
-  while ( $loop->have_posts() ) : $loop->the_post();
-    print the_title();
-    the_excerpt();
-  endwhile;
-
-  wp_reset_postdata();
-  @endphp
 @endsection
