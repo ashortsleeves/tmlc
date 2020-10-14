@@ -23,9 +23,11 @@
 .tribe-common {
   .tribe-common-h5,
   .tribe-common-h6,
-  .tribe-common-h4 {
+  .tribe-common-h4,
+  .tribe-events-single-section-title {
     color: $brand-secondary;
     font-family: $secondary-font;
+    font-weight: 400;
   }
 
   .tribe-common-b2,
@@ -52,6 +54,13 @@
     &:focus {
       color: $brand-hover;
     }
+  }
+
+  a.btn-ticket {
+    @include btn;
+
+    color: #fff!important;
+    padding: 15px!important;
   }
 }
 
@@ -105,9 +114,11 @@
 
       padding: 15px;
       font-family: $primary-font;
+      font-weight: 400;
+      background-color: $brand-secondary;
 
       &.tribe-events-c-top-bar__today-button {
-        background-color: $brand-secondary;
+        padding: 15px;
 
         &:hover,
         &:focus {

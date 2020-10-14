@@ -29,13 +29,24 @@
  function ci_event_template() {
    if(isset($_POST['new_event']) == '1') {
 
+     $new_venue = array(
+       'ID' => '',
+       'post_type' => 'tribe_venue',
+       'post_status' => 'publish',
+       'post_title'  => $_POST['post_venue'],
+       'meta_input' => array(
+
+       ),
+     );
+     $venue_id = wp_insert_post($new_venue);
+
      $new_event = array(
          'ID' => '',
          'post_type'   => 'tribe_events', // Custom Post Type Slug
          'post_status' => 'draft',
          'post_title'  => $_POST['post_title'],
          'meta_input' => array(
-             '_EventURL' => 'www.google.com',
+             '_EventVenueID' => $venue_id,
          ),
        );
 
@@ -74,6 +85,7 @@
        ),
      );
 
+
      $small_id = wp_insert_post($small_ticket);
      $medium_id = wp_insert_post($medium_ticket);
      $large_id = wp_insert_post($large_ticket);
@@ -86,11 +98,21 @@
    if( class_exists('TribeEventsAPI')) {
      ci_event_template();
      ?>
+     <?php
+     // $entry_id = '3';
+     // $entry = GFAPI::get_entry($entry_id);
+     // var_dump($entry);
+     // echo $entry['5'];
+     // // global $post;
+     // // echo get_the_id($post);
+     // echo "Test";
+     ?>
      <script>
      // Adds button to the events list page
      jQuery(function(){
          jQuery("body.post-type-tribe_events .wrap").prepend('<form method="post" action=""><input name="post_title" type="text" /><input type="hidden" name="new_event" value="1" /><input type="submit" name="submit" value="Create Post With Tickets" /></form>');
          //Still need to add refresh functionality
+         jQuery("body.forms_page_gf_entries #post-body-content").append('<form method="post" action=""><input name="post_title" type="text" value="" placeholder="Event Name" /><br /><input name="post_venue" type="text" value="" placeholder="Location" /><br /><input type="hidden" name="new_event" value="" /><input type="submit" name="submit" value="Create Event" /></form>');
      });
      </script>
      <?php

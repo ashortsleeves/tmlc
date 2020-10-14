@@ -27,7 +27,16 @@ $event_classes = tribe_get_post_class( [ 'tribe-events-calendar-latest-past__eve
 
 	<div class="tribe-events-calendar-latest-past__event-wrapper tribe-common-g-col">
 		<article <?php tribe_classes( $event_classes ) ?>>
-			<?php $this->template( 'latest-past/event/featured-image', [ 'event' => $event ] ); ?>
+			<div class="tribe-events-calendar-list__event-featured-image-wrapper tribe-common-g-col">
+				<a
+					href="<?php echo esc_url( $event->permalink ); ?>"
+					title="<?php echo esc_attr( $event->title ); ?>"
+					rel="bookmark"
+					class="tribe-events-calendar-list__event-featured-image-link jumbo-bg"
+					style="background-image: url(<?php echo esc_url( $event->thumbnail->full->url ); ?>)"
+				>
+				</a>
+			</div>
 
 			<div class="tribe-events-calendar-latest-past__event-details tribe-common-g-col">
 
