@@ -47,48 +47,64 @@
          'post_title'  => $_POST['post_title'],
          'meta_input' => array(
              '_EventVenueID' => $venue_id,
+             '_EventStartDate' => date('Y-m-d H:i:s', strtotime($_POST['start_date'])),
+             '_EventEndDate' => date('Y-m-d H:i:s', strtotime($_POST['end_date'])),
          ),
        );
 
      $event_id = wp_insert_post($new_event);
 
-     $small_ticket = array(
-       'ID' => '',
-       'post_type' => 'tribe_tpp_tickets',
-       'post_title'  => 'Small Locker',
-       'post_status' => 'publish',
-       'meta_input' => array(
-           '_tribe_tpp_for_event' => $event_id,
-           '_price'               => 10,
-       ),
-     );
+      if(isset($_POST['small_locker'])) {
+        $small_ticket = array(
+          'ID' => '',
+          'post_type' => 'tribe_tpp_tickets',
+          'post_title'  => 'Small Locker',
+          'post_status' => 'publish',
+          'meta_input' => array(
+              '_tribe_tpp_for_event' => $event_id,
+              '_price'               => 10,
+          ),
+        );
 
-     $medium_ticket = array(
-       'ID' => '',
-       'post_type' => 'tribe_tpp_tickets',
-       'post_title'  => 'Medium Locker',
-       'post_status' => 'publish',
-       'meta_input' => array(
-           '_tribe_tpp_for_event' => $event_id,
-           '_price'               => 15,
-       ),
-     );
+       $small_id = wp_insert_post($small_ticket);
+     } else {
+       $small_id = null;
+     };
 
-     $large_ticket = array(
-       'ID' => '',
-       'post_type' => 'tribe_tpp_tickets',
-       'post_title'  => 'Large Locker',
-       'post_status' => 'publish',
-       'meta_input' => array(
-           '_tribe_tpp_for_event' => $event_id,
-           '_price'               => 20,
-       ),
-     );
+      if(isset($_POST['medium_locker'])) {
+       $medium_ticket = array(
+         'ID' => '',
+         'post_type' => 'tribe_tpp_tickets',
+         'post_title'  => 'Medium Locker',
+         'post_status' => 'publish',
+         'meta_input' => array(
+             '_tribe_tpp_for_event' => $event_id,
+             '_price'               => 15,
+         ),
+       );
 
+      $medium_id = wp_insert_post($medium_ticket);
+    } else {
+      $medium_id = null;
+    };
 
-     $small_id = wp_insert_post($small_ticket);
-     $medium_id = wp_insert_post($medium_ticket);
-     $large_id = wp_insert_post($large_ticket);
+      if(isset($_POST['large_locker'])) {
+       $large_ticket = array(
+         'ID' => '',
+         'post_type' => 'tribe_tpp_tickets',
+         'post_title'  => 'Large Locker',
+         'post_status' => 'publish',
+         'meta_input' => array(
+             '_tribe_tpp_for_event' => $event_id,
+             '_price'               => 20,
+         ),
+       );
+
+      $large_id = wp_insert_post($large_ticket);
+    } else {
+      $large_id = null;
+    };
+
      $post = get_posts($event_id, $small_id, $medium_id, $large_id);
    }
  }
@@ -110,9 +126,7 @@
      <script>
      // Adds button to the events list page
      jQuery(function(){
-         jQuery("body.post-type-tribe_events .wrap").prepend('<form method="post" action=""><input name="post_title" type="text" /><input type="hidden" name="new_event" value="1" /><input type="submit" name="submit" value="Create Post With Tickets" /></form>');
-         //Still need to add refresh functionality
-         jQuery("body.forms_page_gf_entries #post-body-content").append('<form method="post" action=""><input name="post_title" type="text" value="" placeholder="Event Name" /><br /><input name="post_venue" type="text" value="" placeholder="Location" /><br /><input type="hidden" name="new_event" value="" /><input type="submit" name="submit" value="Create Event" /></form>');
+         jQuery("body.forms_page_gf_entries #post-body-content").append('<form method="post" action=""><input name="post_title" type="text" value="" placeholder="Event Name" /><br /><input name="post_venue" type="text" value="" placeholder="Location" /><br /><input name="start_date" type="text" value="" placeholder="Start Date" /><input name="end_date" type="text" value="" placeholder="End Date" /><br /><input name="small_locker" type="checkbox" id="small_locker" value=""/><label for="small_locker">Small Locker</label><br /><input name="medium_locker" type="checkbox" id="medium_locker" value=""/><label for="medium_locker">Medium Locker</label><br /><input name="large_locker" type="checkbox" id="Large_locker" value=""/><label for="large_locker">large Locker</label><br /><input type="hidden" name="new_event" value="" /><input type="submit" name="submit" value="Create Event" /></form>');
      });
      </script>
      <?php
