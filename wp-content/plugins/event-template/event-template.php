@@ -121,7 +121,6 @@
      // echo $entry['5'];
      // // global $post;
      // // echo get_the_id($post);
-     // echo "Test";
      ?>
      <script>
      // Adds button to the events list page

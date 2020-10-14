@@ -1,0 +1,73 @@
+.blog-wrap {
+  background-color: #efefef;
+  border-bottom: solid 10px #fff;
+}
+
+.posts-container {
+  padding: 30px 0;
+
+  @include laptop {
+    padding: 60px 0;
+  }
+
+  @include desktop {
+    padding: 140px 0;
+  }
+
+  h1 {
+    margin-bottom: 30px;
+  }
+
+  .cardstyle,
+  article {
+    background-color: #fff;
+    padding: 15px;
+    margin-bottom: 15px;
+
+    @include laptop {
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+  }
+
+  article {
+    .img-wrap {
+      height: 150px;
+      margin-bottom: 15px;
+
+      @include laptop {
+        height: 250px;
+        margin-bottom: 25px;
+      }
+    }
+  }
+
+  .cardstyle {
+    .widget {
+      margin-bottom: 15px;
+
+      @include laptop {
+        margin-bottom: 25px;
+      }
+    }
+  }
+}
+
+.primary_pagination {
+  span.page-numbers,
+  a.page-numbers {
+    padding: 4px 12px;
+    background-color: #fff;
+    transition: 0.3s;
+    display: inline-block;
+    margin: 0 3px;
+  }
+
+  a.page-numbers {
+    &:hover,
+    &:focus {
+      background-color: $brand-hover;
+      color: #fff;
+    }
+  }
+}
