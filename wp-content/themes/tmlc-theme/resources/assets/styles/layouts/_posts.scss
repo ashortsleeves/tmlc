@@ -1,17 +1,15 @@
 .blog-wrap {
-  background-color: #efefef;
-  border-bottom: solid 10px #fff;
+  background-color: $offwhite;
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: contain;
 }
 
 .posts-container {
-  padding: 30px 0;
+  padding: 0 0;
 
-  @include laptop {
-    padding: 60px 0;
-  }
-
-  @include desktop {
-    padding: 140px 0;
+  @include mobile {
+    padding: 0 15px;
   }
 
   h1 {
@@ -49,6 +47,25 @@
       @include laptop {
         margin-bottom: 25px;
       }
+    }
+  }
+
+  form.search-form {
+    display: flex;
+    flex-wrap: nowrap;
+
+    input.search-field {
+      border-right: transparent;
+    }
+
+    input.search-submit {
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
+      height: calc(1.5em + 0.75rem + 2px);
+      padding: 0.375rem 0.75rem;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: 1.5;
     }
   }
 }

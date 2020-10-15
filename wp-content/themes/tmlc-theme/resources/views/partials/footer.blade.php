@@ -1,4 +1,4 @@
-<section class="contact-footer">
+<section class="contact-footer" id="contactus">
   <img class="section-background" src="{{$footer['background']['url']}}" />
   <div class="container">
     <div class="row">

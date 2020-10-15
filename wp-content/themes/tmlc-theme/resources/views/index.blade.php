@@ -1,14 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
-  <div class="blog-wrap">
+  <section class="blog-wrap content-section" style="background-image: url({{$footer['background']['url']}}})">
+      <img class="content-section-background" src="{{$footer['background']['url']}}" />
     @if (!have_posts())
       <div class="alert alert-warning">
         {{ __('Sorry, no results were found.', 'sage') }}
       </div>
       {!! get_search_form(false) !!}
     @endif
-    <div class="container sm-container posts-container">
+    <div class="container container-sm content-container posts-container">
+      <div class="breadcrumbs cardstyle">
+        {{bcn_display($return = false, $linked = true, $reverse = false, $force = false)}}
+      </div>
       <div class="row">
         <div class="col-md-8">
           @while (have_posts()) @php the_post() @endphp
@@ -39,5 +43,5 @@
         @endphp
       </div>
     </div>
-  </div>
+  </section>
 @endsection
