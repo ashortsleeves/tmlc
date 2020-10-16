@@ -119,3 +119,35 @@ section.content-section {
     }
   }
 }
+
+
+.container-404 {
+  padding: 60px 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+
+  @include laptop {
+    padding: 120px 15px;
+  }
+
+  h1 {
+    color: $brand-primary;
+  }
+
+  h3 {
+    margin-bottom: 15px;
+    max-width: 232px;
+    text-align: center;
+
+    @include laptop {
+      max-width: 389px;
+    }
+  }
+
+  button.btn {
+    @include btn;
+  }
+}
