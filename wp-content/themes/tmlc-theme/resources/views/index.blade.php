@@ -14,12 +14,16 @@
         {{bcn_display($return = false, $linked = true, $reverse = false, $force = false)}}
       </div>
       <div class="row">
-        <div class="col-md-8">
-          @while (have_posts()) @php the_post() @endphp
-            @include('partials.content-'.get_post_type())
-          @endwhile
+        <div class="col-lg-8 col-md-7">
+          <div class="row">
+            @while (have_posts()) @php the_post() @endphp
+              <div class="col-lg-6 col-md-12">
+                @include('partials.content-'.get_post_type())
+              </div>
+            @endwhile
+          </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-lg-4 col-md-5">
           <div class="cardstyle">
               @php dynamic_sidebar('sidebar-primary') @endphp
           </div>
