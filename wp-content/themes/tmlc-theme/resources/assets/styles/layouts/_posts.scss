@@ -21,6 +21,7 @@
     background-color: #fff;
     padding: 15px;
     margin-bottom: 15px;
+    box-shadow: 0 0 15px 0 rgba(0,0,0,0.1);
 
     @include laptop {
       padding: 25px;
@@ -29,6 +30,12 @@
   }
 
   article {
+    height: calc(100% - 15px);
+
+    @include laptop {
+      height: calc(100% - 30px);
+    }
+
     .img-wrap {
       height: 150px;
       margin-bottom: 15px;
