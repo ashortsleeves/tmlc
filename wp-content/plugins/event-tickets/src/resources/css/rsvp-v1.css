@@ -429,7 +429,7 @@
 .tribe-block__rsvp__status > span {
 		flex: none;
 		margin-right: 15px;
-		width: calc((100% - 15px)/2);
+		width: calc(50% - 7.5px);
 	}
 
 .tribe-block__rsvp__status > span:last-child {

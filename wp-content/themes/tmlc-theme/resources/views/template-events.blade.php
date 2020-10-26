@@ -3,7 +3,9 @@
 --}}
 
 @extends('layouts.app')
-
+@php
+  $hideContact = true;
+@endphp
 @section('content')
   @if (!have_posts())
     <div class="alert alert-warning">

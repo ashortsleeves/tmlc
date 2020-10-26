@@ -113,19 +113,17 @@
    // Ensure the TEC plugin exists
    if( class_exists('TribeEventsAPI')) {
      ci_event_template();
-     ?>
-     <?php
-     // $entry_id = '3';
-     // $entry = GFAPI::get_entry($entry_id);
-     // var_dump($entry);
-     // echo $entry['5'];
-     // // global $post;
-     // // echo get_the_id($post);
+
+     echo '<style>
+     form.ci-event-template input {
+       margin: 5px;
+     }
+     </style>';
      ?>
      <script>
      // Adds button to the events list page
      jQuery(function(){
-         jQuery("body.forms_page_gf_entries #post-body-content").append('<form method="post" action=""><input name="post_title" type="text" value="" placeholder="Event Name" /><br /><input name="post_venue" type="text" value="" placeholder="Location" /><br /><input name="start_date" type="text" value="" placeholder="Start Date" /><input name="end_date" type="text" value="" placeholder="End Date" /><br /><input name="small_locker" type="checkbox" id="small_locker" value=""/><label for="small_locker">Small Locker</label><br /><input name="medium_locker" type="checkbox" id="medium_locker" value=""/><label for="medium_locker">Medium Locker</label><br /><input name="large_locker" type="checkbox" id="Large_locker" value=""/><label for="large_locker">large Locker</label><br /><input type="hidden" name="new_event" value="" /><input type="submit" name="submit" value="Create Event" /></form>');
+         jQuery("body.forms_page_gf_entries #post-body-content").append('<form class="ci-event-template" method="post" action=""><input name="post_title" type="text" value="" placeholder="Event Name" /><br /><input name="post_venue" type="text" value="" placeholder="Location" /><br /><input name="start_date" type="text" value="" placeholder="Start Date" /><input name="end_date" type="text" value="" placeholder="End Date" /><br /><input name="small_locker" type="checkbox" id="small_locker" value=""/><label for="small_locker">Small Locker</label><br /><input name="medium_locker" type="checkbox" id="medium_locker" value=""/><label for="medium_locker">Medium Locker</label><br /><input name="large_locker" type="checkbox" id="Large_locker" value=""/><label for="large_locker">large Locker</label><br /><input type="hidden" name="new_event" value="" /><input type="submit" name="submit" value="Create Event" /></form>');
      });
      </script>
      <?php
