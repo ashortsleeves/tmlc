@@ -237,6 +237,17 @@
       border-radius: 20px;
     }
   }
+
+  .datepicker {
+    .datepicker-switch,
+    .dow,
+    .day {
+      font-family: $primary-font;
+    }
+    .day.active {
+      background-color: $brand-orange;
+    }
+  }
 }
 
 .cardstyle-event {
