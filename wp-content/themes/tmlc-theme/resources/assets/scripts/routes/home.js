@@ -31,6 +31,12 @@ export default {
             slidesToShow: 4,
           },
         },
+        {
+          breakpoint: 480,
+          settings: {
+            slidesToShow: 3,
+          },
+        },
       ],
     });
 

@@ -70,6 +70,13 @@ section.content-section {
 
   .content-container {
     position: relative;
+    padding-left: 0;
+    padding-right: 0;
+
+    @include mobile {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
   }
 
   img.content-section-background {

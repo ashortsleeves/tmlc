@@ -40,12 +40,14 @@
 
     .img-wrap {
       height: 150px;
-      margin-bottom: 15px;
+      margin: -15px -15px 15px;
       position: relative;
+      border-bottom: solid 3px $brand-primary;
 
       @include laptop {
         height: 250px;
-        margin-bottom: 25px;
+        margin: -25px -25px 25px;
+
       }
     }
 
@@ -146,4 +148,8 @@ span.rpwwt-post-title {
   font-size: 13px;
   color: #999;
   font-style: italic;
+}
+
+.tribe-events .tribe-events-calendar-month__day-cell--selected, .tribe-events .tribe-events-calendar-month__day-cell--selected:focus, .tribe-events .tribe-events-calendar-month__day-cell--selected:hover {
+  background-color: #fff;
 }

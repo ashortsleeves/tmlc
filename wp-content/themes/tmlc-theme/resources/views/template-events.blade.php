@@ -17,7 +17,7 @@
 
     <section class="content-section content-section-events">
       <img class="content-section-background" src="{{$footer['background']['url']}}" />
-      <div class="container container-sm content-container">
+      <div class="container container-sm">
         @php the_content() @endphp
       </div>
     </section>
