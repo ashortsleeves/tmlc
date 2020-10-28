@@ -1,5 +1,3 @@
-
-
 @if($hideContact !== true)
   <section class="contact-footer" id="contactus">
     <img class="section-background" src="{{$footer['background']['url']}}" />

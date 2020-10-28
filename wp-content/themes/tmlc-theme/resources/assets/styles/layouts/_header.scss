@@ -46,12 +46,6 @@ header.banner {
     li {
       @extend .nav-item;
 
-      &:last-of-type {
-        a {
-          padding-right: 0;
-        }
-      }
-
       a {
         @extend .nav-link;
 
@@ -82,6 +76,16 @@ header.banner {
           top: calc(100% - 0.5rem);
           height: 2px;
           background-color: $brand-primary;
+        }
+      }
+
+      &:last-of-type {
+        a {
+          padding-right: 0;
+
+          &::before {
+            right: 0;
+          }
         }
       }
     }

@@ -74,8 +74,16 @@
     .widget {
       margin-bottom: 15px;
 
+      ul {
+        margin-bottom: 0;
+      }
+
       @include laptop {
         margin-bottom: 25px;
+      }
+
+      &:last-of-type {
+        margin-bottom: 0;
       }
     }
   }

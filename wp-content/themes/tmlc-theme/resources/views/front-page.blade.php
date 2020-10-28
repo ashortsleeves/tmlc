@@ -158,7 +158,7 @@
                 <span class="jobtitle">{{$team['job_title']}}</span>
                 {{$team['bio']}}
                 <a class="email" href="{!!$team['email']!!}">{{$team['email']}}</a>
-                <a class="linkedin" href="{!!$team['linkedin']!!}">LinkedIn</a>
+                <a target="_blank" class="linkedin" href="{!!$team['linkedin']!!}">LinkedIn</a>
               </div>
             </div>
           @endforeach

@@ -1015,6 +1015,11 @@ section.fp-team {
         color: $brand-primary;
         font-weight: 800;
       }
+
+      &:hover,
+      &:focus {
+        color: $brand-hover;
+      }
     }
 
     a.linkedin {
