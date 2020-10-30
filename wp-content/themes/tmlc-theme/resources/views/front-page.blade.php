@@ -157,7 +157,7 @@
                 <h2>{{$team['name']}}</h2>
                 <span class="jobtitle">{{$team['job_title']}}</span>
                 {{$team['bio']}}
-                <a class="email" href="{!!$team['email']!!}">{{$team['email']}}</a>
+                <a class="email" href="mailto:{!!$team['email']!!}">{{$team['email']}}</a>
                 <a target="_blank" class="linkedin" href="{!!$team['linkedin']!!}">LinkedIn</a>
               </div>
             </div>
