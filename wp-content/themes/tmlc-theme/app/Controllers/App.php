@@ -41,11 +41,17 @@ class App extends Controller
       $data = [
         'form'       => get_field('contact_form_footer','option'),
         'content'    => get_field('contact_footer_content','option'),
+        'disclaimer' => get_field('contact_form_disclaimer', 'option'),
         'background' => get_field('contact_footer_background', 'option'),
         'site_info'  => get_field('site_info', 'option'),
         'logo'       => get_field('footer_logo', 'option'),
       ];
 
       return $data;
+    }
+
+    public function location()
+    {
+      return get_field('location');
     }
 }

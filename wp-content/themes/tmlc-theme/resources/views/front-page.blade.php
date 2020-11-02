@@ -122,6 +122,8 @@
                         <h2>{!! esc_html( $title ) !!}</h2>
                         @if(tribe_get_venue($featured_post->ID))
                           <span>{{tribe_get_venue($featured_post->ID)}}</span>
+                        @elseif(!empty(get_field('location',$featured_post->ID)))
+                          <span>{!!get_field('location',$featured_post->ID)!!}</span>
                         @endif
                       </span>
                     </a>
@@ -178,17 +180,6 @@
               <div class="slick-wrap">
                 <div class="testimonial-single">
                   "{!!$testimonial['quote']!!}"
-                </div>
-              </div>
-            @endforeach
-          </div>
-          <div class="slick-images">
-            @foreach($fp_testimonial['testimonials'] as $testimonial)
-
-              <div class="testimonial-wrap">
-                <div class="testimonial-single">
-                  <div class="image-wrap jumbo-bg" style="background-image: url('{{$testimonial['image']['sizes']['thumbnail']}}')">
-                  </div>
                 </div>
               </div>
             @endforeach

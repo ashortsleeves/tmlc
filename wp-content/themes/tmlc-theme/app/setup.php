@@ -133,3 +133,39 @@ add_action('after_setup_theme', function () {
         return "<?= " . __NAMESPACE__ . "\\asset_path({$asset}); ?>";
     });
 });
+add_action( 'init', function () {
+    $labels = array(
+      'name'                => __( 'Portfolio' ),
+      'singular_name'       => __( 'Portfolio Event' ),
+      'menu_name'           => __( 'Portfolio'),
+      'parent_item_colon'   => __( 'Parent Portfolio Events'),
+      'all_items'           => __( 'All Portfolio'),
+      'view_item'           => __( 'View Portfolio Event'),
+      'add_new_item'        => __( 'Add New Portfolio Event'),
+      'archives'            => __( 'Portfolio Archives', 'text_domain' ),
+      'add_new'             => __( 'Add New'),
+      'edit_item'           => __( 'Edit Portfolio Event'),
+      'update_item'         => __( 'Update Portfolio Event'),
+      'search_items'        => __( 'Search Portfolio'),
+      'not_found'           => __( 'Not Found'),
+      'not_found_in_trash'  => __( 'Not found in Trash'),
+    );
+    $args = array(
+        'labels'             => $labels,
+        'description'        => 'Portfolio custom post type.',
+        'public'             => true,
+        'publicly_queryable' => true,
+        'show_ui'            => true,
+        'show_in_menu'       => true,
+        'query_var'          => true,
+        'capability_type'    => 'post',
+        'has_archive'        => true,
+        'hierarchical'       => false,
+        'menu_position'      => 20,
+        'supports'           => array( 'title', 'editor', 'author', 'thumbnail' ),
+        'taxonomies'         => array( 'category', 'post_tag' ),
+        'show_in_rest'       => true
+    );
+
+    register_post_type( 'portfolioevent', $args );
+});

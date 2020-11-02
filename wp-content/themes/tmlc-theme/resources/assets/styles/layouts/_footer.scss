@@ -123,6 +123,11 @@ section.contact-footer {
       }
     }
 
+    span.disclaimer {
+      font-style: italic;
+      opacity: 0.7;
+    }
+
     img.contact-logo,
     ul.footer-details li {
       margin-bottom: 15px;
@@ -148,8 +153,6 @@ section.contact-footer {
       }
     }
   }
-
-
 
   input[type=submit]:not(:disabled):not(.disabled) {
     background-color: $brand-secondary;

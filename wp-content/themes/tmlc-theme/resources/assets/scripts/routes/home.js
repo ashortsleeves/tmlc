@@ -44,37 +44,25 @@ export default {
       slidesToShow: 1,
       slidesToScroll: 1,
       infinite: true,
-      arrows: false,
       dots: false,
-      asNavFor: '.slick-images, .slick-names',
-      fade: true,
+      asNavFor: '.slick-names',
+      fade: false,
       cssEase: 'linear',
+      autoplaySpeed: 2000,
       speed: 200,
-
-    });
-
-    $('.slick-images').slick({
-      slidesToShow: 3,
-      slidesToScroll: 1,
-      infinite: true,
-      arrows: false,
-      dots: false,
-      asNavFor: '.slick-quotes, .slick-names',
-      centerMode: true,
-      autoplay: true,
-      autoplaySpeed: 5000,
-      speed: 200,
+      arrows: true,
+      prevArrow: '<i class="fas fa-chevron-left"></i>',
+      nextArrow: '<i class="fas fa-chevron-right"></i>',
       responsive: [
         {
           breakpoint: 768,
           settings: {
-            slidesToShow: 1,
-            // centerMode: false,
+            arrows: false,
           },
         },
       ],
-
     });
+
 
     $('.slick-names').slick({
       slidesToShow: 1,
@@ -82,7 +70,7 @@ export default {
       infinite: true,
       arrows: false,
       dots: false,
-      asNavFor: '.slick-images, .slick-quotes',
+      asNavFor: '.slick-quotes',
       fade: true,
       cssEase: 'linear',
       speed: 200,

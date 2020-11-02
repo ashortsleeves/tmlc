@@ -17,28 +17,18 @@
                       {{$footer['site_info']['email']}}
                     </a>
                   </li>
-
-                @endif
-                @if($footer['site_info']['phone'])
-                  <li class="phone">
-                    <a href="tel:{{$footer['site_info']['phone']}}">
-                      {{$footer['site_info']['phone']}}
-                    </a>
-                  </li>
-
-                @endif
-                @if($footer['site_info']['address'])
-                  <li class="address">
-                    {{$footer['site_info']['address']}}<br />
-                    {{$footer['site_info']['town']}},  {{$footer['site_info']['state']}} {{$footer['site_info']['zip']}}
-                  </li>
                 @endif
               </ul>
+              @if($footer['disclaimer'])
+                <span class="disclaimer">
+                  {!! $footer['disclaimer'] !!}
+                </span>
+              @endif
             @endif
           </div>
         </div>
         <div class="col-md-6">
-          @php gravity_form($footer['form'], true); @endphp
+          @php gravity_form($footer['form'], true, false, false, null, true); @endphp
         </div>
       </div>
     </div>
@@ -91,6 +81,7 @@
     </div>
   </div>
 </div>
+
 <script type="application/ld+json">
 {
   "@context": "http://schema.org/",

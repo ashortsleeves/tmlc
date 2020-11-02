@@ -137,9 +137,6 @@ section.fp-hero {
         @include tablet {
             margin-bottom: 15px;
         }
-        // @include mobile {
-        //   font-size: 48px;
-        // }
 
         @include laptop {
           font-size: 72px;
@@ -1052,14 +1049,14 @@ section.fp-testimonials {
 
   i.bg-quote {
     left: calc(50% - 100px);
-    top: calc(50% - 235px);
+    top: calc(50% - 150px);
     font-size: 200px;
     color: #e5f7fb;
     position: absolute;
 
-
     @include laptop {
     left: calc(50% - 150px);
+    top: calc(50% - 200px);
     font-size: 300px;
     }
   }
@@ -1070,8 +1067,9 @@ section.fp-testimonials {
 
   h1 {
     text-align: center;
+    margin-bottom: 30px;
 
-    @include phablet {
+    @include laptop {
       margin-bottom: 60px;
     }
   }
@@ -1092,42 +1090,26 @@ section.fp-testimonials {
 
   .slick-quotes {
     margin-bottom: 15px;
+    position: relative;
 
     @include laptop {
-      margin-bottom: 60px;
+      margin-bottom: 30px;
     }
 
     .testimonial-single {
       font-size: 16px;
       font-style: italic;
       max-width: 800px;
-      margin-bottom: 15px;
+      margin-bottom: 30px;
 
       @include phablet {
         font-size: 24px;
       }
-    }
-  }
 
-  .slick-names {
-    span.name,
-    span.org {
-      display: block;
-      line-height: 1;
-      font-size: 16px;
+      @include laptop {
+        margin-bottom: 60px;
+      }
     }
-
-    span.org {
-      font-family: $secondary-font;
-      font-size: 24px;
-      margin-top: 10px;
-    }
-  }
-
-  .slick-images {
-    position: relative;
-    height: 135px;
-    margin-bottom: 30px;
 
     &::before,
     &::after {
@@ -1151,22 +1133,51 @@ section.fp-testimonials {
       background-color: $brand-primary;
     }
 
-    .testimonial-single {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+
+    i.slick-arrow {
+      color: #daf3f9;
+      position: absolute;
+      top: calc(50% - 42px);
+      font-size: 24px;
+      font-weight: bold;
+      z-index: 999;
+
+      @include laptop {
+        top: calc(50% - 72px);
+      }
     }
 
-    .image-wrap {
-      border-radius: 180px;
-      height: 70px;
-      width: 70px;
-      transition: all 300ms ease;
+    .fa-chevron-left {
+      left: -30px;
     }
 
-    .slick-current .image-wrap {
-      height: 100px;
-      width: 100px;
+    .fa-chevron-right {
+      right: -30px;
+    }
+
+    @include laptop {
+      .fa-chevron-left {
+        left: 0px;
+      }
+
+      .fa-chevron-right {
+        right: 0px;
+      }
+    }
+  }
+
+  .slick-names {
+    span.name,
+    span.org {
+      display: block;
+      line-height: 1;
+      font-size: 16px;
+    }
+
+    span.org {
+      font-family: $secondary-font;
+      font-size: 24px;
+      margin-top: 10px;
     }
   }
 }
