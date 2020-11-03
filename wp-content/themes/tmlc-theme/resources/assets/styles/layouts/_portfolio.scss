@@ -1,0 +1,61 @@
+article.portfolio {
+  padding-bottom: 0;
+  position: relative;
+  border-bottom: transparent;
+
+  a {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+
+    @include desktop {
+      padding: 15px 30px;
+    }
+
+    &::after {
+      @include pseudo;
+
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      transition: all .3s ease-in-out;
+    }
+
+    &:hover,
+    &:focus {
+      &::after {
+        background-color: rgba($brand-primary, 0.9);
+      }
+    }
+
+    h2,
+    span {
+      position: relative;
+      color: #fff;
+      z-index: 999;
+      text-align: center;
+      font-weight: 300;
+      text-shadow: 1px 1px 1px hsla(0,0%,5%,.2);
+    }
+  }
+
+  .img-wrap {
+    @include tablet {
+      height: 250px;
+    }
+
+    @include desktop {
+      height: 359px;
+    }
+  }
+}

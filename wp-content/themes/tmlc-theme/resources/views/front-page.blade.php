@@ -132,7 +132,7 @@
               @endforeach
               <div class="event-single jumbo-bg">
                 <span class="event-bg jumbo-bg"></span>
-                <a class="view-more" href="/events">
+                <a class="view-more" href="/portfolio">
                   View More
                   <span>Events</span>
                   <i class="fas fa-arrow-alt-right"></i>

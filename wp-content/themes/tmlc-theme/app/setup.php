@@ -167,5 +167,5 @@ add_action( 'init', function () {
         'show_in_rest'       => true
     );
 
-    register_post_type( 'portfolioevent', $args );
+    register_post_type( 'portfolio', $args );
 });
