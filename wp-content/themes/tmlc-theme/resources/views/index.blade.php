@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+  @if($option_hero['blog'])
+    <section class="page-header responsive-hero jumbo-bg" style="background-image: url({!!$option_hero['blog']['url']!!})">
+      <div class="container">
+        <h1>TMLC Blog</h1>
+      </div>
+    </section>
+  @endif
   <section class="blog-wrap content-section" style="background-image: url({{$footer['background']['url']}}})">
       <img class="content-section-background" src="{{$footer['background']['url']}}" />
     @if (!have_posts())

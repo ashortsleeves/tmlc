@@ -61,6 +61,20 @@ header.banner {
       ul.dropdown-menu {
         border: transparent;
         box-shadow: 7px 6px 27px -10px rgba(0,0,0,0.4);
+        li {
+          &.current_page_item {
+            position: relative;
+
+            > a {
+              background-color: $brand-primary;
+              color: #fff;
+
+              &::before {
+                display: none;
+              }
+            }
+          }
+        }
       }
 
       &.current_page_item,

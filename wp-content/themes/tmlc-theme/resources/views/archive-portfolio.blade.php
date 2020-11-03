@@ -1,6 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
+  @if($option_hero['portfolio'])
+    <section class="page-header responsive-hero jumbo-bg" style="background-image: url({!!$option_hero['portfolio']['url']!!})">
+      <div class="container">
+        <h1>Who We Work With</h1>
+      </div>
+    </section>
+  @endif
   <section class="blog-wrap content-section" style="background-image: url({{$footer['background']['url']}}})">
       <img class="content-section-background" src="{{$footer['background']['url']}}" />
     @if (!have_posts())

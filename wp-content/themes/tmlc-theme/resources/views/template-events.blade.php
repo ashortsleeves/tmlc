@@ -7,6 +7,13 @@
   $hideContact = true;
 @endphp
 @section('content')
+  @if($option_hero['events'])
+    <section class="page-header responsive-hero jumbo-bg" style="background-image: url({!!$option_hero['events']['url']!!})">
+      <div class="container">
+        <h1>Locker Rentals</h1>
+      </div>
+    </section>
+  @endif
   @if (!have_posts())
     <div class="alert alert-warning">
       {{ __('Sorry, no results were found.', 'sage') }}

@@ -54,4 +54,15 @@ class App extends Controller
     {
       return get_field('location');
     }
+
+    public function optionHero()
+    {
+      $data = [
+        'events'    => get_field('events_hero', 'option'),
+        'portfolio' => get_field('portfolio_hero', 'option'),
+        'blog'      => get_field('blog_hero', 'option'),
+      ];
+
+      return $data;
+    }
 }

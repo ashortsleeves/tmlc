@@ -18,12 +18,12 @@
                     </a>
                   </li>
                 @endif
+                @if($footer['disclaimer'])
+                  <li class="disclaimer">
+                    {!! $footer['disclaimer'] !!}
+                  </li>
+                @endif
               </ul>
-              @if($footer['disclaimer'])
-                <span class="disclaimer">
-                  {!! $footer['disclaimer'] !!}
-                </span>
-              @endif
             @endif
           </div>
         </div>
