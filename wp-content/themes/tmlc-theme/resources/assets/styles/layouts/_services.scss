@@ -3,8 +3,17 @@ section.service-content-section {
 }
 
 .service-section {
+  overflow: hidden;
   position: relative;
   padding: 60px 0;
+
+  @include laptop {
+    padding: 90px 0;
+  }
+
+  @include desktop {
+    padding: 120px 0;
+  }
 
   .container {
     // height: 500px;
@@ -18,16 +27,34 @@ section.service-content-section {
       opacity: 0.7;
 
       @include tablet {
-        left: 50%;
+        left: 25%;
         right: auto;
-        bottom: 150px;
-        width: 50vw;
-        height: calc(100% - 150px);
+        bottom: 0;
+        width: 75vw;
+        height: 100%;
         background-position: 50% 50%;
+        opacity: 1;
+      }
+
+      @include laptop {
+        left: calc(50% + 30px);
+        width: 50vw;
       }
 
       svg {
         display: none;
+
+        @include tablet {
+          display: block;
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: -3px;
+
+          path.cls-1 {
+            fill: $offwhite!important;
+          }
+        }
       }
     }
 
@@ -36,6 +63,93 @@ section.service-content-section {
       // z-index: 999;
       // padding: 15px 15px 30px;
       background-color: rgba(255, 255, 254, 0.9);
+
+      @include laptop {
+        width: calc(50% - 30px);
+        background-color: transparent;
+        padding: 0;
+        box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0);
+      }
+    }
+  }
+
+  @include tablet {
+    background-color: $offwhite;
+
+    &:nth-of-type(2) {
+      background-color: $brand-primary;
+
+      .container {
+        .service-image {
+          left: 0;
+          right: 25%;
+
+          svg {
+            transform: rotate(180deg);
+            left: auto;
+            right: -3px;
+
+            path.cls-1 {
+              fill: $brand-primary!important;
+            }
+          }
+        }
+      }
+    }
+
+    &:nth-of-type(3) {
+      background-color: $brand-secondary;
+
+      .container {
+        .service-image {
+          svg {
+            left: -3px;
+
+            path.cls-1 {
+              fill: $brand-secondary!important;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @include laptop {
+    &:nth-of-type(2) {
+      background-color: #daf3f9;
+
+      .content {
+        margin-left: auto;
+      }
+
+      .container {
+        .service-image {
+          right: calc(50% + 30px);
+          left: auto;
+
+          svg {
+            path.cls-1 {
+              fill: #daf3f9!important;
+            }
+          }
+        }
+      }
+    }
+
+    &:nth-of-type(3) {
+      background-color: $offwhite;
+
+      .container {
+        .service-image {
+          svg {
+            left: -3px;
+
+            path.cls-1 {
+              fill: $offwhite!important;
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -15,7 +15,7 @@
         </div>
       </div> --}}
         @foreach($tmp_service as $service)
-          <div class="service-section">
+          <div class="service-section" id="{!!strtolower(str_replace(' ', '-', $service['title']))!!}">
             <div class="container">
               <div class="service-image jumbo-bg" style="background-image: url({{$service['image']['url']}})">
 
