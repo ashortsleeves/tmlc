@@ -14,7 +14,7 @@
 
   h1 {
     margin-bottom: 30px;
-    
+
     @include tablet {
       font-size: 36px;
     }
@@ -160,4 +160,66 @@ span.rpwwt-post-title {
 
 .tribe-events .tribe-events-calendar-month__day-cell--selected, .tribe-events .tribe-events-calendar-month__day-cell--selected:focus, .tribe-events .tribe-events-calendar-month__day-cell--selected:hover {
   background-color: #fff;
+}
+
+// Content Formatting
+.alignright,
+.alignleft,
+.aligncenter {
+  margin-bottom: 15px;
+  margin-top: 0;
+
+  @media(max-width: 767px) {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+.alignleft {
+  @include tablet {
+    margin-right: 15px;
+  }
+}
+
+.alignright {
+  @include tablet {
+    margin-left: 15px;
+  }
+}
+
+.wp-block-pullquote {
+  border-top: solid 3px rgba($brand-primary, 0.2);
+  border-bottom: solid 3px rgba($brand-primary, 0.2);
+}
+
+figcaption {
+  font-size: 13px;
+  font-style: italic;
+  color: #999;
+}
+
+.wp-block-quote {
+  padding-left: 15px;
+  border-left: solid 5px $brand-primary;
+  color: #555;
+
+  cite {
+    font-style: italic;
+    color: #999;
+  }
+}
+
+.wp-block-buttons {
+  margin: 15px 0 30px;
+
+  .wp-block-button .wp-block-button__link {
+    @include btn;
+  }
+}
+
+hr {
+  margin-top: 45px;
+  margin-bottom: 45px;
 }
