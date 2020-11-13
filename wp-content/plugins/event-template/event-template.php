@@ -118,6 +118,10 @@
      form.ci-event-template input {
        margin: 5px;
      }
+
+     form.ci-event-template input[type=text] {
+       width: 200px;
+     }
      </style>';
      ?>
      <script>
