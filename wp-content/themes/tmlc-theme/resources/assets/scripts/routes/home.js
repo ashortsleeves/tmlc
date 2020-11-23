@@ -11,7 +11,7 @@ export default {
       nextArrow: '<i class="fas fa-chevron-right"></i>',
       infinite: true,
       autoplay: true,
-      autoplaySpeed: 4000,
+      autoplaySpeed: 1500,
       responsive: [
         {
           breakpoint: 991,
@@ -48,7 +48,7 @@ export default {
       asNavFor: '.slick-names',
       fade: false,
       cssEase: 'linear',
-      autoplaySpeed: 2000,
+      autoplaySpeed: 1500,
       speed: 200,
       arrows: true,
       prevArrow: '<i class="fas fa-chevron-left"></i>',
