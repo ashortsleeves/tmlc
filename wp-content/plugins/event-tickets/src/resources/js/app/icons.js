@@ -82,19 +82,19 @@ var tribe = typeof tribe === "object" ? tribe : {}; tribe["tickets"] = tribe["ti
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 31);
+/******/ 	return __webpack_require__(__webpack_require__.s = 34);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 13:
+/***/ 11:
 /***/ (function(module, exports) {
 
 module.exports = React;
 
 /***/ }),
 
-/***/ 31:
+/***/ 34:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -115,7 +115,7 @@ __webpack_require__.d(__webpack_exports__, "Attendees", function() { return /* r
 __webpack_require__.d(__webpack_exports__, "Orders", function() { return /* reexport */ orders; });
 
 // EXTERNAL MODULE: external "React"
-var external_React_ = __webpack_require__(13);
+var external_React_ = __webpack_require__(11);
 var external_React_default = /*#__PURE__*/__webpack_require__.n(external_React_);
 
 // CONCATENATED MODULE: ./src/modules/icons/active/clock.svg

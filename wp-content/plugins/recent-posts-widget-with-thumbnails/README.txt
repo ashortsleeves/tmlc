@@ -4,8 +4,8 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: images, posts list, recent posts, thumbnails, widget
 Requires at least: 2.9
 Requires PHP: 5.2
-Tested up to: 5.5.1
-Stable tag: 7.0.0
+Tested up to: 5.5.3
+Stable tag: 7.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -102,60 +102,84 @@ If you want to build your special posts lists with additional options for layout
 
 The plugin considers the output of actions hooked on:
 
-1. widget_title
-2. rpwwt_widget_posts_args
-3. rpwwt_the_excerpt (for manual excerpts only)
-4. the_excerpt (for all excerpts, is also applied after 'rpwwt_the_excerpt')
-5. rpwwt_excerpt_more
-6. rpwwt_excerpt_length
-7. rpwwt_list_cats (for the category list in the backend)
-8. rpwwt_categories (for the category list on the website)
+1. `rpwwt_widget_posts_args`
+	* **passed argument:** the query arguments as an array
+	* **expected return value:** an array of query arguments
+2. `widget_title`
+	* **passed arguments:** 
+		1. the widget title as a string
+		2. the widget settings as an array
+		3. the widget base ID as a string
+	* **expected return value:** a string
+3. `rpwwt_excerpt_length`
+	* **passed argument:** the maximum number of characters of the post excerpt as an integer
+	* **expected return value:** an integer
+4. `rpwwt_excerpt_more`
+	* **passed argument:** the string to append after the post excerpt
+	* **expected return value:** a string
+5. `rpwwt_the_excerpt`
+	* **passed arguments:** 
+		1. the content of the post excerpt field as a string
+		2. the post object
+	* **expected return value:** a string
+6. `the_excerpt`
+	* **passed argument:** the post escerpt as a string
+	* **expected return value:** a string
+7. `rpwwt_categories`
+	* **passed argument:** the category list of each post as a string
+	* **expected return value:** a string
+8. `rpwwt_list_cats`
+	* **passed arguments:** 
+		1. the category name as a string
+		2. the category as an array
+	* **expected return value:** a string
 
 = Useful hints for developers: Available CSS Selectors =
 
 To design the list and its items you can use these CSS selectors:
 
-The elements which contain the posts lists:
 `.rpwwt-widget`
+: the element which contains the post list
 
-The lists which contain the list items:
 `.rpwwt-widget ul`
+: the list which contains the list items
 
-All list items in the lists:
 `.rpwwt-widget ul li`
+: the list item in the list
 
-All list items of sticky posts in the lists:
 `.rpwwt-widget ul li.rpwwt-sticky`
+: the list item of a sticky post
 
-All links in the lists; every link contains the image and the post title:
 `.rpwwt-widget ul li a`
+: link in the list
 
-All images in the lists (use that to set the margins around images):
 `.rpwwt-widget ul li a img`
+: linked image
 
-All post titles in the lists:
 `.rpwwt-widget ul li a span.rpwwt-post-title`
+: the post title
 
-All post author in the lists:
 `.rpwwt-widget ul li div.rpwwt-post-author`
+: the post author
 
-All post categories in the lists:
 `.rpwwt-widget ul li div.rpwwt-post-categories`
+: the post category list
 
-All post dates in the lists:
 `.rpwwt-widget ul li div.rpwwt-post-date`
+: the post date
 
-All post excerpts in the lists: 
 `.rpwwt-widget ul li div.rpwwt-post-excerpt`
+: the post excerpt
 
-All numbers of comments in the lists: 
 `.rpwwt-widget ul li div.rpwwt-post-comments-number`
+: the number of comments
 
 = Languages =
 
 The user interface is available in
 
 * Arabic (العربية), kindly drawn up by [Shadi AlZard](https://profiles.wordpress.org/salzard)
+* Catalan (Català), kindly drawn up by [Juan of the Ibidem Group](https://www.ibidemgroup.com/)
 * Dutch (Nederlands)
 * English (UK)
 * English (US)
@@ -243,6 +267,10 @@ If you want to contribute a translation of the plugin in your language it would 
 2. The second screenshot shows the widget on the Widget Management Page in the backend.
 
 == Changelog ==
+
+= 7.0.1 =
+* Added catalan translation, thanks to Juan of the Ibidem Group
+* Tested successfully with WordPress 5.5.3
 
 = 7.0.0 =
 * Added option for omitting all alternative texts of images to improve accessibility
@@ -577,6 +605,9 @@ Successfully tested with WordPress 4.0
 * The plugin was released.
 
 == Upgrade Notice ==
+
+= 7.0.1 =
+Added catalan translation, tested with WordPress 5.5.3
 
 = 7.0.0 =
 Added accessibility improvements

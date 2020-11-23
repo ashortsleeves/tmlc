@@ -43,8 +43,6 @@ function get_query_template( $type, $templates = array() ) {
 
 	$template = locate_template( $templates );
 
-	// var_dump($templates);
-
 	/**
 	 * Filters the path of the queried template by type.
 	 *

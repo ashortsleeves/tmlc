@@ -1,11 +1,11 @@
 === The Events Calendar ===
 
-Contributors: ModernTribe, borkweb, barry.hughes, bordoni, brianjessee, aguseo, camwynsp, cliffpaulick, courane01, faction23, GeoffBel, geoffgraham, jbrinley, jentheo, leahkoerper, lucatume, neillmcshea, nicosantos, patriciahillebrandt, peterchester, paulskim, reid.peifer, roblagatta, ryancurban, shane.pearlman, vicskf, zbtirrell, juanfra
+Contributors: ModernTribe, borkweb,bordoni, brianjessee, aguseo, camwynsp, cliffpaulick, GeoffBel, geoffgraham, jentheo, leahkoerper, lucatume, neillmcshea, patriciahillebrandt, peterchester, paulskim, reid.peifer, shane.pearlman, vicskf, zbtirrell, juanfra
 Tags: events, calendar, event, venue, organizer, dates, date, google maps, conference, workshop, concert, meeting, seminar, summit, class, modern tribe, tribe, widget
 Donate link: https://m.tri.be/29
 Requires at least: 4.9.14
-Stable tag: 5.2.1
-Tested up to: 5.5.1
+Stable tag: 5.2.1.1
+Tested up to: 5.5.3
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -26,7 +26,7 @@ See the calendar in action on our [demo experience](https://m.tri.be/1ajs). Just
 
 Looking for additional features like recurring events, ticket sales, user-submitted events, automatic imports, and more?
 
-<strong>Check out [Events Calendar Pro](https://m.tri.be/mj), [Event Aggregator](https://m.tri.be/197u), and [more add-ons](https://m.tri.be/2a)</strong>
+<strong>Check out [Events Calendar Pro](https://m.tri.be/mj), [Event Aggregator](https://m.tri.be/197u), and [more add-ons](https://m.tri.be/2a)</strong> ...and all of them are on sale from November 23-30 during our annual 💰[Black Friday Sale](https://m.tri.be/1aod)💰
 
 = 🔌🎨 Plug and Play or Customize =
 
@@ -221,6 +221,10 @@ Previous versions of The Events Calendar are not cross-compatible with 5.X add-o
 Remember to always make a backup of your database and files before updating!
 
 == Changelog ==
+
+= [5.2.1.1] 2020-11-19 =
+
+* Tweak - Update version of Freemius to the latest version 2.4.1 [TEC-3668]
 
 = [5.2.1] 2020-10-22 =
 
@@ -727,16 +731,16 @@ Remember to always make a backup of your database and files before updating!
 = [4.7.2] 2018-12-13 =
 
 * Feature - Added new action `tribe_events_before_event_template_data_date_display` and `tribe_events_after_event_template_data_date_display`
-* Tweak - Corrected font on time picker components in Event Date Time block [116907]
-* Tweak - Adjusted padding on the Event Date Time block [118697]
-* Tweak - Set default start time to 8:00am and default end time to 5:00pm in Event Date Time block [118112]
-* Fix - Corrected an issue where feature detection of async-process support would fire too many requests [118876]
+* Tweak - Corrected font on time picker components in Event Date Time block [116907]
+* Tweak - Adjusted padding on the Event Date Time block [118697]
+* Tweak - Set default start time to 8:00am and default end time to 5:00pm in Event Date Time block [118112]
+* Fix - Corrected an issue where feature detection of async-process support would fire too many requests [118876]
 * Fix - Removed tribe_events_template_data()'s dependency on Events Calendar PRO, which could lead to a fatal error under some conditions [119263]
 * Fix - Made the Event Date Time block respect the timezone settings [118682]
 * Fix - Removed Price block dashboard gap [118683]
 * Fix - Made sure all block editor code for Meta saving is PHP 5.2 compatible
 * Fix - Prevented `undefined` from been displayed at the Event Date Time separator fields [119337]
-* Fix - Solved 500 error when trying to update an event [118058]s
+* Fix - Solved 500 error when trying to update an event [118058]s
 
 = [4.7.1] 2018-12-05 =
 

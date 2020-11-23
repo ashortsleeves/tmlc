@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc77e3f43bed9f6d33fb6a49ae5bf7568
+class ComposerStaticInita5209126f285bbb0b9ea28bf267ced21
 {
     public static $prefixLengthsPsr4 = array (
         'T' => 
@@ -187,6 +187,7 @@ class ComposerStaticInitc77e3f43bed9f6d33fb6a49ae5bf7568
         'Tribe\\Service_Providers\\PUE' => __DIR__ . '/../..' . '/src/Tribe/Service_Providers/PUE.php',
         'Tribe\\Service_Providers\\Shortcodes' => __DIR__ . '/../..' . '/src/Tribe/Service_Providers/Shortcodes.php',
         'Tribe\\Service_Providers\\Tooltip' => __DIR__ . '/../..' . '/src/Tribe/Service_Providers/Tooltip.php',
+        'Tribe\\Service_Providers\\Widgets' => __DIR__ . '/../..' . '/src/Tribe/Service_Providers/Widgets.php',
         'Tribe\\Shortcode\\Manager' => __DIR__ . '/../..' . '/src/Tribe/Shortcode/Manager.php',
         'Tribe\\Shortcode\\Shortcode_Abstract' => __DIR__ . '/../..' . '/src/Tribe/Shortcode/Shortcode_Abstract.php',
         'Tribe\\Shortcode\\Shortcode_Interface' => __DIR__ . '/../..' . '/src/Tribe/Shortcode/Shortcode_Interface.php',
@@ -208,6 +209,9 @@ class ComposerStaticInitc77e3f43bed9f6d33fb6a49ae5bf7568
         'Tribe\\Utils\\Post_Thumbnail' => __DIR__ . '/../..' . '/src/Tribe/Utils/Post_Thumbnail.php',
         'Tribe\\Utils\\Query' => __DIR__ . '/../..' . '/src/Tribe/Utils/Query.php',
         'Tribe\\Utils\\Strings' => __DIR__ . '/../..' . '/src/Tribe/Utils/Strings.php',
+        'Tribe\\Widget\\Manager' => __DIR__ . '/../..' . '/src/Tribe/Widget/Manager.php',
+        'Tribe\\Widget\\Widget_Abstract' => __DIR__ . '/../..' . '/src/Tribe/Widget/Widget_Abstract.php',
+        'Tribe\\Widget\\Widget_Interface' => __DIR__ . '/../..' . '/src/Tribe/Widget/Widget_Interface.php',
         'tad_DI52_Container' => __DIR__ . '/..' . '/lucatume/di52/src/tad/DI52/Container.php',
         'tad_DI52_ContainerInterface' => __DIR__ . '/..' . '/lucatume/di52/src/tad/DI52/ContainerInterface.php',
         'tad_DI52_ProtectedValue' => __DIR__ . '/..' . '/lucatume/di52/src/tad/DI52/ProtectedValue.php',
@@ -220,10 +224,10 @@ class ComposerStaticInitc77e3f43bed9f6d33fb6a49ae5bf7568
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitc77e3f43bed9f6d33fb6a49ae5bf7568::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitc77e3f43bed9f6d33fb6a49ae5bf7568::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitc77e3f43bed9f6d33fb6a49ae5bf7568::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInitc77e3f43bed9f6d33fb6a49ae5bf7568::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInita5209126f285bbb0b9ea28bf267ced21::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInita5209126f285bbb0b9ea28bf267ced21::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInita5209126f285bbb0b9ea28bf267ced21::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInita5209126f285bbb0b9ea28bf267ced21::$classMap;
 
         }, null, ClassLoader::class);
     }

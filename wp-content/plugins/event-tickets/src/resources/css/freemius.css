@@ -242,7 +242,14 @@
 						background-image: url( ../icons/megaphone.svg );
 					}
 
-		.events-cal #fs_connect .fs-permissions.fs-open ul .dashicons-admin-plugins, .toplevel_page_tribe-common #fs_connect .fs-permissions.fs-open ul .dashicons-admin-plugins, .toplevel_page_tribe-help #fs_connect .fs-permissions.fs-open ul .dashicons-admin-plugins, .toplevel_page_tribe-app-shop #fs_connect .fs-permissions.fs-open ul .dashicons-admin-plugins {
+		.events-cal #fs_connect .fs-permissions.fs-open ul .dashicons-admin-plugins,
+					.events-cal #fs_connect .fs-permissions.fs-open ul .dashicons-menu,
+					.toplevel_page_tribe-common #fs_connect .fs-permissions.fs-open ul .dashicons-admin-plugins,
+					.toplevel_page_tribe-common #fs_connect .fs-permissions.fs-open ul .dashicons-menu,
+					.toplevel_page_tribe-help #fs_connect .fs-permissions.fs-open ul .dashicons-admin-plugins,
+					.toplevel_page_tribe-help #fs_connect .fs-permissions.fs-open ul .dashicons-menu,
+					.toplevel_page_tribe-app-shop #fs_connect .fs-permissions.fs-open ul .dashicons-admin-plugins,
+					.toplevel_page_tribe-app-shop #fs_connect .fs-permissions.fs-open ul .dashicons-menu {
 						background-image: url( ../icons/plug.svg );
 					}
 
