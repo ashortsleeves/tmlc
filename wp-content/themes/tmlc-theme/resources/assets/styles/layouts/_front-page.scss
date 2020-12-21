@@ -244,9 +244,14 @@ section.fp-hero {
     }
 
     .affiliate-wrap {
+      opacity: 0;
       display: flex;
       justify-content: center;
       align-items: center;
+
+      &.slick-slide {
+        opacity: 1;
+      }
 
       .affiliate {
         height: 75px;
