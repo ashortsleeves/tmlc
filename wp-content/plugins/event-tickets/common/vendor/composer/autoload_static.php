@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInita5209126f285bbb0b9ea28bf267ced21
+class ComposerStaticInitaee3ddb49ee25934ab7f9d6935e69004
 {
     public static $prefixLengthsPsr4 = array (
         'T' => 
@@ -170,6 +170,8 @@ class ComposerStaticInita5209126f285bbb0b9ea28bf267ced21
         'Psr\\Log\\Test\\DummyTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/DummyTest.php',
         'Psr\\Log\\Test\\LoggerInterfaceTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/LoggerInterfaceTest.php',
         'Psr\\Log\\Test\\TestLogger' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/TestLogger.php',
+        'Tribe\\Customizer\\Control' => __DIR__ . '/../..' . '/src/Tribe/Customizer/Control.php',
+        'Tribe\\Customizer\\Controls\\Heading' => __DIR__ . '/../..' . '/src/Tribe/Customizer/Controls/Heading.php',
         'Tribe\\DB_Lock' => __DIR__ . '/../..' . '/src/Tribe/DB_Lock.php',
         'Tribe\\Dialog\\View' => __DIR__ . '/../..' . '/src/Tribe/Dialog/View.php',
         'Tribe\\Log\\Action_Logger' => __DIR__ . '/../..' . '/src/Tribe/Log/Action_Logger.php',
@@ -206,6 +208,7 @@ class ComposerStaticInita5209126f285bbb0b9ea28bf267ced21
         'Tribe\\Utils\\Lazy_Collection' => __DIR__ . '/../..' . '/src/Tribe/Utils/Lazy_Collection.php',
         'Tribe\\Utils\\Lazy_Events' => __DIR__ . '/../..' . '/src/Tribe/Utils/Lazy_Events.php',
         'Tribe\\Utils\\Lazy_String' => __DIR__ . '/../..' . '/src/Tribe/Utils/Lazy_String.php',
+        'Tribe\\Utils\\Paths' => __DIR__ . '/../..' . '/src/Tribe/Utils/Paths.php',
         'Tribe\\Utils\\Post_Thumbnail' => __DIR__ . '/../..' . '/src/Tribe/Utils/Post_Thumbnail.php',
         'Tribe\\Utils\\Query' => __DIR__ . '/../..' . '/src/Tribe/Utils/Query.php',
         'Tribe\\Utils\\Strings' => __DIR__ . '/../..' . '/src/Tribe/Utils/Strings.php',
@@ -224,10 +227,10 @@ class ComposerStaticInita5209126f285bbb0b9ea28bf267ced21
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInita5209126f285bbb0b9ea28bf267ced21::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInita5209126f285bbb0b9ea28bf267ced21::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInita5209126f285bbb0b9ea28bf267ced21::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInita5209126f285bbb0b9ea28bf267ced21::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitaee3ddb49ee25934ab7f9d6935e69004::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitaee3ddb49ee25934ab7f9d6935e69004::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitaee3ddb49ee25934ab7f9d6935e69004::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInitaee3ddb49ee25934ab7f9d6935e69004::$classMap;
 
         }, null, ClassLoader::class);
     }

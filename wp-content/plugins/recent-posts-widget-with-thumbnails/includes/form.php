@@ -177,4 +177,3 @@ printf(
 <em><?php esc_html_e( 'If activated this option applies to all instances of this widget.', 'recent-posts-widget-with-thumbnails' ); ?></em></p>
 
 <p><?php esc_html_e( 'Do you like the plugin?', 'recent-posts-widget-with-thumbnails' ); ?> <a href="https://wordpress.org/support/plugin/recent-posts-widget-with-thumbnails/reviews/" target="_blank"><?php esc_html_e( 'Please rate it at wordpress.org!', 'recent-posts-widget-with-thumbnails' ); ?></a></p>
-<p><?php esc_html_e( 'Do you need more options?', 'recent-posts-widget-with-thumbnails' ); ?> <a href="http://shop.stehle-internet.de/downloads/ultimate-post-list-pro/" target="_blank"><?php esc_html_e( 'Get Ultimate Post List Pro!', 'recent-posts-widget-with-thumbnails' ); ?></a></p>

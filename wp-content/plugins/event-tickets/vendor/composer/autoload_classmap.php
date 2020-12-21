@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Tribe\\Tickets\\Editor\\Warnings' => $baseDir . '/src/Tribe/Editor/Warnings.php',
     'Tribe\\Tickets\\Events\\Attendees_List' => $baseDir . '/src/Tribe/Events/Attendees_List.php',
     'Tribe\\Tickets\\Events\\Service_Provider' => $baseDir . '/src/Tribe/Events/Service_Provider.php',
     'Tribe\\Tickets\\Events\\Views\\V2\\Hooks' => $baseDir . '/src/Tribe/Events/Views/V2/Hooks.php',

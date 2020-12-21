@@ -1,0 +1,107 @@
+Plugin Name: Snapshot
+Author: Incsub
+
+Change Log:
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+
+4.2.1
+----------------------------------------------------------------------
+- Fix: Inconsistencies with password protection of backup deletion
+
+4.2.0
+----------------------------------------------------------------------
+- New: Integrate Google Drive as a backup destination
+- New: Integrate all S3-compatible providers as backup destinations
+- New: Password-protected backup deletion
+- Improve: Security for enabled directory listing
+- Improve: Add 3rd party destinations in the Dashboard widget
+- Improve: Show confirmation modal before deleting a backup
+- Improve: Prevent adding the same destination twice
+- Fix: Issues with files that contain 'manifest' in their filename
+- Improve: Apply delete restriction on non-last snapshot at API side
+- Improve: Export error message related to missing backups issue
+- Fix: The optional Directory Path field is shown as required when editing S3 destinations
+
+4.1.2
+----------------------------------------------------------------------
+- Improve: Compatibility with WordPress's jQuery update
+- Fix: Deprecated entry after creating a backup with PHP 8.0
+- Fix: Issue with wp_localize_script() when on PHP 8.0
+- Fix: Array to string conversion when listing backup export destinations on PHP 8.0
+- Improve: Exclude non-essential folders from the backup
+- New: Show tooltip of deactivated destinations
+- New: Hotlink for logs
+- Improve: Instructions for S3 compatible providers
+- Improve: Schedule edit button on Destination page
+- Fix: Instructions for Google Cloud provider
+- Fix: Text for editing destinations
+- Improve: Content of export email
+- Fix: Export destination tooltip for destinations with long names or a large number of destinations
+
+4.1.1
+----------------------------------------------------------------------
+- Fix: Copy and image of the What's New modal
+
+4.1.0
+----------------------------------------------------------------------
+- New: Integrate Amazon S3 as a backup destination
+- New: Integration with S3 compatible providers - Backblaze, Wasabi, Google Cloud, and DigitalOcean Spaces
+- Improve: Backup restore of staging sites hosted with WPMU DEV
+- Fix: Inconsistencies with weekly scheduled backups
+
+4.0.3
+----------------------------------------------------------------------
+- New: Add hosting backups in the UI
+- New: Email user when a backup fails
+- Fix: Export failing with special character in filename
+- Fix: Backup failing if it detects an unsanitized filename
+- New: Email exported backup from now-unavailable sites
+- Improvement: Explaining incremental backup size with tooltip
+- Improvement: Add coming soon tag to the upcoming destinations
+- Fix: Issue with Saving Region on Firefox
+- Improvement: Show all backups of each user's sites
+- Improvement: Fix slight delay in showing proper progress when reloading the backups page
+- Improvement: Improve UX of Storage Limit
+- Fix: Modal typo
+- Fix: Slight frontend issue with WP v5.5
+- Fix: Backup Now button disappears upon page reload when backup is underway
+- Fix: Wrong copy at the Uninstall settings
+- Fix: Notifications and Uninstall settings not being reset
+- Fix: Issue with showing the Snapshot hero on the destinations page
+
+4.0.2
+----------------------------------------------------------------------
+- New: Make Hub work with v4
+- Fix: Issues with restoring backups when there are tables with the wrong db prefix 
+- Improvement: Enhance handling of large files in backups
+- Fix: Issues with masking login area when restoring backups
+- Fix: Issues with deleting failed backups
+- Improvement: Prevent backup delays when large sites are being processed
+- Improvement: Enhance UX while a backup is being triggered
+- Improvement: Enhance UX while a schedule is being saved
+- Improvement: Remove unused info from API responses
+- Fix: PHP v5.6 issues
+
+4.0.1
+----------------------------------------------------------------------
+- New: Make Automate work with v4
+- Fix: Dynamic scaling at fetch-filelist stage
+- Improvement: Add Divi's cache folder in permanent exclusions
+- Improvement: Add log entry for failed backup exports in Snapshot's log
+- Improvement: Prevent backups getting stuck when files have been moved between filelist and zipstream stages
+- Fix: Can't delete all backups in one go
+- Fix: Issues with deleting failed backups
+- Fix: Previously deleted db table appears in subsequent export 
+- Improvement: More detailed logging for fetch-filelist stage
+- Improvement: More detailed logging for file-zipstream stage
+- Fix: Issues with deleting backups on sites in subfolders
+- Fix: Frontend inconsistencies with backup cancellations
+- Fix: Backup exports stall when admin and public site have a http/https mismatch
+
+4.0.0
+----------------------------------------------------------------------
+- New: Incremental backups
+
+
+704644-1608571215-ai

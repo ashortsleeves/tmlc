@@ -1,0 +1,84 @@
+Plugin Name: WP Defender
+Author: Anton Shulga, Hoang Ngo, Aaron Edwards
+Tested up to: 5.6
+
+Change Log:
+
+= 2.4.5 ( 2020-12-21 ) =
+
+- New: Add pagination option for IP lockout logs
+- Enhance: Display Blocklist Monitor in the config structure
+- Fix: Malware Scanning marks own files as suspicious
+- Fix: The IP 127.0.0.1 shows as blocked
+- Fix: Display Notifications in the Hub
+- Fix: File Scan display issue in MS Edge
+- Fix: Hero Image overlaps in Preset Configs
+- Fix: Redirect Url UI needs improvement on Choose redirect page
+- Fix: Display MaxMind link
+
+= 2.4.4 ( 2020-12-07 ) =
+
+- Enhance: Change text to 'Security Issue(s)' in the dashboard widget
+- Enhance: Compatibility with WordPress 5.6
+- Fix: Hub synchronization with Defender
+- Fix: Suspicious code found in WPMU DEV plugins
+- Fix: PHP warnings and notices for Firewall and Scan modules
+- Fix: wp_login_form() not working with Masked Login
+- Fix: Chinese URL shows two-digit hexadecimal numbers
+- Fix: IP's text goes outside the box in Firewall Logs after bulk action
+- Fix: Deactivate button not working first time if there is nothing in Choose redirect page URL in Mask Login Area
+- Fix: Update text in Security Recommendations Report
+- Fix: Typo in Security Recommendations 'Prevent user enumeration', 'Update old security keys', 'Manage Login Duration'
+- Fix: While Activating/Deactivating Firewall module, it shows the same message notification
+- Fix: Enabling of Prevent Information Disclosure for Apache server
+
+= 2.4.3 ( 2020-11-27 ) =
+
+- Fix: Masked Login Area not working in some cases
+- Fix: Hub redirect to 404 page when Masked Login Area enabled
+
+= 2.4.2 ( 2020-11-25 ) =
+
+- Fix: Fatal version on WordPress 5.2 and earlier
+
+= 2.4.0 ( 2020-11-24 ) =
+
+- New: Notifications section - centralized manager for all notifications and reports
+- New: Onboarding which will replace the old quick setup and enable everything that is recommended
+- New: New: Bulk behavior for Security Recommendations - resolve/ignore almost everything with a single click
+- New: Improving Security Recommendations UI/UX
+- New: 2FA with Authy and Microsoft Authenticator
+- New: Highlight new features in welcome modal
+- Enhance: Better UI/UX and performance for Malware Scanning
+- Fix: The Audit Logging widget on the dashboard doesn’t show the correct report status
+- Fix: The custom message in Login Lockout doesn’t apply when an IP is banned by using a banned username
+- Fix: Conflict with WP Fastest Cache makes revert buttons show incorrectly
+- Fix: Warning with PHP 7.2.x
+- Fix: The username search in Audit Logging doesn’t work
+
+= 2.3.2 ( 2020-09-14 ) =
+
+- New: Add a separate Tutorials sub-menu and X-icon to remove it from the Dashboard
+- Enhance: Change mention of blacklist and whitelist to blocklist and allowlist on Defender pages
+- Enhance: Change Documentation links for Firewall and Malware Scanning
+- Enhance: Config Improvements
+- Fix: Display custom login forms if the Defender Masking URL is enabled
+- Fix: Receive email from Defender security tweaks daily
+- Fix: Activate 'Mask Login Area' through the Defender dashboard
+- Fix: Correct display of the Audit log for a new registered user - except for a Subscriber role - in MU
+- Fix: Masked login alters ajaxurl in MU in sites table page
+- Fix: Remove 'ambient-light-sensor', 'picture-in-picture', 'speaker' and 'vr' directives from Feature-Policy header
+- Fix: Compatibility with HUB
+
+= 2.3.1 ( 2020-08-10 ) =
+
+- New: Feature to save presets configurations of the Defender's settings, and make them available to download and apply to your other sites
+- New: Add tutorials section in the Defender dashboard
+- Enhance: Allow to bulk delete suspicious files
+- Enhance: Improve the logic of how "Include sub-domains" option should be shown on the Strict Transport Security header
+- Fix: Prevent wp-signup.php to access when Mask Login is enabled
+- Fix: 2FA login does not redirect correctly after login via the my-account page of Woocommerce
+- Fix: Remove the Security Tweak 'Change default database prefix', as this can be bypass
+
+
+704644-1608571131-ai

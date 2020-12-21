@@ -1197,7 +1197,9 @@ var utils_getDefaultCurrencyPosition = function getDefaultCurrencyPosition() {
 
 var details_datePickerFormat = external_tribe_common_utils_["globals"].tecDateSettings().datepickerFormat;
 var currentMoment = moment_default()();
-var details_endMoment = currentMoment.clone().add(100, 'years');
+var bufferDuration = external_tribe_common_utils_["globals"].tickets().end_sale_buffer_duration ? external_tribe_common_utils_["globals"].tickets().end_sale_buffer_duration : 2;
+var bufferYears = external_tribe_common_utils_["globals"].tickets().end_sale_buffer_years ? external_tribe_common_utils_["globals"].tickets().end_sale_buffer_years : 1;
+var details_endMoment = currentMoment.clone().add(bufferDuration, 'hours').add(bufferYears, 'years');
 
 var details_startDateInput = details_datePickerFormat ? currentMoment.format(external_tribe_common_utils_["moment"].toFormat(details_datePickerFormat)) : external_tribe_common_utils_["moment"].toDate(currentMoment);
 var details_endDateInput = details_datePickerFormat ? details_endMoment.format(external_tribe_common_utils_["moment"].toFormat(details_datePickerFormat)) : external_tribe_common_utils_["moment"].toDate(details_endMoment);
@@ -1316,7 +1318,9 @@ var DEFAULT_STATE = {
 
 var temp_details_datePickerFormat = external_tribe_common_utils_["globals"].tecDateSettings().datepickerFormat;
 var temp_details_currentMoment = moment_default()();
-var temp_details_endMoment = temp_details_currentMoment.clone().add(100, 'years');
+var temp_details_bufferDuration = external_tribe_common_utils_["globals"].tickets().end_sale_buffer_duration ? external_tribe_common_utils_["globals"].tickets().end_sale_buffer_duration : 2;
+var temp_details_bufferYears = external_tribe_common_utils_["globals"].tickets().end_sale_buffer_years ? external_tribe_common_utils_["globals"].tickets().end_sale_buffer_years : 1;
+var temp_details_endMoment = temp_details_currentMoment.clone().add(temp_details_bufferDuration, 'hours').add(temp_details_bufferYears, 'years');
 
 var temp_details_startDateInput = temp_details_datePickerFormat ? temp_details_currentMoment.format(external_tribe_common_utils_["moment"].toFormat(temp_details_datePickerFormat)) : external_tribe_common_utils_["moment"].toDate(temp_details_currentMoment);
 var temp_details_endDateInput = temp_details_datePickerFormat ? temp_details_endMoment.format(external_tribe_common_utils_["moment"].toFormat(temp_details_datePickerFormat)) : external_tribe_common_utils_["moment"].toDate(temp_details_endMoment);
@@ -10671,7 +10675,9 @@ var moment_default = /*#__PURE__*/__webpack_require__.n(moment_moment);
 
 var details_datePickerFormat = external_tribe_common_utils_["globals"].tecDateSettings().datepickerFormat;
 var currentMoment = moment_default()();
-var details_endMoment = currentMoment.clone();
+var bufferDuration = external_tribe_common_utils_["globals"].tickets().end_sale_buffer_duration ? external_tribe_common_utils_["globals"].tickets().end_sale_buffer_duration : 2;
+var bufferYears = external_tribe_common_utils_["globals"].tickets().end_sale_buffer_years ? external_tribe_common_utils_["globals"].tickets().end_sale_buffer_years : 1;
+var details_endMoment = currentMoment.clone().add(bufferDuration, 'hours').add(bufferYears, 'years');
 
 var details_startDateInput = details_datePickerFormat ? currentMoment.format(external_tribe_common_utils_["moment"].toFormat(details_datePickerFormat)) : external_tribe_common_utils_["moment"].toDate(currentMoment);
 var details_endDateInput = details_datePickerFormat ? details_endMoment.format(external_tribe_common_utils_["moment"].toFormat(details_datePickerFormat)) : external_tribe_common_utils_["moment"].toDate(details_endMoment);
@@ -12167,22 +12173,18 @@ function setNonEventPostTypeEndDate() {
 				case 11:
 					endMoment = _context19.sent;
 					_context19.next = 14;
-					return Object(effects["b" /* call */])([endMoment, 'add'], 100, 'years');
-
-				case 14:
-					_context19.next = 16;
 					return Object(effects["b" /* call */])(sagas["a" /* createDates */], endMoment.toDate());
 
-				case 16:
+				case 14:
 					_ref8 = _context19.sent;
 					date = _ref8.date;
 					dateInput = _ref8.dateInput;
 					moment = _ref8.moment;
 					time = _ref8.time;
-					_context19.next = 23;
+					_context19.next = 21;
 					return Object(effects["a" /* all */])([Object(effects["e" /* put */])(actions["setRSVPTempEndDate"](date)), Object(effects["e" /* put */])(actions["setRSVPTempEndDateInput"](dateInput)), Object(effects["e" /* put */])(actions["setRSVPTempEndDateMoment"](moment)), Object(effects["e" /* put */])(actions["setRSVPTempEndTime"](time)), Object(effects["e" /* put */])(actions["setRSVPEndDate"](date)), Object(effects["e" /* put */])(actions["setRSVPEndDateInput"](dateInput)), Object(effects["e" /* put */])(actions["setRSVPEndDateMoment"](moment)), Object(effects["e" /* put */])(actions["setRSVPEndTime"](time))]);
 
-				case 23:
+				case 21:
 				case 'end':
 					return _context19.stop();
 			}
@@ -44194,7 +44196,8 @@ var utils = __webpack_require__(8);
 
 	supports: {
 		html: false,
-		multiple: false
+		multiple: false,
+		customClassName: false
 	},
 
 	attributes: {
@@ -45257,7 +45260,7 @@ var controls_style = __webpack_require__(519);
 
 var message = Object(external_var_wp_i18n_root_wp_i18n_["__"])('It looks like you have multiple ecommerce plugins active. We recommend running only one at a time. However, if you need to run multiple, please select which one to use to sell tickets for this event. ', 'event-tickets');
 
-var note = Object(external_var_wp_i18n_root_wp_i18n_["__"])('Note: adjusting this setting will only impact new tickets. Existing tickets will not change. We highly recommend that all tickets for one event use the same ecommerce plugin', 'event-tickets');
+var note = Object(external_var_wp_i18n_root_wp_i18n_["__"])('Note: adjusting this setting will only impact new tickets. Existing tickets will not change. We highly recommend that all tickets for one event use the same ecommerce plugin.', 'event-tickets');
 
 /**
  * @todo: create radio input element, move this over to element
@@ -45527,7 +45530,8 @@ var tickets_container_mapDispatchToProps = function mapDispatchToProps(dispatch)
 
 	supports: {
 		html: false,
-		multiple: false
+		multiple: false,
+		customClassName: false
 	},
 
 	attributes: {
@@ -48095,7 +48099,8 @@ var ticket_container_mergeProps = function mergeProps(stateProps, dispatchProps,
 	parent: ['tribe/tickets'],
 
 	supports: {
-		html: false
+		html: false,
+		customClassName: false
 	},
 
 	attributes: {
@@ -48360,7 +48365,8 @@ var attendees_container_mapDispatchToProps = function mapDispatchToProps(dispatc
 	keywords: ['event', 'events-gutenberg', 'tribe'],
 
 	supports: {
-		html: false
+		html: false,
+		customClassName: false
 	},
 
 	attributes: {

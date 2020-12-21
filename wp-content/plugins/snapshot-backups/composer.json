@@ -1,0 +1,44 @@
+{
+    "name": "incsub/snapshot-backups",
+    "description": "Snapshot - Incremental backups for WP",
+    "type": "wordpress-plugin",
+    "homepage": "https://premium.wpmudev.org/project/snapshot/",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "WPMU DEV",
+            "homepage": "https://premium.wpmudev.org"
+        }
+    ],
+    "support": {
+        "docs": "https://premium.wpmudev.org/docs",
+        "issues": "https://app.asana.com/0/1102895513716897/overview",
+        "forum": "https://premium.wpmudev.org/forums/forum/support",
+        "source": "https://bitbucket.org/incsub/snapshot-backups"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "require": {
+        "google/apiclient": "2.8",
+        "maennchen/zipstream-php": "dev-stream-chunk"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/wpmudev/ZipStream-PHP"
+        }
+    ],
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.6.2",
+        "wp-coding-standards/wpcs": "^2.2"
+    },
+    "scripts": {
+        "post-install-cmd": "Google\\Task\\Composer::cleanup"
+    },
+    "extra": {
+        "google/apiclient-services": [
+            "Drive"
+        ]
+    }
+}

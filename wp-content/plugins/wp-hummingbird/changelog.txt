@@ -1,0 +1,108 @@
+Plugin Name: Hummingbird Pro
+Author: Ignacio Cruz, Ricardo Freitas, Anton Vanyukov
+Tested up to: 5.5
+
+Change Log:
+
+= 2.7.0 =
+
+- New: Site Health module
+- New: Clear page cache for all subsites from network admin
+- Enhance: Asset Optimization on WPMU DEV hosting staging
+- Enhance: Asset Optimization "How does it work?" section
+- Enhance: Gzip configuration UI/UX
+- Enhance: White labeling support
+- Enhance: Nginx instructions for browser caching and gzip compression
+- Fix: Rare instance of fatal PHP error in Page Caching module in multisite
+- Fix: Database cleanup removing drafts that are not from WordPress posts/pages
+- Fix: Cloudflare configuration wizard
+- Fix: Upgrade page buttons hover state
+- Fix: Elements with non-unique IDs in Asset Optimization module
+
+= 2.6.2 ( 2020-10-01 ) =
+
+- New: Integration with WPMU DEV hosting FastCGI cache
+- New: Allow removing query strings from assets network wide
+- New: Allow removing Emoji scripts and styles network wide
+- Enhance: Show OpCache notice on WPMU DEV hosting
+- Enhance: Page cache preloader description text
+- Enhance: Page cache sitemap detection
+- Enhance: Asset Optimization "How does it work?" section
+- Enhance: Automatic Asset Optimization UI/UX
+- Enhance: Upgrade scripts on network installs
+- Enhance: White labeling support
+- Enhance: Integration with Cornerstone builder
+- Fix: File change detection notice on multisite
+- Fix: Asset Optimization logs on network subsites
+- Fix: Missing downtime in Uptime reports
+- Fix: Minor accessibility issues with toggles and icons
+- Fix: Include/exclude icons in Asset Optimization
+- Fix: Clearing mobile cache on page/post edit
+- Fix: Error when clearing Cloudflare cache
+- Fix: Log cleanup
+- Fix: Redis connect modal
+
+= 2.6.1 ( 2020-09-08 ) =
+
+- Fix: Errors on multisite upgrade
+- Fix: Asset Optimization network debug logs UI
+- Fix: Asset Optimization exclusions select styles
+- Fix: Typos in Advanced Tools module
+
+= 2.6.0 ( 2020-09-07 ) =
+
+- New: Asset Optimization automatic mode
+- New: Asset Optimization presets
+- New: Support for caching page headers
+- Enhance: Compatibility with tagDiv Composer
+- Enhance: Page Cache sitemaps support
+- Enhance: Handling of critical.css file
+- Enhance: Notices and forms accessibility
+- Fix: register_rest_route was called incorrectly warning in WordPress 5.5
+- Fix: Asset Optimization reset to defaults action
+- Fix: Asset Optimization file size reductions calculation
+- Fix: Asset Optimization PHP silenced notices
+- Fix: Asset Optimization activate page
+- Fix: Opcache integration
+- Fix: Styles conflict with SupportCandy Reports plugin
+- Fix: Performance modal closing on initial scan
+- Fix: Preserve image ratios when branding
+
+= 2.5.3 ( 2020-08-11 ) =
+
+- Fix: Remove background color from critical.css file
+
+= 2.5.2 ( 2020-08-11 ) =
+
+- Enhance: Change default value for file change detection
+- Fix: register_rest_route was called incorrectly warning in WordPress 5.5
+- Fix: Asset Optimization not enabling in network admin in WordPress 5.5
+- Fix: Performance modal closing on initial scan
+
+= 2.5.1 ( 2020-07-21 ) =
+
+- Enhance: WordPress 5.5 compatibility
+- Fix: Performance scans getting stuck on a loop
+- Fix: Settings reset functionality
+
+= 2.5.0 ( 2020-07-20 ) =
+
+- New: Redis object cache
+- New: Comment lazy loading
+- Enhance: Performance report functionality
+- Enhance: Try to fetch latest performance report, if present on the Hub
+- Enhance: Compatibility with Oxygen builder
+- Enhance: Asset Optimization UI
+- Enhance: Performance reporting UI
+- Enhance: Uptime reporting UI
+- Enhance: Page cache handling of advanced-cache.php file
+- Fix: Asset Optimization not returning some assets back to WordPress queue
+- Fix: Asset Optimization not updating assets on version change
+- Fix: Cache clear from Hub
+- Fix: Deactivate button in Gzip module
+- Fix: Smush links in dashboard meta box
+- Fix: class-oembed.php is deprecated error
+
+
+
+704644-1608571193-ai

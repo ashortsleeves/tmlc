@@ -1,9 +1,6 @@
 export default {
   init() {
     // JavaScript to be fired on the home page
-  },
-  finalize() {
-    // JavaScript to be fired on the home page, after the init JS
     $('.strapline-container').slick({
       slidesToShow: 8,
       slidesToScroll: 1,
@@ -39,6 +36,9 @@ export default {
         },
       ],
     });
+  },
+  finalize() {
+    // JavaScript to be fired on the home page, after the init JS
 
     $('.slick-quotes').slick({
       slidesToShow: 1,

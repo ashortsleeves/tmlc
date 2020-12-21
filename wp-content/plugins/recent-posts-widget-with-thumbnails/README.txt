@@ -4,8 +4,8 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: images, posts list, recent posts, thumbnails, widget
 Requires at least: 2.9
 Requires PHP: 5.2
-Tested up to: 5.5.3
-Stable tag: 7.0.1
+Tested up to: 5.6
+Stable tag: 7.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,7 +15,7 @@ List the most recent posts with post titles, thumbnails, excerpts, authors, cate
 
 List the most recent posts with post titles, thumbnails, excerpts, authors, categories, dates and more!
 
-The plugin is available in Dutch (Nederlands), English, Spanish (Español), Galician, German (Deutsch), Persian (فارسی), Arabic (العربية), Polish (Polski) Russian (русский), Turkish (Türkçe), Japanese (日本語) and Greek (Ελληνικά).
+The plugin is available in Dutch (Nederlands), English, Spanish (Español), Galician, German (Deutsch), Persian (فارسی), Arabic (العربية), Polish (Polski) Russian (русский), Turkish (Türkçe), Japanese (日本語), Greek (Ελληνικά) and Catalan (Català).
 
 Although the plugin is built only for widget areas users reported that it **works in Elementor** and **works in Oxygen**. Whether it runs in other page builders is unknown. Please let me know in which **page builder** you were able to use the plugin successfully.
 
@@ -93,10 +93,6 @@ Some users published video tutorials on YouTube:
 36. Print slugs of post categories in class attribute of LI elements
 37. Print inline CSS instead of creating a CSS file
 38. No CSS generation at all
-
-= Much more options available in the Pro version =
-
-If you want to build your special posts lists with additional options for layout, informations about each post and embedding via shortcode [take a look at the plugin Ultimate Post List Pro](https://shop.stehle-internet.de/downloads/ultimate-post-list-pro/).
 
 = Useful hints for developers: Supported Hooks =
 
@@ -179,7 +175,7 @@ To design the list and its items you can use these CSS selectors:
 The user interface is available in
 
 * Arabic (العربية), kindly drawn up by [Shadi AlZard](https://profiles.wordpress.org/salzard)
-* Catalan (Català), kindly drawn up by [Juan of the Ibidem Group](https://www.ibidemgroup.com/)
+* Catalan (Català), kindly drawn up by [Ibidem Group](https://www.ibidemgroup.com/)
 * Dutch (Nederlands)
 * English (UK)
 * English (US)
@@ -268,8 +264,12 @@ If you want to contribute a translation of the plugin in your language it would 
 
 == Changelog ==
 
+= 7.0.2 =
+* Corrected comments in uninstall.php
+* Tested successfully with WordPress 5.6
+
 = 7.0.1 =
-* Added catalan translation, thanks to Juan of the Ibidem Group
+* Added catalan translation, thanks to Ibidem Group
 * Tested successfully with WordPress 5.5.3
 
 = 7.0.0 =
@@ -449,7 +449,6 @@ If you want to contribute a translation of the plugin in your language it would 
 * Added polish translation. Thank you very much, [Marcin Mikolajczyk](https://profiles.wordpress.org/marcinmik)
 * Improved: Manual excerpts are taken unchanged ("as is")
 * I18n description in the backend's plugin list
-* Added link to more versatile plugin [Ultimate Post List Pro](https://shop.stehle-internet.de/downloads/ultimate-post-list-pro/)
 * Tested successfully with WordPress 4.5
 * Updated *.pot file and translations
 
@@ -605,6 +604,9 @@ Successfully tested with WordPress 4.0
 * The plugin was released.
 
 == Upgrade Notice ==
+
+= 7.0.2 =
+Tested successfully with WordPress 5.6
 
 = 7.0.1 =
 Added catalan translation, tested with WordPress 5.5.3
