@@ -105,3 +105,22 @@ header.banner {
     }
   }
 }
+
+.ci-banner {
+  a {
+    display: block;
+    background-color: $brand-primary;
+    color: #fff;
+    padding: 5px 0;
+    font-size: 14px;
+
+    &:hover,
+    &:focus {
+      background-color: $brand-orange;
+    }
+  }
+  .container {
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -65,4 +65,15 @@ class App extends Controller
 
       return $data;
     }
+
+    public function ciBanner()
+    {
+      $data = [
+        'text' => get_field('banner', 'option'),
+        'link' => get_field('banner_link', 'option'),
+      ];
+
+      return $data;
+    }
+
 }
