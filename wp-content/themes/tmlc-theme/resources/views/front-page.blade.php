@@ -50,7 +50,7 @@
     </section>
     <section class="fp-services jumbo-bg">
       <div class="background-wrap">
-        <img class="section-background" src="{{$fp_services['background']['url']}}" />
+        <img class="section-background" src="{{$fp_services['background']['url']}}" alt="{{$fp_services['background']['alt']}}" />
       </div>
       <div class="container title-container">
         <h1>{{$fp_services['title']}}</h1>
@@ -82,7 +82,7 @@
         @foreach($fp_works as $work)
           <div class="row work-row">
             <div class="col-md-6">
-              <img src="{{$work['image']['url']}}" />
+              <img src="{{$work['image']['url']}}" alt="{{$work['image']['alt']}}" />
             </div>
             <div class="col-md-6">
               <span class="subtitle">{{$work['subtitle']}}</span>
@@ -98,7 +98,7 @@
     @if($fp_events)
       <section class="fp-events">
         <div class="background-wrap">
-          <img class="section-background" src="{{$fp_eventstitle['background']['url']}}" />
+          <img class="section-background" src="{{$fp_eventstitle['background']['url']}}" alt="{{$fp_eventstitle['background']['alt']}}" />
         </div>
         <div class="container">
           <div class="title">
@@ -146,14 +146,14 @@
 
     @if($fp_team)
       <section class="fp-team">
-        <img class="section-background" src="{!!$fp_team['image']['url']!!}"/>
+        <img class="section-background" src="{!!$fp_team['image']['url']!!}" alt="{!!$fp_team['image']['alt']!!}"/>
         <div class="container team-container">
           <h1>{{$fp_team['title']}}</h1>
           <span class="subtitle">{{$fp_team['subtitle']}}</span>
           @foreach($fp_team['team_members'] as $team)
             <div class="team-member">
               <div class="image-wrap">
-                <img src="{!!$team['image']['url']!!}" />
+                <img src="{!!$team['image']['url']!!}" src="{!!$team['image']['alt']!!}" />
               </div>
               <div class="content">
                 <h2>{{$team['name']}}</h2>

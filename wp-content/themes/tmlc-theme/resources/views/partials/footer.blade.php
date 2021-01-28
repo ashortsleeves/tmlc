@@ -1,6 +1,6 @@
 @if($hideContact !== true)
   <section class="contact-footer" id="contactus">
-    <img class="section-background" src="{{$footer['background']['url']}}" />
+    <img class="section-background" src="{{$footer['background']['url']}}" alt="{{$footer['background']['alt']}}"/>
     <div class="container">
       <div class="row">
         <div class="col-md-6">
