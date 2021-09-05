@@ -57,6 +57,7 @@ class Manual extends Model\Request {
 		$data['bu_tables']            = 'all';
 		$data['bu_time']              = false;
 		$data['bu_status']            = false;
+		$data['description']          = $this->get( 'description' );
 		$data['bu_exclusion_enabled'] = $this->get( 'apply_exclusions' );
 		$data['site_name']            = $this->get_this_site();
 		$data['plugin_v']             = defined( 'SNAPSHOT_BACKUPS_VERSION' ) ? SNAPSHOT_BACKUPS_VERSION : null;

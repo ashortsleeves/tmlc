@@ -155,7 +155,7 @@ class Two_Fa extends Component {
 		$value = unpack( 'N', $four_bytes );
 		$value = $value[1];
 		//make sure it always act like 32 bits
-		$value = $value & 0x7FFFFFFF;;
+		$value = $value & 0x7FFFFFFF;
 		//we so close
 		$code = $value % pow( 10, 6 );
 		//in some case we have the 0 before, so it become lesser than 6, make sure it always right
@@ -167,8 +167,8 @@ class Two_Fa extends Component {
 	/**
 	 * Generate a QR code for apps can use
 	 *  1. Authy
-	 *  2. Google Authencator
-	 *  3. Microsoft Authencator
+	 *  2. Google Authenticator
+	 *  3. Microsoft Authenticator
 	 */
 	public static function generate_qr_code() {
 		$settings = new \WP_Defender\Model\Setting\Two_Fa();

@@ -2,25 +2,65 @@
 
 namespace WP_Defender\Component\Security_Tweaks\Servers;
 
-use Calotes\Helper\HTTP;
-
 class Server {
 	public static function create( $server ) {
 		return new Server_Factory( $server );
 	}
 
 	/**
-	 * Determine the server
-	 * Incase we are using a hybrid server and need to know where static files are houses, pass true as a param
+	 * @param string $default_server_name
 	 *
-	 * @param $use_static_path - use static path instead of home url. This is the path to Defender changelog
+	 * @return string
 	 */
-	public static function get_current_server( $use_static_path = false ) {
-		$url         = $use_static_path ? defender_path( 'changelog.txt' ) : home_url();
+	public static function get_software_by_self_ping( $default_server_name = 'apache' ) {
+		$request = wp_remote_head(
+			home_url(),
+			array(
+				'user-agent' => ! empty( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : 'Defender Self Ping',
+				//most hosts dont really have valid ssl or ssl still pending
+				'sslverify'  => apply_filters( 'defender_ssl_verify', true ),
+			)
+		);
+		$server  = wp_remote_retrieve_header( $request, 'server' );
+		$server  = explode( '/', $server );
+
+		if ( isset( $server[0] ) ) {
+			$server = strtolower( $server[0] );
+		} else {
+			$server = $default_server_name;
+		}
+
+		return $server;
+	}
+
+	/**
+	 * @return string
+	 */
+	public static function get_software() {
+		if ( empty( $_SERVER['SERVER_SOFTWARE'] ) ) {
+			return self::get_software_by_self_ping();
+		}
+
+		$server = explode( ' ', $_SERVER['SERVER_SOFTWARE'] );
+		$server = explode( '/', reset( $server ) );
+		if ( isset( $server[0] ) ) {
+			return strtolower( $server[0] );
+		} else {
+			return self::get_software_by_self_ping();
+		}
+	}
+
+	/**
+	 * Determine the server
+	 *
+	 * @return string
+	 */
+	public static function get_current_server() {
+		$url         = home_url();
 		$server_type = get_site_transient( 'defender_current_server' );
 
 		if ( ! is_array( $server_type ) ) {
-			$server_type = [];
+			$server_type = array();
 		}
 
 		if ( isset( $server_type[ $url ] ) && ! empty( $server_type[ $url ] ) ) {
@@ -30,43 +70,19 @@ class Server {
 		// Url should be end with php
 		global $is_apache, $is_nginx, $is_IIS, $is_iis7;
 
-		$server     = null;
-		$ssl_verify = apply_filters( 'defender_ssl_verify', true ); //most hosts dont really have valid ssl or ssl still pending
-
 		if ( $is_nginx ) {
 			$server = 'nginx';
 		} elseif ( $is_apache ) {
 			//case the url is detecting php file
-			if ( pathinfo( $url, PATHINFO_EXTENSION ) == 'php' ) {
+			if ( 'php' === pathinfo( $url, PATHINFO_EXTENSION ) ) {
 				$server = 'apache';
 			} else {
-				//so the server software is apache, let see what the header return
-				$request = wp_remote_head( $url, array(
-					'user-agent' => ! empty( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : 'Defender Self Ping',
-					'sslverify'  => $ssl_verify
-				) );
-				$server  = wp_remote_retrieve_header( $request, 'server' );
-				$server  = explode( '/', $server );
-				if ( strtolower( $server[0] ) == 'nginx' ) {
-					//proxy case
-					$server = 'nginx';
-				} else {
-					$server = 'apache';
-				}
+				$server = self::get_software();
 			}
 		} elseif ( $is_iis7 || $is_IIS ) {
 			$server = 'iis-7';
-		}
-
-		if ( is_null( $server ) ) {
-			//if fall in here, means there is st unknown.
-			$request = wp_remote_head( $url, array(
-				'user-agent' => ! empty( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : 'Defender Self Ping',
-				'sslverify'  => $ssl_verify
-			) );
-			$server  = wp_remote_retrieve_header( $request, 'server' );
-			$server  = explode( '/', $server );
-			$server  = $server[0];
+		} else {
+			$server = self::get_software();
 		}
 
 		$server_type[ $url ] = $server;
@@ -83,7 +99,7 @@ class Server {
 	 * @return bool
 	 */
 	public static function ping_test_failed( $url ) {
-		$response = wp_remote_post( $url, [ 'user-agent' => 'WP Defender Self Ping Test' ] );
+		$response = wp_remote_post( $url, array( 'user-agent' => 'WP Defender Self Ping Test' ) );
 
 		if ( is_wp_error( $response ) ) {
 			return true;

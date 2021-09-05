@@ -7,6 +7,7 @@
 
 use WPMUDEV\Snapshot4\Helper;
 use WPMUDEV\Snapshot4\Task;
+use WPMUDEV\Snapshot4\Helper\Settings;
 
 $assets = new Helper\Assets();
 
@@ -34,7 +35,7 @@ wp_nonce_field( 'snapshot_update_destination', '_wpnonce-snapshot-update-destina
 				</figure>
 
 				<button class="sui-button-icon sui-button-float--right" data-modal-close>
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 				</button>
 
 				<h3 class="sui-box-title sui-lg"><?php echo wp_kses_post( __( 'Configure Amazon S3', 'snapshot' ) ); ?></h3>
@@ -51,7 +52,7 @@ wp_nonce_field( 'snapshot_update_destination', '_wpnonce-snapshot-update-destina
 							</div>
 							<div class="sui-notice-actions">
 								<button class="sui-button-icon hide-notice">
-									<i class="sui-icon-check" aria-hidden="true"></i>
+									<span class="sui-icon-check" aria-hidden="true"></span>
 									<span class="sui-screen-reader-text"><?php esc_html_e( 'Close this notice', 'snapshot' ); ?></span>
 								</button>
 							</div>
@@ -66,7 +67,7 @@ wp_nonce_field( 'snapshot_update_destination', '_wpnonce-snapshot-update-destina
 							</div>
 							<div class="sui-notice-actions">
 								<button class="sui-button-icon hide-notice">
-									<i class="sui-icon-check" aria-hidden="true"></i>
+									<span class="sui-icon-check" aria-hidden="true"></span>
 									<span class="sui-screen-reader-text"><?php esc_html_e( 'Close this notice', 'snapshot' ); ?></span>
 								</button>
 							</div>
@@ -77,8 +78,12 @@ wp_nonce_field( 'snapshot_update_destination', '_wpnonce-snapshot-update-destina
 						<div class="sui-notice-content">
 							<div class="sui-notice-message">
 								<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
-								<?php /* translators: %s - Link for support */ ?>
-								<p><?php echo wp_kses_post( sprintf( __( 'You\'re trying to save a destination that already exists. If you want to create a new destination with the same credentials, please choose a different folder or create a new one. If you run into further issues, you can contact our <a href="%s" target="_blank">Support team</a> for help.', 'snapshot' ), 'https://premium.wpmudev.org/hub/support/#get-support' ) ); ?></p>
+								<?php if ( Settings::get_branding_hide_doc_link() ) { ?>
+									<p><?php esc_html_e( 'You\'re trying to save a destination that already exists. If you want to create a new destination with the same credentials, please choose a different folder or create a new one. If you run into further issues, you can contact support for help.', 'snapshot' ); ?></p>
+								<?php } else { ?>
+									<?php /* translators: %s - Link for support */ ?>
+									<p><?php echo wp_kses_post( sprintf( __( 'You\'re trying to save a destination that already exists. If you want to create a new destination with the same credentials, please choose a different folder or create a new one. If you run into further issues, you can contact our <a href="%s" target="_blank">Support team</a> for help.', 'snapshot' ), 'https://wpmudev.com/hub2/support#get-support' ) ); ?></p>
+								<?php } ?>
 							</div>
 						</div>
 					</div>
@@ -87,8 +92,12 @@ wp_nonce_field( 'snapshot_update_destination', '_wpnonce-snapshot-update-destina
 						<div class="sui-notice-content">
 							<div class="sui-notice-message">
 								<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
-								<?php /* translators: %s - Link for support */ ?>
-								<p><?php echo wp_kses_post( sprintf( __( 'You\'re trying to save a destination that already exists. If you want to create a new destination with the same credentials, please choose a different bucket or create a new folder. If you run into further issues, you can contact our <a href="%s" target="_blank">Support team</a> for help.', 'snapshot' ), 'https://premium.wpmudev.org/hub/support/#get-support' ) ); ?></p>
+								<?php if ( Settings::get_branding_hide_doc_link() ) { ?>
+									<p><?php esc_html_e( 'You\'re trying to save a destination that already exists. If you want to create a new destination with the same credentials, please choose a different bucket or create a new folder. If you run into further issues, you can contact support for help.', 'snapshot' ); ?></p>
+								<?php } else { ?>
+									<?php /* translators: %s - Link for support */ ?>
+									<p><?php echo wp_kses_post( sprintf( __( 'You\'re trying to save a destination that already exists. If you want to create a new destination with the same credentials, please choose a different bucket or create a new folder. If you run into further issues, you can contact our <a href="%s" target="_blank">Support team</a> for help.', 'snapshot' ), 'https://wpmudev.com/hub2/support#get-support' ) ); ?></p>
+								<?php } ?>
 							</div>
 						</div>
 					</div>
@@ -198,18 +207,18 @@ wp_nonce_field( 'snapshot_update_destination', '_wpnonce-snapshot-update-destina
 
 			<div class="sui-box-footer sui-lg sui-content-separated">
 				<button class="sui-button sui-button-ghost sui-button-red snapshot-delete-destination-button">
-					<i class="sui-icon-trash" aria-hidden="true"></i>
+					<span class="sui-icon-trash" aria-hidden="true"></span>
 					<?php esc_html_e( 'Delete', 'snapshot' ); ?>
 				</button>
 
 				<button class="sui-button sui-button-blue snapshot-edit-destination-button">
 					<span class="sui-button-text-default">
-						<i class="sui-icon-save" aria-hidden="true"></i>
+						<span class="sui-icon-save" aria-hidden="true"></span>
 						<?php esc_html_e( 'Save changes', 'snapshot' ); ?>
 					</span>
 
 					<span class="sui-button-text-onload">
-						<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+						<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 						<?php esc_html_e( 'Saving...', 'snapshot' ); ?>
 					</span>
 				</button>

@@ -11,6 +11,7 @@
 
 namespace Hummingbird\Core\Traits;
 
+use Hummingbird\Core\Filesystem;
 use Hummingbird\WP_Hummingbird;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,29 +31,20 @@ trait WPConfig {
 	public $wp_config_file = ABSPATH . 'wp-config.php';
 
 	/**
-	 * File pointer.
-	 *
-	 * @var null|resource $fp
-	 */
-	private $fp = null;
-
-	/**
 	 * Add a define to wp-config.php file.
 	 *
 	 * @since 2.5.0
 	 *
 	 * @param string $name   Define name.
 	 * @param string $value  Define value.
-	 *
-	 * @return bool
 	 */
 	public function wpconfig_add( $name, $value ) {
 		if ( ! $this->can_continue() ) {
-			return false;
+			return;
 		}
 
 		$value = $this->prepare_value( $value );
-		$lines = $this->get_lines();
+		$lines = file( $this->wp_config_file );
 
 		// Generate the new file data.
 		$new_file = array();
@@ -62,20 +54,21 @@ trait WPConfig {
 			if ( preg_match( "/define\(\s*'{$name}'/i", $line ) ) {
 				$added = true;
 				WP_Hummingbird::get_instance()->core->logger->log( "Added define( {$name}, {$value} ) to wp-config.php file.", $this->get_slug() );
-				$new_file[] = "define( '{$name}', {$value} ); // Added by Hummingbird";
+				$new_file[] = "define( '{$name}', {$value} ); // Added by Hummingbird\n";
 				continue;
 			}
 
 			// If we reach the end and no define - add it.
 			if ( ! $added && preg_match( "/\/\* That's all, stop editing!.*/i", $line ) ) {
 				WP_Hummingbird::get_instance()->core->logger->log( "Added define( {$name}, {$value} ) to wp-config.php file.", $this->get_slug() );
-				$new_file[] = "define( '{$name}', {$value} ); // Added by Hummingbird";
+				$new_file[] = "define( '{$name}', {$value} ); // Added by Hummingbird\n";
 			}
 
 			$new_file[] = $line;
 		}
 
-		return $this->write( implode( "\n", $new_file ) );
+		$wphb_fs = Filesystem::instance();
+		$wphb_fs->write( $this->wp_config_file, implode( '', $new_file ) );
 	}
 
 	/**
@@ -84,15 +77,13 @@ trait WPConfig {
 	 * @since 2.5.0
 	 *
 	 * @param string $name  Define name.
-	 *
-	 * @return bool
 	 */
 	public function wpconfig_remove( $name ) {
 		if ( ! $this->can_continue() ) {
-			return false;
+			return;
 		}
 
-		$lines = $this->get_lines();
+		$lines = file( $this->wp_config_file );
 
 		// Generate the new file data.
 		$new_file = array();
@@ -105,7 +96,8 @@ trait WPConfig {
 			$new_file[] = $line;
 		}
 
-		return $this->write( implode( "\n", $new_file ) );
+		$wphb_fs = Filesystem::instance();
+		$wphb_fs->write( $this->wp_config_file, implode( '', $new_file ) );
 	}
 
 	/**
@@ -119,8 +111,9 @@ trait WPConfig {
 		// Taken from wp-load.php.
 		// If config file doesn't exists in root directory, try to locate it in a directory above.
 		if ( ! file_exists( $this->wp_config_file )
-			&& ( file_exists( dirname( ABSPATH ) . '/wp-config.php' ) && ! file_exists( dirname( ABSPATH ) . '/wp-settings.php' ) ) )
-		{
+			&& file_exists( dirname( ABSPATH ) . '/wp-config.php' )
+			&& ! file_exists( dirname( ABSPATH ) . '/wp-settings.php' )
+		) {
 			// The config file resides one level above ABSPATH but is not part of another installation.
 			$this->wp_config_file = dirname( ABSPATH ) . '/wp-config.php';
 		}
@@ -130,7 +123,7 @@ trait WPConfig {
 			return false;
 		}
 
-		if ( ! $this->fp = fopen( $this->wp_config_file, 'r+' ) ) {
+		if ( ! is_writable( $this->wp_config_file ) ) {
 			WP_Hummingbird::get_instance()->core->logger->log( 'Failed to open wp-config.php for writing.', $this->get_slug() );
 			return false;
 		}
@@ -158,49 +151,6 @@ trait WPConfig {
 		}
 
 		return $value;
-	}
-
-	/**
-	 * Get lines from file.
-	 *
-	 * @since 2.5.0
-	 *
-	 * @return array
-	 */
-	private function get_lines() {
-		// Attempt to get a lock. If the filesystem supports locking, this will block until the lock is acquired.
-		flock( $this->fp, LOCK_EX );
-
-		$lines = array();
-		while ( ! feof( $this->fp ) ) {
-			$lines[] = rtrim( fgets( $this->fp ), "\r\n" );
-		}
-
-		return $lines;
-	}
-
-	/**
-	 * Write to the start of the file, and truncate it to that length.
-	 *
-	 * @since 2.5.0
-	 *
-	 * @param string $data  File data.
-	 *
-	 * @return bool
-	 */
-	private function write( $data ) {
-		fseek( $this->fp, 0 );
-		$bytes = fwrite( $this->fp, $data );
-
-		if ( $bytes ) {
-			ftruncate( $this->fp, ftell( $this->fp ) );
-		}
-
-		fflush( $this->fp );
-		flock( $this->fp, LOCK_UN );
-		fclose( $this->fp );
-
-		return (bool) $bytes;
 	}
 
 }

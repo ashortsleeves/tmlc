@@ -33,7 +33,7 @@ class Core_Integrity extends Behavior {
 			$file_size = $this->format_bytes_into_readable( $file_size );
 		}
 
-		return [
+		return array(
 			'id'         => $this->owner->id,
 			'type'       => Scan_Item::TYPE_INTEGRITY,
 			'file_name'  => pathinfo( $file, PATHINFO_BASENAME ),
@@ -42,7 +42,7 @@ class Core_Integrity extends Behavior {
 			'size'       => $file_size,
 			'scenario'   => $data['type'],
 			'short_desc' => $this->get_short_description(),
-		];
+		);
 	}
 
 	/**
@@ -53,8 +53,8 @@ class Core_Integrity extends Behavior {
 	private function get_origin_code() {
 		global $wp_version;
 		$data            = $this->owner->raw_data;
-		$file            = $data['file'];
-		$relative_path   = str_replace( ABSPATH, '', $file );
+		$file            = wp_normalize_path( $data['file'] );
+		$relative_path   = str_replace( wp_normalize_path( ABSPATH ), '', $file );
 		$source_file_url = "http://core.svn.wordpress.org/tags/$wp_version/" . $relative_path;
 		$ds              = DIRECTORY_SEPARATOR;
 		if ( ! function_exists( 'download_url' ) ) {
@@ -72,7 +72,7 @@ class Core_Integrity extends Behavior {
 
 	/**
 	 * Restore the file with it's origin content
-	 * @return array
+	 * @return void|array
 	 */
 	public function resolve() {
 		$data = $this->owner->raw_data;
@@ -82,21 +82,25 @@ class Core_Integrity extends Behavior {
 		}
 
 		$origin = $this->get_origin_code();
-		if ( is_wp_error( $origin ) || false === $origin ) {
+		if ( false === $origin || is_wp_error( $origin ) ) {
 			return;
 		}
 
 		//now it time
 		$path = $data['file'];
-
-		$ret = file_put_contents( $path, $origin );
+		$ret  = @file_put_contents( $path, $origin );// phpcs:ignore
 		if ( $ret ) {
 			$scan = Scan::get_last();
 			$scan->remove_issue( $this->owner->id );
 
-			return [
-				'message' => __( 'This item has been resolved.', 'wpdef' )
-			];
+			return array(
+				'message' => __( 'This item has been resolved.', 'wpdef' ),
+			);
+		} else {
+			return new \WP_Error(
+				'defender_permissions_denied',
+				__( 'Permissions Denied. Defender does not have the needed permissions to edit the file. Please change file permissions to 640 or contact your hosting provider so they could change them for you.', 'wpdef' )
+			);
 		}
 	}
 
@@ -107,9 +111,9 @@ class Core_Integrity extends Behavior {
 		$scan = Scan::get_last();
 		$scan->ignore_issue( $this->owner->id );
 
-		return [
-			'message' => __( 'The suspicious file has been successfully ignored.', 'wpdef' )
-		];
+		return array(
+			'message' => __( 'The suspicious file has been successfully ignored.', 'wpdef' ),
+		);
 	}
 
 	/**
@@ -119,9 +123,9 @@ class Core_Integrity extends Behavior {
 		$scan = Scan::get_last();
 		$scan->unignore_issue( $this->owner->id );
 
-		return [
-			'message' => __( 'The suspicious file has been successfully restored.', 'wpdef' )
-		];
+		return array(
+			'message' => __( 'The suspicious file has been successfully restored.', 'wpdef' ),
+		);
 	}
 
 	/**
@@ -133,15 +137,15 @@ class Core_Integrity extends Behavior {
 		if ( 'unversion' === $data['type'] && unlink( $data['file'] ) ) {
 			$scan->remove_issue( $this->owner->id );
 
-			return [
-				'message' => __( 'This item has been permanently removed', 'wpdef' )
-			];
+			return array(
+				'message' => __( 'This item has been permanently removed', 'wpdef' ),
+			);
 		} elseif ( 'dir' === $data['type'] && $this->delete_dir( $data['file'] ) ) {
 			$scan->remove_issue( $this->owner->id );
 
-			return [
-				'message' => __( 'This item has been permanently removed', 'wpdef' )
-			];
+			return array(
+				'message' => __( 'This item has been permanently removed', 'wpdef' ),
+			);
 		}
 
 		return new \WP_Error( Error_Code::NOT_WRITEABLE, __( 'Defender doesn\'t have enough permission to remove this file', 'wpdef' ) );
@@ -158,27 +162,28 @@ class Core_Integrity extends Behavior {
 	public function pull_src() {
 		$data = $this->owner->raw_data;
 		if ( ! file_exists( $data['file'] ) && ! is_dir( $data['file'] ) ) {
-			return [
+			return array(
 				'code'   => '',
-				'origin' => ''
-			];
+				'origin' => '',
+			);
 		}
 		switch ( $data['type'] ) {
 			case 'unversion':
-				return [
-					'code' => file_get_contents( $data['file'] )
-				];
+				return array(
+					'code' => file_get_contents( $data['file'] ),
+				);
 			case 'dir':
-				$dir_tree = new File( $data['file'], true, true, [], [], false );
+				$dir_tree = new File( $data['file'], true, true, array(), array(), false );
 
-				return [
-					'code' => implode( PHP_EOL, $dir_tree->get_dir_tree() )
-				];
+				return array(
+					'code' => implode( PHP_EOL, $dir_tree->get_dir_tree() ),
+				);
 			case 'modified':
-				return [
+			default:
+				return array(
 					'code'   => file_get_contents( $data['file'] ),
-					'origin' => $this->get_origin_code()
-				];
+					'origin' => $this->get_origin_code(),
+				);
 		}
 	}
 

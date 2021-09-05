@@ -219,7 +219,7 @@ class Scanner {
 
 		$result = array();
 
-		$args             = array(
+		$args = array(
 			'timeout'   => 0.01,
 			'cookies'   => $cookies,
 			'blocking'  => false,

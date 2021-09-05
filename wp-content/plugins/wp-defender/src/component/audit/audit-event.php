@@ -344,7 +344,7 @@ abstract class Audit_Event extends Component {
 			'ip'          => $this->get_user_ip(),
 			'msg'         => strip_tags( $text ),
 			'blog_id'     => get_current_blog_id(),
-			'ttl'         => strtotime( '+ ' . $settings->storage_days, time() )
+			'ttl'         => strtotime( '+ ' . $settings->storage_days )
 		);
 		Array_Cache::append( 'logs', $post, 'audit' );
 	}

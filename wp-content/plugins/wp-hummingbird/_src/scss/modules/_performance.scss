@@ -3,9 +3,150 @@
  */
 
 @import "../common/mixins";
+@import "../common/variables";
 @import "~@wpmudev/shared-ui/scss/colors";
 
 .wpmud .wrap-wphb-performance {
+    .box-performance-metrics .wphb-performance-metrics {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+
+        @include bp(tablet) { flex-direction: column; }
+
+        .wphb-metrics-table {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+
+            & > div {
+                display: flex;
+                justify-content: space-between;
+                flex: 50%;
+                border: 1px solid #E6E6E6;
+                padding: 20px 30px;
+                font-size: 13px;
+
+                &:nth-child(even) { border-left-width: 0; }
+                &:nth-child(n+3) { border-top-width: 0; }
+
+                @include bp(desktop-large) { padding: 20px 10px; }
+                @include bp(desktop) {
+                    flex: 100%;
+                    &:nth-child(even) { border-left-width: 1px; }
+                    &:nth-child(n+2) { border-top-width: 0; }
+                }
+                @include bp(tablet) {
+                    flex: 50%;
+                    &:nth-child(even) { border-left-width: 0; }
+                    &:nth-child(2) { border-top-width: 1px; }
+                }
+                @include bp(phone-large) {
+                    flex: 100%;
+                    &:nth-child(even) { border-left-width: 1px; }
+                    &:nth-child(2) { border-top-width: 0; }
+                }
+            }
+
+            .wphb-metric-info {
+                display: flex;
+                align-items: center;
+                a, span.sui-tooltip, span[class^="sui-icon-"] { line-height: 16px; }
+                strong { margin: 0 10px; }
+            }
+
+            .wphb-metric-value {
+                font-weight: 500;
+                letter-spacing: -0.25px;
+                color: #888888;
+            }
+        }
+    }
+
+    .box-performance-metrics .wphb-performance-score {
+        font-family: $font;
+        margin-right: 30px;
+
+        .wphb-gauge__wrapper {
+            margin: 0 auto;
+            width: 290px;
+            stroke-width: 28px;
+            stroke-linecap: butt;
+
+            .wphb-gauge__percentage {
+                text-anchor: middle;
+                dominant-baseline: central;
+                font-weight: bold;
+                letter-spacing: -1px;
+                font-size: 16px;
+                color: $gray-alt;
+            }
+
+            .metric {
+                pointer-events: auto;
+                transition: transform .1s .2s ease-out,  opacity .3s ease-out;
+
+                &.metric--FCP .speed-metric-gauge { color: $color--performance-fcp; }
+                &.metric--SI .speed-metric-gauge { color: $color--performance-si; }
+                &.metric--LCP .speed-metric-gauge { color: $color--performance-lcp; }
+                &.metric--TTI .speed-metric-gauge { color: $color--performance-tti; }
+                &.metric--TBT .speed-metric-gauge { color: $color--performance-tbt; }
+                &.metric--CLS .speed-metric-gauge { color: $color--performance-cls; }
+
+                .wphb-gauge {
+                    fill: none;
+                }
+
+                .wphb-gauge--bg { opacity: 0.3; }
+
+                .speed-metric-gauge {
+                    stroke-dashoffset: var(--metric-offset);
+                }
+
+                .speed-metric-gauge.wphb-gauge--fill {
+                    stroke-dasharray: var(--metric-array);
+                }
+
+                circle {
+                    stroke: currentcolor;
+                    r: 38px;
+                }
+
+                text {
+                    &.metric__label {
+                        font-size: 7px;
+                        font-weight: bold;
+                    }
+
+                    &.metric__label,
+                    &.metric__value {
+                        letter-spacing: -0.25px;
+                    }
+
+                    &.metric__value {
+                        font-size: 6.5px;
+                        font-weight: 500;
+                        fill: #000000;
+                        opacity: 0;
+                        transition: opacity 0.2s;
+                    }
+                }
+            }
+
+            &.state--highlight {
+                .wphb-gauge__percentage { opacity: 0; }
+                .metric { opacity: .3; }
+                .metric--highlight {
+                    opacity: 1;
+                    stroke-width: 32px;
+                }
+                .metric--highlight .metric__value {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+
 
     #wphb-error-details {
         display: none;
@@ -18,7 +159,7 @@
     /**
      * Historic Field Data meta box.
      */
-    .box-performance-field-data {
+    .box-performance-metrics {
         .wphb-border-frame .table-header { background-color: #FAFAFA; }
 
         #first_contentful_paint,
@@ -86,7 +227,45 @@
     /**
      * Performance audits.
      */
-    .box-performance-audits-opportunities {
+    .box-performance-audits {
+        .wphb-audits-filter p.sui-description {
+            margin-bottom: 10px;
+        }
+
+        .sui-accordion:not(.sui-table):not(.sui-accordion-block):not(.sui-builder-fields) {
+            margin: 0 -30px 60px;
+            border-top: 0;
+            border-left: 0;
+            border-right: 0;
+
+            &:last-of-type {
+                margin-top: -20px;
+                border-bottom-width: 1px;
+            }
+
+            @include bp(tablet) { margin: 0 -20px 30px; }
+
+            .sui-accordion-item:last-child .sui-accordion-item-header,
+            .sui-accordion:not(.sui-table):not(.sui-accordion-block):not(.sui-builder-fields) .sui-accordion-item:last-child .sui-accordion-item-body {
+                border-bottom-right-radius: 0;
+                border-bottom-left-radius: 0;
+            }
+        }
+
+        .sui-accordion-header > div:nth-child(2) {
+            flex-basis: 62px;
+        }
+
+        .sui-accordion-header > div:nth-child(2),
+        .sui-accordion-item-header > div:nth-child(2) {
+            width: 62px;
+            flex-grow: 0;
+            display: flex;
+            justify-content: flex-start;
+        }
+    }
+
+    .box-performance-audits {
         #server-response-time {
             .sui-settings-box {
                 margin-top: 20px;
@@ -115,6 +294,19 @@
         }
     }
 
+    /**
+     * Diagnostics.
+     */
+    .box-performance-audits {
+        #largest-contentful-paint-element,
+        #layout-shift-elements {
+            .sui-accordion-item-body .sui-box-body table th:nth-child(2) { width: 200px }
+            .sui-code-snippet {
+                tab-size: 0;
+            }
+        }
+    }
+
     .sui-actions-right .sui-tooltip {
         margin-right: 10px;
     }
@@ -136,6 +328,8 @@
             text-align: left !important;
         }
     }
+
+    #duplicated-javascript .sui-accordion-item-body .sui-box-body table th:last-of-type { width: 130px; }
 
     .sui-accordion .sui-accordion-item-header .sui-accordion-open-indicator { margin-left: 30px !important; }
 }

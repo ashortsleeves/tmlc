@@ -5,6 +5,87 @@ Change Log:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 
+4.3.5
+----------------------------------------------------------------------
+- Feature: Backup comments
+- Bug: Save Changes button doesn't save storage limit
+- Bug: Only one destination is displayed under "Last backup destination"
+- Bug: Pressing Esc doesn't close modals
+- Improvement: DB level dynamic scaling
+- Improvement: Increase file listing success rate
+- Improvement: Compatibility with the WP Hide & Security Enhancer plugin
+- Improvement: Option to clear all global file exclusions at once
+- Improvement: "Load more" button for large log files
+- Improvement: Troubleshooting message with IPs to be whitelisted when backup can't start
+
+4.3.4
+----------------------------------------------------------------------
+- Feature: Snapshot Tutorials
+- Bug: Error when adding Google Drive destination
+- Bug: Changing Google Drive Directory ID has no effect
+- Bug: Validation error when editing a destination
+- Bug: Backup fails in filelist stage when multiple steps are required
+- Improvement: Schedule now stored on the API side only
+- Improvement: Include recommendations in error notifications
+- Improvement: New Global file exclusion UI
+- Improvement: Storage Space widget on Backups page
+- Improvement: Fallback to default time format when WP's time format doesn't include time
+- Improvement: Send email when backup export fails
+- Improvement: Skip What's New modal for fresh installs
+- Improvement: Modal for members with inactive membership
+
+4.3.3
+----------------------------------------------------------------------
+- Feature: FTP restoration
+- Feature: Send email upon backup creation
+- Bug: Backup size appears bigger due to manifest duplicates
+- Bug: Backup export issues due to manifest duplicates
+- Bug: Space issues above Destinations widget on WPMU DEV hosted sites
+- Bug: Translations issues
+- Improvement: Warnings when restoring with advanced-cache.php
+- Improvement: Warnings when restoring from Jetpack
+- Improvement: Update hub links
+- Improvement: Icon indicating last backup failure in Hub
+- Improvement: Re-enable the Backup Now button automatically
+- Improvement: Use wpmudev.com in the Google Drive app
+- Improvement: Reset storage limit when resetting settings
+- Improvement: Exclude Defender's log from backup
+
+4.3.2
+----------------------------------------------------------------------
+- Bug: Issues when DB results need an alias
+- Bug: Issues with DB backup when dblist needs multiple iterations
+- Improvement: Restore button is not clear for the user
+
+4.3.1
+----------------------------------------------------------------------
+- Feature: Make backup rotation configurable
+- Feature: Add support for DB views
+- Bug: Re-enable backup retention
+- Bug: Conflict with W3 Total Cache
+- Bug: Connected destinations persist after settings reset
+- Bug: Rotation issues
+- Bug: Failed backups can occupy storage space
+- Bug: Reset settings potentially failing altogether
+- Bug: Frontend issue with long destination names
+- Bug: Mobile navigation issues
+- Bug: Exclude Large-Size folders issues
+- Improvement: Enhance settings text to specify which backups are being removed
+- Improvement: Remove Hosting Settings subpage
+- Improvement: Resume restore after manually extracting the backup zip
+- Improvement: Schedule Module showing up twice when initially set up from the Hub
+- Improvement: jQuery Migrate warnings
+- Improvement: Add Destination in logs
+- Improvement: Inform better about the 50 days expiry policy
+- Improvement: Migration of all links to wpmudev.com
+
+4.3.0
+----------------------------------------------------------------------
+- New: Whitelabel WPMU DEV's brand
+- Improve: Flush output buffer after zipstream writes - To help with underpowered hosts
+- Fix: Wrong icon colors in Schedule modal
+- Fix: Design inconsistencies in onboarding modals
+
 4.2.1
 ----------------------------------------------------------------------
 - Fix: Inconsistencies with password protection of backup deletion
@@ -73,7 +154,7 @@ Change Log:
 4.0.2
 ----------------------------------------------------------------------
 - New: Make Hub work with v4
-- Fix: Issues with restoring backups when there are tables with the wrong db prefix 
+- Fix: Issues with restoring backups when there are tables with the wrong db prefix
 - Improvement: Enhance handling of large files in backups
 - Fix: Issues with masking login area when restoring backups
 - Fix: Issues with deleting failed backups
@@ -92,7 +173,7 @@ Change Log:
 - Improvement: Prevent backups getting stuck when files have been moved between filelist and zipstream stages
 - Fix: Can't delete all backups in one go
 - Fix: Issues with deleting failed backups
-- Fix: Previously deleted db table appears in subsequent export 
+- Fix: Previously deleted db table appears in subsequent export
 - Improvement: More detailed logging for fetch-filelist stage
 - Improvement: More detailed logging for file-zipstream stage
 - Fix: Issues with deleting backups on sites in subfolders
@@ -104,4 +185,4 @@ Change Log:
 - New: Incremental backups
 
 
-704644-1608571215-ai
+704644-1630851826-au

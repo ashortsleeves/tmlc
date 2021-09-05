@@ -5,14 +5,13 @@
  * @package Hummingbird
  *
  * @var array  $results            Current report.
- * @var array  $labels             List of labels for titles.
  * @var array  $human_results      Current report in readable format.
  * @var array  $expires            Current expiration value settings.
- * @var bool   $cf_active          CloudFlare status.
- * @var bool   $show_cf_notice     Show CloudFlare notice.
- * @var bool   $cf_server          Do we detect CloudFlare headers.
- * @var int    $cf_current         CloudFlare expiration value.
- * @var string $cf_disable_url     CloudFlare deactivate URL.
+ * @var bool   $cf_active          Cloudflare status.
+ * @var bool   $show_cf_notice     Show Cloudflare notice.
+ * @var bool   $cf_server          Do we detect Cloudflare headers.
+ * @var int    $cf_current         Cloudflare expiration value.
+ * @var string $cf_disable_url     Cloudflare deactivate URL.
  * @var string $server_type        Current server type.
  * @var array  $snippets           Code snippets for servers.
  * @var bool   $htaccess_written   File .htaccess is written.
@@ -25,6 +24,7 @@
  * @var bool   $different_expiry   Are different expiry values used?
  */
 
+use Hummingbird\Core\Module_Server;
 use Hummingbird\Core\Utils;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -47,18 +47,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 		<?php
 		if ( ! $cf_active && ! $show_cf_notice ) {
+			$servers = Module_Server::get_servers();
+
+			$servers['apache']    = 'Apache';
+			$servers['litespeed'] = 'Open LiteSpeed';
+
 			$this->admin_notices->show_inline(
 				sprintf( /* translators: %1$s: server type, %2$s: opening a tag, %3$s: closing a tag */
 					esc_html__( "We've automatically detected your server type is %1\$s. If this is incorrect, manually select your server type to generate the relevant rules and instructions. If you are using Cloudflare %2\$sconnect your account%3\$s to control your cache settings from here.", 'wphb' ),
-					ucfirst( esc_html( $server_type ) ),
-					'<a href="#" class="connect-cloudflare-link">',
+					esc_html( $servers[ $server_type ] ),
+					'<a href="#" data-modal-open="cloudflare-connect" data-modal-open-focus="cloudflare-email" data-modal-close-focus="wrap-wphb-browser-caching" data-modal-mask="false" data-esc-close="false">',
 					'</a>'
 				),
 				'grey'
 			);
 		} elseif ( ! $cf_active ) {
 			$this->admin_notices->show_inline(
-				esc_html__( 'We’ve detected you’re using Cloudflare which handles browser caching for you. You can control your CloudFlare settings from Hummingbird by connecting your account below.', 'wphb' ),
+				esc_html__( 'We’ve detected you’re using Cloudflare which handles browser caching for you. You can control your Cloudflare settings from Hummingbird by connecting your account below.', 'wphb' ),
 				'grey'
 			);
 		}
@@ -66,7 +71,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</div>
 </div>
 
-<div class="sui-box-settings-row">
+<script>
+	jQuery(document).ready( function() {
+		if ( window.WPHB_Admin ) {
+			window.WPHB_Admin.getModule( 'cloudflare' );
+		}
+	});
+</script>
+
+<?php
+// Only allow these setting on single sites and network admin, except when Cloudflare is enabled on subsites.
+if ( is_multisite() && ! is_main_site() && ! $cf_active ) {
+	return;
+}
+?>
+
+<div class="sui-box-settings-row" id="wphb-expiry-time-row">
 	<div class="sui-box-settings-col-1">
 		<span class="sui-settings-label"><?php esc_html_e( 'Expiry Time', 'wphb' ); ?></span>
 		<span class="sui-description">
@@ -76,6 +96,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="sui-box-settings-col-2">
 		<form method="post" id="expiry-settings">
 			<input type="hidden" class="hb-server-type" name="hb_server_type" value="<?php echo esc_attr( $server_type ); ?>">
+			<input type="hidden" id="hb_all_expiry" <?php checked( $all_expiry ); ?>>
 			<?php wp_nonce_field( 'wphb-caching' ); ?>
 			<div class="sui-side-tabs sui-tabs">
 				<?php if ( ! $cf_active && ! $cf_server ) : ?>
@@ -97,8 +118,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 								Utils::get_caching_frequencies_dropdown(
 									array(
 										'name'      => 'set-expiry-all',
-										'class'     => 'wphb-expiry-select',
-										'selected'  => $expires['css'],
+										'class'     => 'sui-select wphb-expiry-select',
+										'selected'  => $expires['CSS'],
 										'data-type' => 'all',
 									)
 								);
@@ -107,17 +128,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</div>
 						<div class="sui-tab-boxed <?php echo $different_expiry ? '' : 'active'; ?>">
 							<?php foreach ( $human_results as $cache_type => $result ) : ?>
+								<?php $label = strtolower( $cache_type ); ?>
 								<div class="sui-form-field sui-input-md">
 									<label class="sui-label">
-										<?php echo esc_html( $labels[ $cache_type ] ); ?>
+										<?php echo esc_html( $cache_type ); ?>
 									</label>
 									<?php
 									Utils::get_caching_frequencies_dropdown(
 										array(
-											'name'      => "set-expiry-{$cache_type}",
-											'class'     => 'wphb-expiry-select',
+											'name'      => "set-expiry-{$label}",
+											'class'     => 'sui-select wphb-expiry-select',
 											'selected'  => $expires[ $cache_type ],
-											'data-type' => $cache_type,
+											'data-type' => $label,
 										)
 									);
 									?>
@@ -128,7 +150,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<div class="wphb-expiry-changes sui-notice sui-notice-warning sui-margin-top" style="display: none" id="wphb-expiry-change-notice">
 							<div class="sui-notice-content">
 								<div class="sui-notice-message">
-									<i class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></i>
+									<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
 									<p>
 										<?php if ( $htaccess_writable && $already_enabled ) : ?>
 											<?php esc_html_e( 'You’ve made changes to your browser cache settings. You need to update your .htaccess or nginx.conf file with the newly generated code below.', 'wphb' ); ?>
@@ -159,7 +181,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							Utils::get_caching_frequencies_dropdown(
 								array(
 									'name'      => 'set-expiry-all',
-									'class'     => 'wphb-expiry-select',
+									'class'     => 'sui-select wphb-expiry-select',
 									'selected'  => $cf_current,
 									'data-type' => 'all',
 								),
@@ -171,7 +193,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<?php
 							if ( ! $cf_active && $cf_server ) {
 								$this->admin_notices->show_inline(
-									esc_html__( 'Note: You need to connect your CloudFlare account below for your selected expiry time to take effect.', 'wphb' ),
+									esc_html__( 'Note: You need to connect your Cloudflare account below for your selected expiry time to take effect.', 'wphb' ),
 									'grey'
 								);
 							} elseif ( $cf_active ) {
@@ -211,7 +233,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div data-panes>
 					<div class="active">
 						<p>
-							<?php esc_html_e( 'Hummingbird can automatically apply browser caching for Apache servers by writing your .htaccess file. Alternately, switch to Manual to apply these rules yourself.', 'wphb' ); ?>
+							<?php esc_html_e( 'Hummingbird can automatically apply browser caching for Apache/LiteSpeed servers by writing your .htaccess file. Alternately, switch to Manual to apply these rules yourself.', 'wphb' ); ?>
 						</p>
 
 						<?php
@@ -234,7 +256,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<?php elseif ( ! $already_enabled ) : ?>
 									<a href="<?php echo esc_url( $enable_link ); ?>" class="sui-button sui-button-blue activate-button">
 										<span class="sui-loading-text"><?php esc_html_e( 'Activate', 'wphb' ); ?></span>
-										<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+										<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 									</a>
 								<?php endif; ?>
 							</div>
@@ -256,7 +278,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							<p><strong>Troubleshooting</strong></p>
 							<p><?php esc_html_e( 'If adding the rules to your .htaccess doesn’t work and you have access to vhosts.conf or httpd.conf try to find the line that starts with <Directory> - add the code above into that section and save the file.', 'wphb' ); ?></p>
-							<p><?php esc_html_e( "If you don't know where those files are, or you aren't able to reload Apache, you would need to consult with your hosting provider or a system administrator who has access to change the configuration of your server", 'wphb' ); ?></p>
+							<p><?php esc_html_e( "If you don't know where those files are, or you aren't able to reload Apache/LiteSpeed, you would need to consult with your hosting provider or a system administrator who has access to change the configuration of your server", 'wphb' ); ?></p>
 							<p><?php Utils::still_having_trouble_link(); ?></p>
 						</div>
 					</div>
@@ -313,158 +335,97 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php endif; ?>
 		</div>
 
+		<div id="wphb-server-instructions-litespeed" class="wphb-server-instructions sui-hidden" data-server="litespeed">
+			<?php if ( $already_enabled ) : ?>
+				<?php $this->admin_notices->show_inline( esc_html__( 'Your browser caching is already enabled and working well', 'wphb' ) ); ?>
+			<?php elseif ( $htaccess_writable && $htaccess_written ) : ?>
+				<?php
+				$this->admin_notices->show_inline(
+					esc_html__( 'Automatic browser caching is active.', 'wphb' ),
+					'info'
+				);
+				?>
+			<?php else : ?>
+				<p>
+					<?php esc_html_e( 'Follow the steps below to add browser caching to your Open LiteSpeed server.', 'wphb' ); ?>
+				</p>
+
+				<ol class="wphb-listing wphb-listing-ordered">
+					<li>
+						<?php
+						printf( /* translators: %1$s - opening strong tag, %2$s - closing strong tag, %3$s: Link to TechNet */
+							__( 'Manually configure the %1$sCache-Control%2$s header for browser caching in your WebAdmin Console following the Open LiteSpeed guide <a href="%3$s" target="_blank">here</a>.', 'wphb' ),
+							'<strong>',
+							'</strong>',
+							'https://openlitespeed.org/kb/how-to-set-up-custom-headers/'
+						);
+						?>
+					</li>
+					<li>
+						<?php
+						printf( /* translators: %1$s - opening strong tag, %2$s - closing strong tag */
+							esc_html__( 'Set Expires by Type to %1$s31536000 (1 year)%2$s to meet Google’s recommended benchmark.', 'wphb' ),
+							'<strong>',
+							'</strong>'
+						);
+						?>
+					</li>
+				</ol>
+			<?php endif; ?>
+		</div>
+
 		<div id="wphb-server-instructions-cloudflare" class="wphb-server-instructions sui-hidden" data-server="cloudflare">
 			<span class="sui-description">
-				<?php esc_html_e( 'Hummingbird can control your CloudFlare Browser Cache settings from here. Simply add your CloudFlare API details and configure away.', 'wphb' ); ?>
+				<?php esc_html_e( 'Hummingbird can control your Cloudflare Browser Cache settings from here. Simply add your Cloudflare API details and configure away.', 'wphb' ); ?>
 			</span>
-			<?php
-			$cf_module    = Utils::get_module( 'cloudflare' );
-			$current_step = 'credentials';
-			$zones        = array();
-			if ( $cf_module->is_zone_selected() && $cf_module->is_connected() ) {
-				$current_step = 'final';
-			} elseif ( ! $cf_module->is_zone_selected() && $cf_module->is_connected() ) {
-				$current_step = 'zone';
-				$zones        = $cf_module->get_zones_list();
-				if ( is_wp_error( $zones ) ) {
-					$zones = array();
-				}
-			}
 
-			$cf_settings            = $cf_module->get_options();
-			$cloudflare_js_settings = array(
-				'currentStep' => $current_step,
-				'email'       => $cf_settings['email'],
-				'apiKey'      => $cf_settings['api_key'],
-				'zone'        => $cf_settings['zone'],
-				'zoneName'    => $cf_settings['zone_name'],
-				'plan'        => $cf_module->get_plan(),
-				'zones'       => $zones,
-			);
-
-			$cloudflare_js_settings = wp_json_encode( $cloudflare_js_settings );
-			?>
-
-			<script type="text/template" id="cloudflare-step-credentials">
-				<div class="cloudflare-step">
-					<form class="sui-border-frame" action="" method="post" id="cloudflare-credentials">
-						<div class="sui-form-field">
-							<label for="cloudflare-email" class="sui-label"><?php esc_html_e( 'Cloudflare account email', 'wphb' ); ?></label>
-							<input type="text" class="sui-form-control" autocomplete="off" value="{{ data.email }}" name="cloudflare-email" id="cloudflare-email" placeholder="<?php esc_attr_e( 'Enter email address', 'wphb' ); ?>">
-						</div>
-
-						<div class="sui-form-field">
-							<label for="cloudflare-api-key" class="sui-label"><?php esc_html_e( 'Cloudflare Global API Key', 'wphb' ); ?></label>
-							<input type="text" class="sui-form-control" autocomplete="off" value="{{ data.apiKey }}" name="cloudflare-api-key" id="cloudflare-api-key" placeholder="<?php esc_attr_e( 'Enter your 37 digit API key', 'wphb' ); ?>">
-						</div>
-
-						<div class="cloudflare-submit sui-margin-top sui-no-padding-bottom">
-							<a href="#cloudflare-how-to" class="cloudflare-how-to-title"><?php esc_html_e( 'Need help getting your API Key?', 'wphb' ); ?></a>
-							<input type="submit" class="sui-button sui-button-blue" value="<?php echo esc_attr( _x( 'Connect', 'Connect to Cloudflare button text', 'wphb' ) ); ?>">
-						</div>
-
-						<ol id="cloudflare-how-to" class="wphb-block-content-blue">
-							<li><?php printf( __( '<a target="_blank" href="%s">Log in</a> to your Cloudflare account.', 'wphb' ), 'https://dash.cloudflare.com/login' ); ?></li>
-							<li><?php esc_html_e( 'Go to My Profile.', 'wphb' ); ?></li>
-							<li><?php esc_html_e( 'Switch to API Tokens tab.', 'wphb' ); ?></li>
-							<li><?php esc_html_e( "Click 'View' button and copy the Global API Key identifier.", 'wphb' ); ?></li>
-						</ol>
-					</form>
-				</div>
-			</script>
-
-			<script type="text/template" id="cloudflare-step-zone">
-				<div class="cloudflare-step">
-					<form action="" method="post" id="cloudflare-zone">
-						<# if ( ! data.zones.length ) { #>
-							<p><?php esc_html_e( 'It appears you have no active zones available. Double check your domain has been added to Cloudflare and try again.', 'wphb' ); ?></p>
-							<p class="cloudflare-submit">
-								<a href="<?php echo esc_url( Utils::get_admin_menu_url( 'caching' ) ); ?>&reload=<?php echo time(); ?>#wphb-box-dashboard-cloudflare" class="sui-button sui-button-blue">
-									<?php esc_html_e( 'Re-Check', 'wphb' ); ?>
-								</a>
-							</p>
-						<# } else { #>
-							<# var zone = false; #>
-							<# var current_host = location.host; #>
-							<# for( var i = 0, len = data.zones.length; i < len; i++ ) { #>
-								<# if( current_host.indexOf(data.zones[i].label) !== -1 ) { #>
-									<# zone = true; #>
-									<# break; #>
-								<# } #>
-							<# } #>
-							<# if ( zone ) { #>
-								<div class="sui-border-frame" style="margin-top: 30px">
-									<label for="cloudflare-zone" class="sui-label">
-										<?php esc_html_e( 'Select the zone that matches your domain name', 'wphb' ); ?>
-									</label>
-									<select name="cloudflare-zone" id="cloudflare-zone">
-										<option value=""><?php esc_html_e( 'Select zone', 'wphb' ); ?></option>
-										<# for ( i in data.zones ) { #>
-											<option value="{{ data.zones[i].value }}">{{{ data.zones[i].label }}}</option>
-										<# } #>
-									</select>
-									<div class="cloudflare-submit">
-										<input type="submit" class="sui-button sui-button-blue" value="<?php esc_attr_e( 'Enable Cloudflare', 'wphb' ); ?>">
-									</div>
-								</div>
-							<# } else { #>
-								<?php
-								$this->admin_notices->show_inline(
-									esc_html__( 'CloudFlare is connected, but it appears you don’t have any active zones for this domain. Double check your domain has been added to Cloudflare and tap re-check when ready.', 'wphb' ),
-									'warning sui-margin-top',
-									sprintf( /* translators: %1$s - opening a tag, %2$s - </a> */
-										esc_html__( '%1$sRe-check%2$s', 'wphb' ),
-										'<button class="sui-button sui-button-icon-left" id="cf-recheck-zones"><span class="sui-loading-text"><i class="sui-icon-update" aria-hidden="true"></i>',
-										'</span><i class="sui-icon-loader sui-loading" aria-hidden="true"></i></button>'
-									)
-								);
-								?>
-							<# } #>
-						<# } #>
-					</form>
-
-					<a href="<?php echo esc_url( $cf_disable_url ); ?>" class="sui-button sui-button-ghost sui-margin-top">
-						<i class="sui-icon-power-on-off" aria-hidden="true"></i>
+			<?php if ( Utils::get_module( 'cloudflare' )->is_connected() && Utils::get_module( 'cloudflare' )->is_zone_selected() ) : ?>
+				<?php
+				$msg = esc_html__( 'Cloudflare is connected for this domain. Adjust your expiry settings and save your settings to update your Cloudflare cache settings.', 'wphb' );
+				$this->admin_notices->show_inline( $msg, 'info' );
+				?>
+				<div class="buttons buttons-on-left">
+					<a href="<?php echo esc_url( $cf_disable_url ); ?>" class="cloudflare-deactivate sui-button sui-button-ghost sui-button-icon-left">
+						<span class="sui-icon-power-on-off" aria-hidden="true"></span>
 						<?php esc_attr_e( 'Deactivate', 'wphb' ); ?>
 					</a>
-				</div>
-			</script>
-
-			<script type="text/template" id="cloudflare-step-final">
-				<div class="cloudflare-step sui-margin-top">
-					<?php
-					$this->admin_notices->show_inline(
-						esc_html__( 'Cloudflare is connected for this domain. Adjust your expiry settings and save your settings to update your Cloudflare cache settings.', 'wphb' ),
-						'info'
-					);
-					?>
-					<div class="buttons buttons-on-left">
-						<a href="<?php echo esc_url( $cf_disable_url ); ?>" class="cloudflare-deactivate sui-button sui-button-ghost sui-button-icon-left">
-							<i class="sui-icon-power-on-off" aria-hidden="true"></i>
-							<?php esc_attr_e( 'Deactivate', 'wphb' ); ?>
-						</a>
-						<span class="alignright sui-tooltip sui-tooltip-top-right" data-tooltip="<?php esc_attr_e( 'Clear all assets cached by CloudFlare', 'wphb' ); ?>">
+					<span class="alignright sui-tooltip sui-tooltip-top-right" data-tooltip="<?php esc_attr_e( 'Clear all assets cached by Cloudflare', 'wphb' ); ?>">
 							<input type="submit" class="cloudflare-clear-cache sui-button" value="<?php esc_attr_e( 'Clear Cache', 'wphb' ); ?>">
 						</span>
-						<span class="spinner cloudflare-spinner"></span>
-					</div>
+					<span class="spinner cloudflare-spinner"></span>
 				</div>
-			</script>
+			<?php elseif ( Utils::get_module( 'cloudflare' )->is_connected() && ! Utils::get_module( 'cloudflare' )->is_zone_selected() ) : ?>
+			<div class="sui-border-frame">
+				<p><?php esc_html_e( 'It appears you have no active zones available. Double check your domain has been added to Cloudflare and try again.', 'wphb' ); ?></p>
+				<a href="<?php echo esc_url( $cf_disable_url ); ?>" class="sui-button sui-button-ghost">
+					<span class="sui-icon-power-on-off" aria-hidden="true"></span>
+					<?php esc_attr_e( 'Deactivate', 'wphb' ); ?>
+				</a>
 
-			<div id="cloudflare-steps"></div>
+				<button type="button" class="sui-button" id="cf-recheck-zones" aria-live="polite">
+					<span class="sui-button-text-default">
+						<span class="sui-icon-update" aria-hidden="true"></span>
+						<?php esc_html_e( 'Re-check', 'wphb' ); ?>
+					</span>
+					<span class="sui-button-text-onload">
+						<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
+						<?php esc_html_e( 'Re-checking...', 'wphb' ); ?>
+					</span>
+				</button>
+			</div>
+			<?php else : ?>
+				<p>
+					<button class="sui-button"
+						aria-label="<?php esc_attr_e( 'Connect', 'wphb' ); ?>"
+						data-modal-open="cloudflare-connect"
+						data-modal-open-focus="cloudflare-email"
+						data-modal-close-focus="wphb-box-integrations"
+						data-modal-mask="false"
+						data-esc-close="false"
+					><?php esc_html_e( 'Connect', 'wphb' ); ?></button>
+				</p>
+			<?php endif; ?>
 		</div>
 
 	</div><!-- end sui-box-settings-col-1 -->
-
-	<script>
-		jQuery(document).ready( function() {
-			window.WPHB_Admin.DashboardCloudFlare.init( <?php echo $cloudflare_js_settings; ?> );
-			<?php if ( $cf_active ) : ?>
-				if ( window.WPHB_Admin ) {
-					window.WPHB_Admin.getModule( 'cloudflare' );
-				}
-			<?php endif; ?>
-		});
-	</script>
 </div><!-- end row -->
-

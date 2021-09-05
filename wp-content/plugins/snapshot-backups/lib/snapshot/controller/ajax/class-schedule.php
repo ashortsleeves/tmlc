@@ -81,7 +81,7 @@ class Schedule extends Controller\Ajax {
 		wp_send_json_success(
 			array(
 				'api_response' => $response,
-				'schedule'     => Model\Schedule::get_schedule_info(),
+				'schedule'     => Model\Schedule::get_schedule_info( true ),
 			)
 		);
 	}

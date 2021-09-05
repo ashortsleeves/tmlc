@@ -87,12 +87,37 @@
 				var time_elapsed = ( Date.now() / 1000 - last_backup.timestamp ) / 60 ;
 				$(window).trigger('snapshot:toggle_cooldown', [time_elapsed]);
 
-				$('.snapshot-listed-backups .sui-table > tbody:last-child').html('');
+				var backups_table = $('.snapshot-listed-backups .sui-table');
+				backups_table.find('>tbody:last-child').html('');
 				data.backups.slice(0, 5).forEach(function (item) {
 					var row = $(item.row);
 					row.find('>td').slice(-5).remove();
+					row.find('>td:not(.mobile-row)').slice(1).remove();
 					row.find('.failed-icon-tooltip').addClass('sui-tooltip-top-left');
-					$('.snapshot-listed-backups .sui-table > tbody:last-child').append(row);
+					row.find('.sui-accordion-open-indicator').remove();
+
+					var first_td = row.find('>td').eq(0);
+					var destination = first_td.clone().empty().addClass('gray');
+					var destination_span = $('<span></span>');
+					destination_span.text(row.data('destination_text'));
+					var destination_tooltip = row.data('destination_tooltip');
+					if (destination_tooltip) {
+						destination_span.addClass('sui-tooltip sui-tooltip-left-mobile sui-tooltip-constrained');
+						//destination_span.css('--tooltip-width', '170px');
+						destination_span.attr('data-tooltip', destination_tooltip);
+					}
+					destination.append(destination_span).insertAfter(first_td);
+
+					var mobile_row = row.find('td.mobile-row');
+					mobile_row.find('>.sui-row').remove();
+					var col = $('<div class="sui-col"><div class="sui-table-item-title snapshot-mobile-title"></div></div>');
+					var destination_mobile_span = destination_span.clone();
+					destination_mobile_span.removeClass('sui-tooltip-left-mobile');
+					col.append($('<div class="sui-table-item-title gray"></div>').append(destination_mobile_span));
+					col.find('.snapshot-mobile-title').text(backups_table.find('>thead>tr>th').eq(1).text());
+					mobile_row.append($('<div class="sui-row"></div>').append(col));
+
+					backups_table.find('>tbody:last-child').append(row);
 					$('.snapshot-dashboard-backups > .sui-box-body:not(.api-error)').show();
 					$('.snapshot-dashboard-backups > .snapshot-listed-backups').show();
 					$('.snapshot-dashboard-backups > .sui-box-footer').attr('style', 'display: flex !important');

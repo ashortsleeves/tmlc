@@ -26,15 +26,10 @@ if ( ! class_exists( 'Hummingbird\\Core\\Modules\\Page_Cache' ) ) {
 		return;
 	}
 
-	include_once $plugin_path . 'core/class-utils.php';
-	include_once $plugin_path . 'core/class-module.php';
-	include_once $plugin_path . 'core/traits/trait-wpconfig.php';
-	include_once $plugin_path . 'core/modules/class-page-cache.php';
-
-	if ( ! method_exists( 'Hummingbird\\Core\\Modules\\Page_Cache', 'serve_cache' ) ) {
+	if ( ! file_exists( $plugin_path . 'core/cache.php' ) ) {
 		return;
 	}
 
 	define( 'WPHB_ADVANCED_CACHE', true );
-	\Hummingbird\Core\Modules\Page_Cache::serve_cache();
+	include_once $plugin_path . 'core/cache.php';
 }

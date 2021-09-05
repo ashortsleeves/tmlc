@@ -21,7 +21,7 @@
 
 				<div class="sui-box-header sui-flatten sui-content-center sui-spacing-top--60">
 					<button class="sui-button-icon sui-button-float--right" data-modal-close>
-						<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+						<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 						<span class="sui-screen-reader-text"><?php esc_html_e( 'Close this dialog.', 'snapshot' ); ?></span>
 					</button>
 					<h3 id="modal-notification-add-recipient-label" class="sui-box-title sui-lg"><?php esc_html_e( 'Add Recipient', 'snapshot' ); ?></h3>

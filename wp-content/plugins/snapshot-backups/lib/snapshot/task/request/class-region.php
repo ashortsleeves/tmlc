@@ -1,6 +1,6 @@
 <?php // phpcs:ignore
 /**
- * Get/Set region task.
+ * Get/Set creds task.
  *
  * @package snapshot
  */
@@ -10,7 +10,7 @@ namespace WPMUDEV\Snapshot4\Task\Request;
 use WPMUDEV\Snapshot4\Task;
 
 /**
- * Gets/sets region from/to the service task class.
+ * Gets/sets creds (region, storage limit) from/to the service task class.
  */
 class Region extends Task {
 
@@ -24,18 +24,18 @@ class Region extends Task {
 	);
 
 	/**
-	 * Validates region action.
+	 * Validates creds action.
 	 *
 	 * @param string $action Action coming from controller.
 	 *
 	 * @return string
 	 */
 	public static function validate_action( $action ) {
-		return ( 'get' === $action || 'set' === $action ) ? $action : null;
+		return ( 'get' === $action || 'set' === $action || 'set_storage' === $action ) ? $action : null;
 	}
 
 	/**
-	 * Get/Set region.
+	 * Get/Set creds.
 	 *
 	 * @param array $args Arguments coming from the ajax call.
 	 */
@@ -43,6 +43,7 @@ class Region extends Task {
 		$request_model = $args['request_model'];
 		$action        = $args['action'];
 		$region        = isset( $args['region'] ) ? $args['region'] : null;
+		$storage_limit = isset( $args['storage_limit'] ) ? $args['storage_limit'] : 30;
 
 		$request_model->set( 'action', $action );
 
@@ -50,13 +51,13 @@ class Region extends Task {
 			// site id *** have no region set yet.
 			$request_model->set( 'ok_codes', array( 404 ) );
 
-			$region = $request_model->get_region();
+			$result = $request_model->get_credsls();
 
 			if ( $request_model->add_errors( $this ) ) {
 				return false;
 			}
 
-			return $region;
+			return $result;
 		}
 
 		if ( 'set' === $action ) {
@@ -68,6 +69,17 @@ class Region extends Task {
 
 			$result = json_decode( wp_remote_retrieve_body( $response ), true );
 			return isset( $result['bu_region'] ) ? $result['bu_region'] : null;
+		}
+
+		if ( 'set_storage' === $action ) {
+			$response = $request_model->set_storage( $storage_limit );
+
+			if ( $request_model->add_errors( $this ) ) {
+				return false;
+			}
+
+			$result = json_decode( wp_remote_retrieve_body( $response ), true );
+			return isset( $result['rotation_frequency'] ) ? $result['rotation_frequency'] : null;
 		}
 
 	}

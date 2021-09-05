@@ -127,7 +127,7 @@ class Pro_AJAX {
 
 		$name = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
 
-		if( empty( $name ) ){
+		if ( empty( $name ) ) {
 			wp_send_json_error(
 				array(
 					'message' => __( 'Please, insert a valid name.', 'wphb' ),
@@ -180,7 +180,7 @@ class Pro_AJAX {
 		$module = sanitize_text_field( wp_unslash( $_POST['module'] ) );
 
 		// Get the data from ajax.
-		parse_str( $_POST['data'], $data );
+		parse_str( wp_unslash( $_POST['data'] ), $data );
 
 		$reports = Utils::get_module( $module );
 		$options = $reports->get_options();
@@ -283,7 +283,7 @@ class Pro_AJAX {
 					$notice = __( 'Your changes have been saved successfully. You will get an instant email notification if your website is down.', 'wphb' );
 				} else {
 					$notice = sprintf(
-					/* translators: %d number of minutes */
+						/* translators: %d number of minutes */
 						esc_html__( 'Your changes have been saved successfully. You will get an email notification if your website has been down for more than %d minutes.', 'wphb' ),
 						absint( $data['threshold'] )
 					);
@@ -293,12 +293,6 @@ class Pro_AJAX {
 				$data['report-frequency'] = '';
 				$data['report-day']       = '';
 			} elseif ( isset( $data['report-frequency'] ) ) {
-				$freq = array(
-					'1'  => __( 'day', 'wphb' ),
-					'7'  => __( 'week', 'wphb' ),
-					'30' => __( 'month', 'wphb' ),
-				);
-
 				$notice = esc_html__( 'Your changes have been saved.', 'wphb' );
 			}
 		} else {
@@ -309,8 +303,9 @@ class Pro_AJAX {
 		$is_pending_list = array();
 
 		$is_pending = false;
-		if ( is_array( $options[ $type ]['recipients'] ) ) {
-			$is_pending_list = @wp_list_pluck( $options[ $type ]['recipients'], 'is_pending' );
+		// Only for Uptime notifications.
+		if ( 'notifications' === $type && 'uptime' === $module && is_array( $options[ $type ]['recipients'] ) ) {
+			$is_pending_list = wp_list_pluck( $options[ $type ]['recipients'], 'is_pending' );
 			$is_pending      = in_array( true, $is_pending_list, true );
 		}
 

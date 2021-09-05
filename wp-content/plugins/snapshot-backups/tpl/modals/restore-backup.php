@@ -30,7 +30,7 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 						/>
 					</figure>
 					<button class="sui-button-icon sui-button-float--right" data-modal-close>
-						<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+						<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					</button>
 					<h3 class="sui-box-title sui-lg" id="modal-snapshot-restore-backup-title"><?php esc_html_e( 'Restore Backup' ); ?></h3>
 					<span id="modal-snapshot-restore-backup-description" class="sui-description"><?php esc_html_e( 'This is the default directory where your website will be restored to.' ); ?></span>
@@ -41,7 +41,7 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 					<div class="sui-form-field">
 						<label for="restore-backup-path" id="restore-backup-path-title" class="sui-label"><?php esc_html_e( 'Default directory', 'snapshot' ); ?></label>
 						<input class="sui-form-control" name="restore_rootpath" autocomplete="off" id="restore-backup-path" aria-labelledby="restore-backup-path-title" aria-describedby="restore-backup-path-description" disabled="disabled">
-						<i class="sui-icon-folder-open sui-md" aria-hidden="true"></i>
+						<span class="sui-icon-folder-open sui-md" aria-hidden="true"></span>
 
 						<div class="sui-block-content-center">
 							<button type="submit" class="sui-button sui-button-blue"><?php esc_html_e( 'Restore', 'snapshot' ); ?></button>

@@ -41,11 +41,11 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 				<div class="sui-box-body sui-lg sui-block-content-center">
 					<button class="sui-button <?php echo sanitize_html_class( $button_class ); ?>" onclick="jQuery(window).trigger('snapshot:install_dashboard', ['<?php echo esc_attr( $installed ); ?>'])">
 						<span class="sui-button-text-default">
-							<i class="sui-icon-wpmudev-logo" aria-hidden="true"></i>
+							<span class="sui-icon-wpmudev-logo" aria-hidden="true"></span>
 							<?php echo esc_html( $button ); ?>
 						</span>
 						<span class="sui-button-text-onload">
-							<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+							<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 							<?php echo esc_html( $button_loading ); ?>
 						</span>
 					</button>
@@ -70,7 +70,7 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 
 				<div class="sui-box-body sui-lg sui-block-content-center">
 					<a href="<?php echo esc_attr( network_admin_url() . 'admin.php?page=wpmudev' ); ?>" class="sui-button <?php echo sanitize_html_class( $button_class ); ?>">
-						<i class="sui-icon-wpmudev-logo" aria-hidden="true"></i><?php echo esc_html__( 'Login to the plugin', 'snapshot' ); ?>
+						<span class="sui-icon-wpmudev-logo" aria-hidden="true"></span><?php echo esc_html__( 'Login to the plugin', 'snapshot' ); ?>
 					</a>
 				</div>
 

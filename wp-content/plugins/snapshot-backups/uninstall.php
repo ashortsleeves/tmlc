@@ -25,6 +25,7 @@ if ( ! empty( get_site_option( 'snapshot_remove_on_uninstall' ) ) ) {
 	delete_site_option( 'snapshot_global_exclusions' );
 	delete_site_option( 'snapshot_remove_on_uninstall' );
 	delete_site_option( 'snapshot_email_settings' );
+	delete_site_option( 'snapshot_exclude_large' );
 
 	update_site_option( 'snapshot_activate_schedule', 0 );
 } else {
@@ -36,6 +37,7 @@ delete_site_option( 'snapshot_latest_backup' );
 delete_site_option( 'snapshot_running_backup' );
 delete_site_option( 'snapshot_running_backup_status' );
 delete_site_option( 'snapshot_manual_backup_trigger_time' );
+delete_site_option( 'snapshot_tutorials_slider_seen' );
 
 require_once trailingslashit( __DIR__ ) . 'lib/snapshot/helper/class-log.php';
 Log::remove_log_dir();

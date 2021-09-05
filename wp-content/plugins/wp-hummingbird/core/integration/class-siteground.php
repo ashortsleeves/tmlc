@@ -53,7 +53,6 @@ class SiteGround {
 	 */
 	private function sg_optimizer_active() {
 		if ( ! function_exists( 'is_plugin_active' ) ) {
-			/* @noinspection PhpIncludeInspection */
 			include_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 

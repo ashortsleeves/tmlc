@@ -6,7 +6,7 @@
 
 .sui-header .sui-actions-right {
     label,
-    .select-container {
+    .select2-container {
         margin-right: 10px;
     }
     label {
@@ -109,7 +109,7 @@
  */
 .wpmud .wrap-wphb-uptime .box-uptime-summary.sui-summary:not(.sui-rebranded):not(.sui-unbranded):not(.sui-summary-sm) {
     @if variable-exists(summary-image) {
-        @include background-2x("#{$image--path}/hb-graphic-uptime-up", 'png', 192px, 172px, 30px 100%);
+        @include background-2x("#{$image--path}/summary-graphic-uptime", 'png', 192px, 172px, 30px 100%);
     }
 
     @include media(max-width, md) {
@@ -321,17 +321,6 @@
 }
 
 @include bp(phone-large) {
-    .wpmud .select-container.uptime-data-range {
-        position: absolute;
-        top: 0;
-        right: 0;
-        margin-right: 0;
-    }
-
-    .wpmud .wrap-wphb-uptime .actions > .documentation-button {
-        margin-left: 0 !important;
-    }
-
     .wpmud .wrap-wphb-uptime .wphb-pills.green {
         position: absolute;
         top: 0;

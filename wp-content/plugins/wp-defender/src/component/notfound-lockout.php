@@ -62,6 +62,11 @@ class Notfound_Lockout extends Component {
 		//check if this hostname has googlebot or google.com
 		if ( preg_match( '/\.googlebot|google\.com$/i', $hostname ) ) {
 			$hosts = gethostbynamel( $hostname );
+
+			if ( ! is_array( $hosts ) ) {
+				return false;
+			}
+
 			//check if this match the oringal ip
 			foreach ( $hosts as $host ) {
 				if ( $ip === $host ) {
@@ -75,8 +80,12 @@ class Notfound_Lockout extends Component {
 
 	private function is_bing_ua( $user_agent = '' ) {
 		if ( empty( $user_agent ) ) {
-			$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : null;
+			if ( empty( $_SERVER['HTTP_USER_AGENT'] ) ) {
+				return false;
+			}
+			$user_agent = $_SERVER['HTTP_USER_AGENT'];
 		}
+
 		if ( function_exists( 'mb_strtolower' ) ) {
 			$user_agent = mb_strtolower( $user_agent, 'UTF-8' );
 		} else {
@@ -103,6 +112,11 @@ class Notfound_Lockout extends Component {
 		$hostname = gethostbyaddr( $ip );
 		if ( preg_match( '/\.msnbot|msn\.com$/i', $hostname ) ) {
 			$hosts = gethostbynamel( $hostname );
+
+			if ( ! is_array( $hosts ) ) {
+				return false;
+			}
+
 			//check if this match the oringal ip
 			foreach ( $hosts as $host ) {
 				if ( $ip === $host ) {
@@ -284,7 +298,6 @@ class Notfound_Lockout extends Component {
 		$model->date       = time();
 		$model->tried      = $uri;
 		$model->blog_id    = get_current_blog_id();
-
 		switch ( $scenario ) {
 			case self::SCENARIO_ERROR_404:
 				$model->type = Lockout_Log::ERROR_404;
@@ -295,14 +308,14 @@ class Notfound_Lockout extends Component {
 				$model->log  = sprintf( __( "Request for file %s which doesn't exist", 'wpdef' ), $uri );
 				break;
 			case self::SCENARIO_LOCKOUT_404:
+			default:
 				$model->type = Lockout_Log::LOCKOUT_404;
-				$model->log  = sprintf( __( 'Lockout occurred:  Too many 404 requests for %s', 'wpdef' ),
-					$uri );
+				$model->log  = sprintf( __( 'Lockout occurred:  Too many 404 requests for %s', 'wpdef' ), $uri );
 				break;
 		}
+		$model->save();
 		if ( $model->type === Lockout_Log::LOCKOUT_404 ) {
 			do_action( 'defender_notify', 'firewall-notification', $model );
 		}
-		$model->save();
 	}
 }

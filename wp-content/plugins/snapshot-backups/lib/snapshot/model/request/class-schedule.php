@@ -18,7 +18,6 @@ use WPMUDEV\Snapshot4\Helper\Log;
  */
 class Schedule extends Model\Request {
 	const DEFAULT_ERROR           = 'snapshot_schedule_service_unreachable';
-	const ERROR_EMPTY_SCHEDULE_ID = 'snapshot_empty_schedule_id';
 
 	/**
 	 * Schedule request endpoint
@@ -102,16 +101,7 @@ class Schedule extends Model\Request {
 				$method = 'get';
 				$data   = array();
 
-				$active_schedule = get_site_option( 'wp_snapshot_backup_schedule' );
-
-				if ( empty( $active_schedule['schedule_id'] ) ) {
-					$message        = __( 'Unable to get current schedule, schedule_id not saved in database', 'snapshot' );
-					$this->errors[] = array( self::ERROR_EMPTY_SCHEDULE_ID, $message );
-					Log::error( $message );
-					return;
-				}
-
-				$path .= '/' . $active_schedule['schedule_id'];
+				$path .= '/' . $schedule->get( 'schedule_id' );
 				// request: /site_id/schedules/schedule_id - GET.
 
 				break;
@@ -125,24 +115,20 @@ class Schedule extends Model\Request {
 			case 'update':
 				$method = 'put';
 
-				$active_schedule = get_site_option( 'wp_snapshot_backup_schedule' );
-
-				$path .= '/' . $active_schedule['schedule_id'];
+				$path .= '/' . $schedule->get( 'schedule_id' );
 				break;
 			case 'delete':
 				$method            = 'put';
 				$data['bu_status'] = 'inactive';
 
-				$active_schedule = get_site_option( 'wp_snapshot_backup_schedule' );
+				if ( 'null' === $data['bu_frequency_weekday'] ) {
+					$data['bu_frequency_weekday'] = null;
+				}
+				if ( 'null' === $data['bu_frequency_monthday'] ) {
+					$data['bu_frequency_monthday'] = null;
+				}
 
-				$data['bu_frequency']          = $active_schedule['bu_frequency'];
-				$data['bu_files']              = $active_schedule['bu_files'];
-				$data['bu_tables']             = $active_schedule['bu_tables'];
-				$data['bu_time']               = $active_schedule['bu_time'];
-				$data['bu_frequency_weekday']  = $active_schedule['bu_frequency_weekday'];
-				$data['bu_frequency_monthday'] = $active_schedule['bu_frequency_monthday'];
-
-				$path .= '/' . $active_schedule['schedule_id'];
+				$path .= '/' . $schedule->get( 'schedule_id' );
 				break;
 			case 'hard_delete':
 				$method = 'DELETE';

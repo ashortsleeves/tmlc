@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="sui-progress-block">
 					<div class="sui-progress">
 						<span class="sui-progress-icon" aria-hidden="true">
-							<i class="sui-icon-loader sui-loading"></i>
+							<span class="sui-icon-loader sui-loading"></span>
 						</span>
 						<div class="sui-progress-text">
 							<span>0%</span>
@@ -40,8 +40,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<span style="width: 0"></span>
 						</div>
 					</div>
-					<button class="sui-button-icon sui-tooltip" id="cancel-minification-check" type="button" data-modal-close="" data-tooltip="<?php esc_attr_e( 'Cancel Test', 'wphb' ); ?>">
-						<i class="sui-icon-close" aria-hidden="true"></i>
+					<button class="sui-button-icon sui-tooltip" id="cancel-minification-check" onclick="WPHB_Admin.minification.scanner.cancel()" type="button" data-modal-close="" data-tooltip="<?php esc_attr_e( 'Cancel Test', 'wphb' ); ?>">
+						<span class="sui-icon-close" aria-hidden="true"></span>
 					</button>
 				</div>
 

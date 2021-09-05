@@ -4,9 +4,11 @@
  *
  * @package Hummingbird
  *
+ * @var bool          $cdn_active        Asset optimization CDN status.
  * @var string        $deactivate_url    Deactivate URL.
  * @var bool|WP_Error $error             Error if present.
  * @var bool          $can_deactivate    Is deactivating page caching on subsites enabled.
+ * @var bool          $minify_active     Asset optimization status.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,7 +22,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	if ( is_wp_error( $error ) ) {
 		$this->admin_notices->show_inline( $error->get_error_message(), 'error' );
 	} else {
-		$this->admin_notices->show_inline( esc_html__( 'Page caching is currently active.', 'wphb' ) );
+		$notice = esc_html__( 'Page caching is currently active.', 'wphb' );
+		if ( $minify_active && $cdn_active ) {
+			$notice = esc_html__( 'Page caching is currently active. You are storing your assets on the CDN in the Asset Optimization module. Hummingbird will automatically purge your cache when assets on the CDN expire (after every two months).', 'wphb' );
+		}
+
+		$this->admin_notices->show_inline( $notice );
 	}
 	?>
 </div><!-- end row -->
@@ -55,7 +62,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 		<div class="sui-box-settings-col-2">
 			<a href="<?php echo esc_url( $deactivate_url ); ?>" class="sui-button sui-button-ghost sui-button-icon-left" onclick="WPHB_Admin.Tracking.disableFeature( 'Page Caching' )">
-				<i class="sui-icon-power-on-off" aria-hidden="true"></i>
+				<span class="sui-icon-power-on-off" aria-hidden="true"></span>
 				<?php esc_html_e( 'Deactivate', 'wphb' ); ?>
 			</a>
 			<span class="sui-description">

@@ -25,6 +25,15 @@ class Login_Duration extends Component {
 	}
 
 	/**
+	 * @param string|int $duration
+	 *
+	 * @return bool
+	 */
+	private function is_incorect_duration( $duration ) {
+		return ( ! is_numeric( $duration ) || 0 >= (int) $duration );
+	}
+
+	/**
 	 * Here is the code for processing, if the return is true, we add it to resolve list, WP_Error if any error
 	 *
 	 * @return bool|\WP_Error
@@ -32,7 +41,7 @@ class Login_Duration extends Component {
 	public function process() {
 		$duration = HTTP::post( 'duration' );
 
-		if ( ! is_numeric( $duration ) || 0 >= intval( $duration ) ) {
+		if ( $this->is_incorect_duration( $duration ) ) {
 			return new WP_Error(
 				'defender_invalid_duration',
 				__( 'Duration can only be a number and greater than 0', 'wpdef' )
@@ -52,16 +61,18 @@ class Login_Duration extends Component {
 	}
 
 	/**
-	 * Set Login_Duration::resolved to true to indicate that the issue has been resolve
+	 * Set $duration as resolved if value > 0 otherwise revert value
 	 *
 	 * @return void
 	 */
 	public function shield_up() {
-		$this->resolved = true;
-
-		if ( get_site_option( "defender_security_tweeks_{$this->slug}" ) ) {
-			add_filter( 'auth_cookie_expiration', [ $this, 'cookie_duration' ], 10, 3 );
+		$duration = get_site_option( "defender_security_tweeks_{$this->slug}" );
+		if ( empty( $duration ) || $this->is_incorect_duration( $duration ) ) {
+			return $this->revert();
 		}
+		$this->resolved = true;
+		add_filter( 'auth_cookie_expiration', [ $this, 'cookie_duration' ], 10, 3 );
+		//Todo: need hook 'login_message'?
 	}
 
 	/**
@@ -76,7 +87,7 @@ class Login_Duration extends Component {
 	public function cookie_duration( $duration, $user_id, $remember ) {
 		$saved_duration = $this->get_duration( true );
 
-		// When remember is set or saved_duration is greater than 2 days, return sevaed_duration.
+		// When remember is set or saved_duration is smaller than 2 days, return saved_duration.
 		if ( $remember || 2 > $saved_duration ) {
 			return $saved_duration;
 		}
@@ -95,11 +106,13 @@ class Login_Duration extends Component {
 	/**
 	 * Get duration in days or seconds. Returns in seconds on passing true
 	 *
+	 * @param bool $in_seconds
+	 *
 	 * @return int
 	 */
 	private function get_duration( $in_seconds = false ) {
 		$duration = apply_filters( "defender_security_tweaks_{$this->slug}_get_duration",
-			get_site_option( "defender_security_tweeks_{$this->slug}" ) );
+			get_site_option( "defender_security_tweeks_{$this->slug}" ), $in_seconds );
 
 		if ( ! $in_seconds ) {
 			return $duration;

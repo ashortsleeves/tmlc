@@ -5,6 +5,7 @@ namespace WP_Defender\Controller;
 use Calotes\Component\Request;
 use Calotes\Component\Response;
 use WP_Defender\Component\Blacklist_Lockout;
+use WP_Defender\Component\Config\Config_Hub_Helper;
 use WP_Defender\Controller2;
 use WP_Defender\Model\Setting\Notfound_Lockout;
 use WP_Defender\Traits\IP;
@@ -57,11 +58,12 @@ class Nf_Lockout extends Controller2 {
 	 */
 	public function save_settings( Request $request ) {
 		$data        = $request->get_data( $this->request_filter_rules() );
-		$old_enabled = boolval( $this->model->enabled );
+		$old_enabled = (bool) $this->model->enabled;
 
 		$this->model->import( $data );
 		if ( $this->model->validate() ) {
 			$this->model->save();
+			Config_Hub_Helper::set_clear_active_flag();
 
 			return new Response( true, array_merge( [
 				'message' => $this->get_update_message( $data, $old_enabled ),
@@ -74,7 +76,7 @@ class Nf_Lockout extends Controller2 {
 	}
 
 	/**
-	 * All the variables that we will show on frontend, both in the main page, or dashboard widget
+	 * All the variables that we will show on frontend, both in the main page, or dashboard widget.
 	 *
 	 * @return array
 	 */
@@ -85,13 +87,9 @@ class Nf_Lockout extends Controller2 {
 	}
 
 	/**
-	 * Export the data of this module, we will use this for export to HUB, create a preset etc
-	 *
-	 * @return array
+	 * Export the data of this module, we will use this for export to HUB, create a preset etc.
 	 */
-	public function to_array() {
-		// TODO: Implement to_array() method.
-	}
+	public function to_array() {}
 
 	private function adapt_data( $data ) {
 		$adapted_data = array();
@@ -111,9 +109,7 @@ class Nf_Lockout extends Controller2 {
 			$adapted_data['duration_unit'] = $data['detect_404_lockout_duration_unit'];
 		}
 		if ( isset( $data['detect_404_lockout_ban'] ) ) {
-			$adapted_data['lockout_type'] = $data['detect_404_lockout_ban'] || 'permanent' === $data['detect_404_lockout_ban']
-				? 'permanent'
-				: 'timeframe';
+			$adapted_data['lockout_type'] = 'permanent' === $data['detect_404_lockout_ban'] ? 'permanent' : 'timeframe';
 		}
 		if ( isset( $data['detect_404_blacklist'] ) ) {
 			$adapted_data['blacklist'] = $data['detect_404_blacklist'];
@@ -132,11 +128,10 @@ class Nf_Lockout extends Controller2 {
 	}
 
 	/**
-	 * Import the data of other source into this, it can be when HUB trigger the import, or user apply a preset
+	 * Import the data of other source into this, it can be when HUB trigger the import, or user apply a preset.
+	 * @param array $data
 	 *
-	 * @param $data array
-	 *
-	 * @return boolean
+	 * @return mixed
 	 */
 	public function import_data( $data ) {
 		if ( ! empty( $data ) ) {
@@ -154,22 +149,14 @@ class Nf_Lockout extends Controller2 {
 	}
 
 	/**
-	 * Remove all settings, configs generated in this container runtime
-	 *
-	 * @return mixed
+	 * Remove all settings, configs generated in this container runtime.
 	 */
-	public function remove_settings() {
-		// TODO: Implement remove_settings() method.
-	}
+	public function remove_settings() {}
 
 	/**
-	 * Remove all data
-	 *
-	 * @return mixed
+	 * Remove all data.
 	 */
-	public function remove_data() {
-		// TODO: Implement remove_data() method.
-	}
+	public function remove_data() {}
 
 	/**
 	 * @return array
@@ -238,7 +225,7 @@ class Nf_Lockout extends Controller2 {
 	 * @return string
 	 */
 	private function get_update_message( $data, $old_data ) {
-		$new_data = boolval( $data['enabled'] );
+		$new_data = (bool) $data['enabled'];
 
 		// If old data and new data is matched, then it is not activated or deactivated.
 		if ( $old_data === $new_data ) {
@@ -251,5 +238,4 @@ class Nf_Lockout extends Controller2 {
 
 		return __( '404 Detection has been deactivated.', 'wpdef' );
 	}
-
 }

@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<!-- Loading State Content -->
 		<span class="sui-button-text-onload">
-			<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+			<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 			<?php esc_html_e( 'Saving Settings', 'wphb' ); ?>
 		</span>
 	</button>

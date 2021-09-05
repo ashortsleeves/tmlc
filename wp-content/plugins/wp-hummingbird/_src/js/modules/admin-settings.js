@@ -1,7 +1,7 @@
-/* global wphb */
 /* global WPHB_Admin */
 
 import Fetcher from '../utils/fetcher';
+import { getLink } from '../utils/helpers';
 
 ( function ( $ ) {
 	'use strict';
@@ -14,7 +14,7 @@ import Fetcher from '../utils/fetcher';
 			const wrap = body.find( '.wrap-wphb-settings' );
 
 			// Save settings
-			body.on( 'click', 'button.sui-button-blue', function( e ) {
+			$( '.sui-box-footer' ).on( 'click', 'button.sui-button-blue', function( e ) {
 				e.preventDefault();
 				const form_data = body.find( '.settings-frm' ).serialize();
 
@@ -156,6 +156,15 @@ import Fetcher from '../utils/fetcher';
 				Fetcher.settings.exprotSettings();
 			} );
 
+			/**
+			 * Show/hide options for admin bar cache control.
+			 *
+			 * @since 3.0.1
+			 */
+			$( 'input[id="control"]' ).on( 'change', function () {
+				$( '.cache-control-options' ).toggle();
+			} );
+
 			return this;
 		},
 
@@ -167,7 +176,7 @@ import Fetcher from '../utils/fetcher';
 		confirmReset: () => {
 			Fetcher.common.call( 'wphb_reset_settings' ).then( () => {
 				Fetcher.common.call( 'wphb_redis_disconnect' );
-				window.location.href = wphb.urls.resetSettings;
+				window.location.href = getLink( 'resetSettings' );
 			} );
 		},
 	};

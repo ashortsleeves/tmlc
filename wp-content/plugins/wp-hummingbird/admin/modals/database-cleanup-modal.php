@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="sui-box">
 			<div class="sui-box-header sui-flatten sui-content-center sui-spacing-top--60">
 				<button class="sui-button-icon sui-button-float--right" id="dialog-close-div" data-modal-close="">
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text"><?php esc_attr_e( 'Close this dialog window', 'wphb' ); ?></span>
 				</button>
 
@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php esc_html_e( 'Cancel', 'wphb' ); ?>
 				</button>
 				<button class="sui-button sui-button-ghost sui-button-red" onclick="WPHB_Admin.advanced.confirmDelete( jQuery(this).attr('data-type') )" type="button">
-					<i class="sui-icon-trash" aria-hidden="true"></i>
+					<span class="sui-icon-trash" aria-hidden="true"></span>
 					<?php esc_html_e( 'Delete entries', 'wphb' ); ?>
 				</button>
 			</div>

@@ -1,6 +1,1095 @@
 /**
  * Page: Backups.
  */
+var $ = jQuery;
+/**
+ * Helper collections.
+ */
+const Helper = {
+
+	/**
+	 * Checks if provided string is empty.
+	 *
+	 * @param {string} label
+	 * @returns {boolean}
+	 */
+	isEmpty: function (label) {
+		return ('' === label || null === label || 'undefined' === label ) ? true : false;
+	},
+
+	/**
+	 * Checks if the provided data is pure JS object.
+	 *
+	 * @param {*} obj
+	 * @returns {boolean}
+	 */
+	isObject: function (obj) {
+		if (null === obj || 'undefined' === typeof obj) {
+			return false;
+		}
+
+		if ('object' === typeof obj && 'Object' === obj.constructor.name) {
+			return true;
+		}
+
+		return false;
+	},
+
+	/**
+	 * Convert pure Object to FormData
+	 *
+	 * @param {Object} obj
+	 * @returns {FormData}
+	 */
+	objToFormData: function (obj) {
+		if (this.isObject(obj)) {
+			let formData = new FormData();
+			for (const key in obj) {
+				formData.append(key, obj[key]);
+			}
+			return formData;
+		}
+
+		return obj;
+	},
+
+	/**
+	 * Appends the query strings to the url.
+	 *
+	 * @param {string} url
+	 * @param {*} args
+	 *
+	 * @returns {string}
+	 */
+	buildUrl: function(url, args) {
+		if (this.isEmpty(url)) {
+			return '';
+		}
+
+		let params = new URLSearchParams();
+
+		for (let key in args) {
+			if (!this.isEmpty(args[key])) {
+				params.set(key, args[key]);
+			}
+		}
+
+		return `${url}?${params.toString()}`
+	},
+
+	/**
+	 * Resolve or Reject the promise.
+	 *
+	 * @returns {Promise}
+	 */
+	 deferred: function () {
+		let res,
+			rej,
+			p = new Promise((a,b) => (res = a, rej = b));
+
+		p.resolve = res;
+		p.reject = rej;
+		return p;
+	},
+
+	/**
+	 * Sends the AJAX request.
+	 *
+	 * @param {Object} data
+	 *
+	 * @returns {Promise}
+	 */
+	request: function(data) {
+		let method = 'POST';
+		if ('method' in data && 'GET' === data.method) {
+			method = 'GET';
+		}
+		delete data['method'];
+
+		let args = {
+			credentials: 'same-origin',
+			method
+		};
+
+		let ajaxUrl = SnapshotAjax.ajaxurl;
+		if ('GET' === method) {
+			ajaxUrl = this.buildUrl(ajaxUrl, data);
+		} else {
+			data = this.objToFormData(data);
+			args.body = data;
+		}
+
+		return fetch(ajaxUrl, args);
+	},
+
+	/**
+	 * Trigger the defined event.
+	 *
+	 * @param {string} event Name of the event.
+	 * @param {*} els        List of elements|element.
+	 */
+	trigger: (event, els) => {
+		if ( ! els || Helper.isEmpty(event) || els.length === 0 ) {
+			return;
+		}
+
+		if ( els.length > 1 ) {
+			els.forEach((el) => {
+				el.dispatchEvent(new Event(event));
+			});
+		} else {
+			els.dispatchEvent(new Event(event));
+		}
+	},
+};
+
+/**
+ * UI object.
+ */
+const UI = {
+	/**
+	 * Snapshot backups page tabs.
+	 */
+	tabs: {
+		backups: ['.snapshot-list-backups', '.snapshot-vertical-backups'],
+		logs: ['.snapshot-logs', '.snapshot-vertical-logs'],
+		settings: ['.snapshot-backups-settings', '.snapshot-vertical-settings'],
+		notifications: ['.snapshot-notifications', '.snapshot-vertical-notifications']
+	},
+
+	/**
+	 * Switch the tab
+	 * @param {string} tab Id of the tab to switch to.
+	 */
+	switchTab: function(tab) {
+		if (Helper.isEmpty(tab)) {
+			return;
+		}
+
+		const $navTab = document.querySelector(this.tabs[tab][1]);
+		const $tabEl  = document.querySelector(this.tabs[tab][0]);
+
+		for (let name in this.tabs) {
+			if (tab === name) {
+				$navTab.classList.add('current');
+				$tabEl.style.display = 'block';
+			} else {
+				document.querySelector(this.tabs[name][0]).style.display = 'none';
+				document.querySelector(this.tabs[name][1]).classList.remove('current');
+			}
+		}
+	},
+
+	/**
+	 * Hide errors.
+	 *
+	 * @param {string} selector
+	 */
+	hideErrors: function (selector) {
+		const $els = document.querySelectorAll(selector);
+
+		if ($els.length > 0) {
+			$els.forEach(($el) => {
+				if ('block' === $el.style.display) {
+					$el.style.display = 'none';
+				}
+			});
+		}
+	},
+
+	/**
+	 * Display the notice.
+	 *
+	 * @param {*} args
+	 */
+	displayNotice: function (args) {
+		if (!'message' in args || Helper.isEmpty(args.message)) {
+			// Message must be set and mustn't be empty.
+			return;
+		}
+
+		let icon_class = '';
+
+		switch (args.type) {
+			case 'success':
+				icon_class = 'check-tick';
+				break;
+
+			case 'error':
+			case 'warning':
+				icon_class = 'warning-alert';
+				break;
+
+			case 'info':
+			default:
+				icon_class = 'info';
+				break;
+		}
+
+		const options = {
+			icon: icon_class,
+			type: args.type
+		};
+
+		if (args.dismissible) {
+			options.dismiss = {show: true};
+		}
+
+		if (args.autoclose) {
+			options.autoclose = {timeout: args.autoclose};
+		} else {
+			options.autoclose = {show: false};
+		}
+
+		const $suiHeader    = document.querySelector('.sui-header');
+		const noticeId     = 'snapshot-notice-' + Math.random().toString(36).substr(2,9);
+		let $noticesWrapper = document.querySelector('.sui-floating-notices');
+		let $notice         = document.createElement('div');
+
+		if (!$noticesWrapper) {
+			$noticesWrapper = document.createElement('div');
+			$noticesWrapper.setAttribute('class', 'sui-floating-notices');
+		}
+		$suiHeader.insertBefore($noticesWrapper, $suiHeader.childNodes[0]);
+
+		$notice.setAttribute('id', noticeId);
+		$notice.setAttribute('role', 'alert');
+		$notice.setAttribute('aria-live', 'assertive');
+		$notice.setAttribute('class', 'sui-notice');
+
+		$noticesWrapper.appendChild($notice);
+
+		const noticeContent = `<p>${args.message}</p>`;
+		SUI.openNotice(noticeId, noticeContent, options);
+	},
+
+	/**
+	 * Initialize the select2 dropdown for normal "Select"
+	 *
+	 * @param {HTMLSelectElement} $el
+	 */
+	initSelect2: function ($el) {
+		if ('nodeName' in $el && 'select' !== $el.nodeName.toLowerCase() ) {
+			return;
+		}
+
+		SUI.select.init(jQuery($el));
+
+		// Add "onchange" event to the "select"
+		$el.onchange = (e) => {
+			Log.filter(e);
+		};
+	},
+
+	/**
+	 * Attach 'click' event to all the dynamically appended .log-row
+	 *
+	 * @param {Event} event Click event.
+	 */
+	tr_click: function(event) {
+		let el = event.target;
+
+		if (el.classList.contains('log-row') || el.parentNode.classList.contains('log-row')) {
+			if ( 'nodeName' in el && '' !== el.nodeName && 'tr' !== el.nodeName.toLowerCase() ) {
+				el = el.parentNode;
+				Log.single(el);
+			}
+		}
+	},
+
+	/**
+	 * Build backups table.
+	 *
+	 * @param {*} data
+	 */
+	build_backups_table: function(response) {
+		const $page_main = document.querySelector(Log.main_page);
+		const $backups   = $page_main.querySelector('.snapshot-listed-backups');
+		const $table     = $backups.querySelector('table');
+
+		if (response.backups !== undefined) {
+			const backups_number = response.backups.length;
+			const failed_number  = response.failed_backups || 0;
+
+			$table.querySelector('tbody').innerHTML = '';
+
+			const backups = response.backups;
+			if (backups && backups.length) {
+				const $tbody = document.querySelector('tbody');
+				backups.forEach((backup) => {
+					const row = backup.row;
+					$tbody.innerHTML += backup.row;
+					$tbody.innerHTML += backup.row_content;
+				});
+
+				const trs = $tbody.querySelectorAll('tr.snapshot-row');
+				trs.forEach((tr) => {
+					tr.classList.add('sui-accordion-item');
+					const nextTr = tr.nextElementSibling;
+					nextTr.querySelector('.row-current-schedule').querySelector('.sui-loading').style.display = 'none';
+					nextTr.querySelector('.open-edit-schedule').style.display = 'block';
+					nextTr.querySelector('span.schedule').textContent = document.querySelector('.snapshot-schedule-frequency').textContent;
+					const openEditSchedule = nextTr.querySelector('.open-edit-schedule');
+					openEditSchedule.onclick = (e) => {
+						e.preventDefault();
+						SUI.openModal('modal-snapshot-edit-schedule', e.target);
+					}
+				});
+			}
+		}
+	}
+};
+
+/**
+ * Log
+ */
+const Log = {
+	/**
+	 * @var {boolean}
+	 */
+	processing: false,
+
+	/**
+	 * @var {string}
+	 */
+	main_page: '.snapshot-page-main',
+
+	/**
+	 * @var {string}
+	 */
+	logs_list: '.logs-list',
+
+	/**
+	 * Checks if logs are loaded or not.
+	 *
+	 * @returns {boolean}
+	 */
+	isListReady: function() {
+		const mainPage = document.querySelector(this.main_page);
+		return ('1' === mainPage.querySelector(this.logs_list).getAttribute('data-logs-loaded')) ? true : false;
+	},
+
+	/**
+	 * Loads all log file.
+	 *
+	 * @param {HTMLButtonElement} el
+	 * @returns {Promise}
+	 */
+	all: function (el) {
+		if (this.processing) {
+			return;
+		}
+		this.processing = true;
+		let resp = Helper.deferred();
+
+		const $mainPage = document.querySelector(this.main_page);
+		const $logLists = $mainPage.querySelector(this.logs_list);
+
+		// Prepare data for AJAX request.
+		const data = {
+			action: 'snapshot-get_log_list',
+			_wpnonce: el.getAttribute('data-nonce'),
+			method: 'GET'
+		};
+
+		const request = Helper.request(data);
+		request
+			.then(response => response.json())
+			.then((result) => {
+				if (result.success) {
+					$logLists.setAttribute('data-logs-loaded', 1);
+					if ('' !== result.data.content) {
+						$logLists.querySelector('.log-rows').innerHTML = result.data.content;
+						$logLists.querySelector('.logs-loading').style.display = 'none';
+						$logLists.querySelector('.logs-not-empty').style.display = 'block';
+						resp.resolve();
+					} else {
+						UI.displayNotice({
+							type: 'warning',
+							message: snapshot_messages.no_logs_found,
+							autoclose: 3000
+						});
+						resp.reject();
+					}
+				} else {
+					UI.displayNotice({
+						type: 'warning',
+						message: snapshot_messages.failed_listing_logs,
+						autoclose: 3000
+					});
+					resp.reject(result.data);
+				}
+				el.removeAttribute('disabled');
+				this.processing = false;
+			})
+			.catch((err) => {
+				this.processing = false;
+				el.removeAttribute('disabled');
+				UI.displayNotice({
+					type: 'warning',
+					message: snapshot_messages.failed_listing_logs,
+					autoclose: 3000
+				});
+				resp.reject();
+			})
+
+		return resp;
+	},
+
+	/**
+	 * Loads the single log file.
+	 *
+	 * @param {*} el
+	 *
+	 * @returns {void}
+	 */
+	single: function (el) {
+		if (this.processing) {
+			return;
+		}
+
+		const backupId = el.getAttribute('data-backup-id');
+		if (Helper.isEmpty(backupId)) {
+			return;
+		}
+		this.processing = true;
+		const $mainPage = document.querySelector(this.main_page);
+		let $tableRow   = null;
+		if ( 'nodeName' in el && '' !== el.nodeName && 'tr' === el.nodeName.toLowerCase() ){
+			$tableRow = el;
+		} else {
+			$tableRow = $mainPage.querySelector(`tr[data-backup-id="${backupId}"]`);
+		}
+
+		if (!$tableRow) {
+			this.processing = false;
+			el.removeAttribute('disabled');
+			UI.displayNotice({
+				type: 'warning',
+				message: snapshot_messages.backup_log_not_found,
+				autoclose: 3000
+			});
+			return;
+		}
+		const trSibling = $tableRow.nextElementSibling;
+
+		const data = {
+			action: 'snapshot-get_backup_log',
+			_wpnonce: el.getAttribute('data-nonce'),
+			backup_id: backupId,
+			method: 'GET'
+		};
+
+		const backup = Helper.request(data);
+		backup
+			.then(response => response.json())
+			.then((result) => {
+				trSibling.querySelector('.snapshot-loading').style.display = 'none';
+				trSibling.querySelector('.snapshot-loaded').style.display = 'block';
+				if (result.success) {
+					$tableRow.setAttribute('data-append-log', 1);
+
+					// Hide all errors.
+					UI.hideErrors('.notice-error');
+					const $select = trSibling.querySelector('select');
+					if ($select) {
+						UI.initSelect2($select);
+					}
+					if ('items' in result.data.log) {
+						const items = result.data.log.items;
+
+						items.forEach((item) => {
+							const entry = `<div class="log-item log-level-${item.level}">
+								<div class="log-item__icon" aria-hidden="true"></div>
+								<div class="log-item__content">${item.message}</div>
+							</div>`;
+							trSibling.querySelector('.log-lists').innerHTML += entry;
+						});
+					}
+
+
+					// We need to set the pagination as well.
+					if ('pages' in result.data.log && result.data.log.pages) {
+						const $paginateLog = trSibling.querySelector('.paginate-log');
+						$paginateLog.parentNode.style.display = 'block'
+						$paginateLog.setAttribute('data-pages', result.data.log.pages);
+						$paginateLog.setAttribute('data-next', result.data.log.next_page);
+						$paginateLog.setAttribute('data-current', result.data.log.current_page);
+					} else if (!result.data.log.pages) {
+						trSibling.querySelector('.paginate-log').style.display = 'none';
+					}
+
+				} else {
+					let $noContent = null;
+					if ('no_content' === result.data.status ) {
+						$noContent = $mainPage.querySelector('.no-log-content');
+					} else {
+						$noContent = $mainPage.querySelector('.general-error');
+					}
+
+					$noContent.style.display = 'block';
+				}
+				el.removeAttribute('disabled');
+				this.processing = false;
+			})
+			.catch((err) => {
+				// Display the error message.
+				el.removeAttribute('disabled');
+				this.processing = false;
+			});
+
+	},
+
+	/**
+	 * Paginates the single log file.
+	 *
+	 * @param {HTMLButtonElement} el
+	 *
+	 * @returns {void}
+	 */
+	paginate: function(el) {
+		if (this.processing) {
+			return;
+		}
+
+		const page      = parseInt(el.getAttribute('data-current'));
+		const next      = parseInt(el.getAttribute('data-next'));
+		const pages     = parseInt(el.getAttribute('data-pages'));
+		const backupId  = el.getAttribute('data-backup-id');
+		const boxEl     = el.closest('.sui-box-body');
+
+		// We cannot proceed if we don't have "backup id".
+		if (Helper.isEmpty(backupId)) {
+			return;
+		}
+		// Do we need to proceed?
+		if (page > pages || next <= 0 || page === pages) {
+			el.parentNode.style.display = 'none';
+			return;
+		}
+
+		this.processing = true;
+		el.setAttribute('disabled', 'disabled');
+		el.classList.add('sui-button-onload');
+
+		const data = {
+			method: 'GET',
+			action: 'snapshot-paginate_log',
+			_wpnonce: el.getAttribute('data-nonce'),
+			offset: next,
+			backup_id: backupId
+		};
+
+		const request = Helper.request(data);
+		request
+			.then(response => response.json())
+			.then((result) => {
+				if (result.success) {
+
+					if ('items' in result.data.log) {
+						const items = result.data.log.items;
+
+						items.forEach((item) => {
+							const entry = `<div class="log-item log-level-${item.level}">
+								<div class="log-item__icon" aria-hidden="true"></div>
+								<div class="log-item__content">${item.message}</div>
+							</div>`;
+							boxEl.querySelector('.log-lists').innerHTML += entry;
+						});
+					}
+
+					if ('pages' in result.data.log && result.data.log.pages) {
+						el.setAttribute('data-current', result.data.log.current_page);
+						el.setAttribute('data-next', result.data.log.next_page);
+
+						if (parseInt(result.data.log.current_page) === parseInt(result.data.log.pages)) {
+							el.parentNode.style.display = 'none';
+						}
+					} else {
+						el.parentNode.style.display = 'none';
+					}
+
+				} else {
+					UI.displayNotice({
+						type: 'warning',
+						message: snapshot_messages.failed_listing_logs,
+						autoclose: 3000
+					});
+				}
+				this.processing = false;
+				el.removeAttribute('disabled');
+				el.classList.remove('sui-button-onload');
+			})
+			.catch((err) => {
+				UI.displayNotice({
+					type: 'warning',
+					message: snapshot_messages.failed_listing_logs,
+					autoclose: 3000
+				});
+				this.processing = false;
+				el.removeAttribute('disabled');
+				el.classList.remove('sui-button-onload');
+			});
+	},
+
+	/**
+	 * Filters the log entries.
+	 *
+	 * @param {HTMLSelectElement} e
+	 *
+	 * @returns {void}
+	 */
+	filter: function(e) {
+		if ('' === e.target.value) {
+			return;
+		}
+
+		const el         = e.target;
+		const value      = el.value;
+		const allErrors  = el.closest('td').querySelectorAll('.notice-error');
+		const allEntries = el.closest('td').querySelectorAll('.log-item');
+		const error      = el.closest('td').querySelector(`.no-${value}`);
+		let hasErrors    = [];
+
+		allEntries.forEach((entry) => {
+			if ('all' === value) {
+				allErrors.forEach((err) => { err.style.display = 'none' });
+				entry.style.display = 'block';
+			} else {
+				const sel   = `log-level-${value}`;
+				allErrors.forEach((err) => { err.style.display = 'none' });
+				if (entry.classList.contains(sel)) {
+					entry.style.display = 'block';
+					hasErrors.push(value);
+				} else {
+					entry.style.display = 'none';
+				}
+			}
+		});
+
+		if (hasErrors.length === 0) {
+			allErrors.forEach((err) => { err.style.display = 'none' });
+			if ('all' !== value) error.style.display = 'block';
+		}
+	}
+};
+
+/**
+ * Backup
+ */
+const Backup = {
+
+	/**
+	 * Initialize and register "click" listener
+	 *
+	 * @returns {void}
+	 */
+	init: function() {
+		const $mainPage = document.querySelector('.snapshot-page-main');
+		const _self     = this;
+		if ($mainPage) {
+			$mainPage.addEventListener('click', (e) => {
+				_self.click(e);
+			});
+		}
+	},
+
+	/**
+	 * Delegated click event.
+	 *
+	 * @param {Event} e
+	 *
+	 * @returns {void}
+	 */
+	click: function(e) {
+		let el = e.target;
+
+		if (el.classList.contains('view-log') || el.parentNode.classList.contains('view-log')) {
+			e.preventDefault();
+			if (el.parentNode.classList.contains('view-log')) {
+				el = el.parentNode;
+			}
+
+			const mainPage = document.querySelector(Log.main_page);
+			const backup   = el.getAttribute('data-backup-id');
+			el.setAttribute('disabled', 'disabled');
+
+			if (Log.isListReady()) {
+				const $tableRow = mainPage.querySelector(`tr[data-backup-id="${backup}"]`);
+				if (!$tableRow) {
+					Log.processing = false;
+					el.removeAttribute('disabled');
+					UI.displayNotice({
+						type: 'warning',
+						message: snapshot_messages.backup_log_not_found,
+						autoclose: 3000
+					});
+					return;
+				}
+				$tableRow.click();
+				// Switch to "logs" tab.
+				UI.switchTab('logs');
+				Log.single(el);
+			} else {
+				const lists = Log.all(el);
+				lists.then((result) => {
+					const $tableRow = mainPage.querySelector(`tr[data-backup-id="${backup}"]`);
+					if (!$tableRow) {
+						Log.processing = false;
+						UI.displayNotice({
+							type: 'warning',
+							message: snapshot_messages.backup_log_not_found,
+							autoclose: 3000
+						});
+						return;
+					}
+					$tableRow.click();
+					UI.switchTab('logs');
+					Log.single(el);
+					const logLists = mainPage.querySelectorAll(".log-row");
+					if (logLists.length) {
+						logLists.forEach((list) => {
+							list.onclick = UI.tr_click.bind(this);
+						});
+					}
+					Helper.trigger('click', logLists);
+				})
+				.catch((err) => {
+					Log.processing = false;
+					el.removeAttribute('disabled');
+					UI.displayNotice({
+						type: 'warning',
+						message: snapshot_messages.backup_log_not_found,
+						autoclose: 3000
+					});
+				});
+			}
+		}
+
+		if (el.classList.contains('paginate-log') || el.parentNode.classList.contains('paginate-log')) {
+			e.preventDefault();
+			if (el.parentNode.classList.contains('paginate-log')) {
+				el = el.parentNode;
+			}
+
+			const loadedBox = el.closest('.snapshot-loaded');
+			if (loadedBox) {
+				const filterLog = loadedBox.querySelector('.log-filter');
+				if ('all' !== filterLog.value) {
+					const all = filterLog.querySelector('option[value="all"]');
+					all.selected = true;
+					filterLog.dispatchEvent(new Event('change'));
+				}
+			}
+
+			/**
+			 * Paginate the log file.
+			 */
+			Log.paginate(el);
+		}
+	},
+
+	/**
+	 * Reload all backups.
+	 *
+	 * @param {String} nonce
+	 */
+	reload: function(nonce) {
+		const data = {
+			_wpnonce: nonce,
+			action: 'snapshot-list_backups',
+			force_refresh: '1',
+			method: 'POST'
+		};
+		const $main_page = document.querySelector(Log.main_page);
+		if ($main_page) {
+			$main_page.querySelector('.snapshot-listed-backups').style.display = 'none';
+			$main_page.querySelector('.snapshot-backup-list-loader').style.display = 'block';
+		}
+
+		const request = Helper.request(data);
+		request
+			.then(response => response.json())
+			.then((result) => {
+				$main_page.querySelector('.snapshot-backup-list-loader').style.display = 'none';
+				$main_page.querySelector('.snapshot-listed-backups').style.display = 'block';
+				UI.build_backups_table(result.data);
+			})
+			.catch((err) => {
+				console.log(err);
+			})
+	},
+};
+// Initialize the backup logs.
+Backup.init();
+
+const $main_page = document.querySelector('.snapshot-page-main');
+
+const submit_backup_comment_form = (e) => {
+	e.preventDefault();
+	const el = e.target;
+	const btn = el.querySelector('button[type=submit]');
+	const action = btn.getAttribute('data-action-type');  // add|edit actions.
+	const backupId = el.querySelector('#comment-backup-id').value;
+	let comment = el.querySelector('textarea').value;
+
+	if ( null === backupId || 'undefined' === backupId || '' === backupId ) {
+		el.closest('.sui-box-body').querySelector('#notice-no-backup-id').style.display = 'block';
+		return;
+	} else {
+		el.closest('.sui-box-body').querySelector('#notice-no-backup-id').style.display = 'none';
+	}
+
+	comment = comment.trim();
+	if ('' === comment || null === comment || 'undefined' === comment) {
+		comment = '';
+	}
+
+	// Show loading icon on button.
+	btn.classList.add('sui-button-onload');
+
+	const formData = new FormData();
+	formData.append('comment_type', action);
+	formData.append('description', comment);
+	formData.append('backup_id', backupId);
+	formData.append('action', 'snapshot-update_backup');
+	formData.append('_wpnonce', el.querySelector('#_wpnonce-snapshot_update_backup_comment').value);
+
+	const request = fetch( SnapshotAjax.ajaxurl, {
+		method: 'POST',
+		credentials: 'same-origin',
+		body: formData
+	})
+	request
+		.then(response => response.json())
+		.then((result) => {
+			Backup.reload(result.data.nonce);
+
+			if (result.success) {
+				btn.classList.remove('sui-button-onload');
+				SUI.closeModal();
+				let msg = null;
+				if ('edit' === action) {
+					msg = snapshot_messages.comment_updated;
+				} else if ('add' === action) {
+					msg = snapshot_messages.comment_added;
+				}
+				UI.displayNotice({
+					type: 'success',
+					message: msg,
+					dismissible: true
+				});
+			} else {
+				// UI.displayNotice({
+				// 	type: 'warning',
+				// 	message: ''
+				// })
+			}
+		})
+		.catch((err) => {
+			btn.classList.remove('sui-button-onload');
+			SUI.closeModal();
+			UI.displayNotice({
+				type: 'warning',
+				message: snapshot_messages.generic_error,
+				autoclose: 3000
+			});
+		});
+};
+
+
+const $backupForm = document.querySelector('#form-snapshot-edit-manual-backup-comment');
+if ( $backupForm ) {
+	// Add backup form 'submit' event listener.
+	$backupForm.addEventListener('submit', (e) => {
+		submit_backup_comment_form(e);
+	});
+}
+
+/**
+ * Binds the click event.
+ *
+ * @param {Event} e
+ *
+ * @returns
+ */
+const open_backup_comment_modal  = (e) => {
+	let el = e.target;
+
+	if (
+		el.classList.contains('open-edit-backup')
+		|| el.parentNode.classList.contains('open-edit-backup')
+	) {
+		e.preventDefault();
+
+		if (el.classList.contains('sui-icon-pencil') || el.classList.contains('snapshot-backup--content')) {
+			el = el.parentNode;
+		}
+
+		const type     = el.getAttribute('data-type');
+		const modal    = 'modal-snapshot-update-backup-comment';
+		const button   = document.querySelector(`#${modal}`).querySelector('button[type=submit]');
+		const comment  = el.getAttribute('data-tooltip');
+		const snapshot = el.closest('tr').getAttribute('data-backup_id');
+
+		if ('edit' === type) {
+			if (comment) {
+				document.querySelector(`#${modal}`).querySelector('#manual-backup-comment-modal').value = comment.trim();
+			}
+			button.querySelector('.sui-button-text-default').innerHTML = snapshot_messages.edit_comment_text;
+		} else if ('add' === type ) {
+			button.querySelector('.sui-button-text-default').innerHTML = snapshot_messages.add_comment_text;
+			document.querySelector(`#${modal}`).querySelector('#manual-backup-comment-modal').value = '';
+		}
+		document.querySelector(`#${modal}`).querySelector('#comment-backup-id').value = snapshot;
+		button.setAttribute('data-action-type', type);
+		if (button.classList.contains('sui-button-onload')) {
+			button.classList.remove('sui-button-onload');
+		}
+
+		SUI.openModal(modal, el);
+	}
+}
+
+let $textArea = null;
+let exclusions = null;
+if ($main_page) {
+	// Attach the 'click' event listener to the main page.
+	$main_page.addEventListener('click', open_backup_comment_modal);
+	$textArea = $main_page.querySelector('#snapshot-file-exclusions');
+}
+
+/**
+ * Dispatches an event.
+ *
+ * @param {*}      $el   Element where the events need to be dispatched.
+ * @param {string} event Event name.
+ */
+const trigger = ($el, event) => {
+	$el.dispatchEvent(new Event(event));
+}
+
+var cuClicked = false;
+/**
+ * Clears the exclusions list in bulk.
+ * @param {*} el
+ */
+const clear_exclusions = (el) => {
+	exclusions = $textArea.value;
+	$textArea.value = '';
+	trigger($textArea, 'change');
+}
+
+/**
+ * Restores the exclusions list when cleared in bulk.
+ * @param {*} el
+ */
+const undo_exclusions = (el) => {
+	$textArea.value = exclusions;
+	trigger($textArea, 'change');
+}
+
+if ($textArea && null !== $textArea) {
+	// Listen to the textarea change.
+	$textArea.addEventListener('change', (e) => {
+		const $wrap     = e.target.closest('.sui-multistrings-wrap');
+		const $lists    = $wrap.querySelector('.sui-multistrings-list');
+		const $desc     = $lists.nextElementSibling;
+		const $allLists = $lists.querySelectorAll('li');
+		const $clearUndo = $desc.querySelector('.snapshot-clear-undo');
+
+		if ($allLists && $allLists.length) {
+			if ($allLists.length > 1 && $allLists.length < 3) {
+				if(!cuClicked) {
+					$clearUndo.style.display = 'none';
+				} else {
+					$clearUndo.style.display = 'inline';
+				}
+			} else if ($allLists.length >= 3) {
+				$clearUndo.style.display = 'inline';
+			}
+		}
+		cuClicked = false;
+	});
+}
+
+const $custom_events = document.querySelectorAll('a[data-custom-event]');
+if ($custom_events) {
+	$custom_events.forEach( ($el) => {
+		$el.addEventListener('click', (evt) => {
+			evt.preventDefault();
+			let el = evt.target;
+			let nodename = '';
+			if ('nodeName' in el && '' !== el.nodeName ) {
+				nodename = el.nodeName.toLowerCase();
+			}
+
+			if ('strong' === nodename || 'span' === nodename) {
+				el = el.parentNode;
+			}
+			const action = el.getAttribute('data-custom-event');
+
+			if ('' !== action) {
+				cuClicked = true;
+			}
+			if ('clear-exclusions' === action) {
+				el.nextElementSibling.style.display = 'inline';
+				clear_exclusions(el);
+				el.style.display = 'none';
+			} else if ('undo-exclusions' === action) {
+				el.previousElementSibling.style.display = 'inline';
+				undo_exclusions(el);
+				el.style.display = 'none';
+			}
+		});
+	});
+}
+
+/**
+ * Handle file exclusions
+ *
+ * @param {Event} e
+ * @returns
+ */
+const handle_file_exclusions = (e) => {
+	const $el = e.target;
+	if (
+		$el.classList.contains('sui-button-close')
+		|| $el.parentNode.classList.contains('sui-button-close')
+	) {
+		e.preventDefault();
+		const elementToRemove = $el.closest('li');
+		const elementText     = elementToRemove.getAttribute('title');
+		const textAreaVal = $textArea.value;
+		const replaceable = elementText + "\n";
+		textAreaVal.replace( replaceable, '');
+		$textArea.value = textAreaVal;
+		trigger($textArea, 'change');
+		return;
+	}
+}
+
+if ($main_page) {
+	$main_page.addEventListener('click', (e) => {
+		handle_file_exclusions(e);
+	});
+}
+
+/**
+ * Display the "Clear exclusions" when "enter" is pressed.
+ */
+window.addEventListener('keyup', (e) => {
+	if ('key' in e && '' !== e.key && 'enter' === e.key.toLowerCase() ) {
+		const $lists    = $main_page.querySelector('.sui-multistrings-list');
+		const $allLists = $lists.querySelectorAll('li');
+
+		if ($lists && $allLists.length > 2) {
+			e.preventDefault();
+			trigger($textArea, 'change');
+		}
+	}
+});
+
 ;(function($) {
 
 	// Offset for continuous update of the running backup log, false - if don't need to update the log
@@ -12,16 +1101,18 @@
 	// Previous scroll position in log modal
 	var log_prev_scroll = 0;
 
+	var last_schedule_info = null;
+
 	/**
 	 * Tabs in Backups page. Array - [box selector, vertical selector, mobile nav selector].
 	 *
 	 * @type {Object}
 	 */
 	var navbar_tabs = {
-		'backups': ['.snapshot-list-backups', '.snapshot-vertical-backups', '#undefined-option-backups'],
-		'logs': ['.snapshot-logs', '.snapshot-vertical-logs', '#undefined-option-logs'],
-		'settings': ['.snapshot-backups-settings', '.snapshot-vertical-settings', '#undefined-option-settings'],
-		'notifications': ['.snapshot-notifications', '.snapshot-vertical-notifications', '#undefined-option-notifications']
+		'backups': ['.snapshot-list-backups', '.snapshot-vertical-backups'],
+		'logs': ['.snapshot-logs', '.snapshot-vertical-logs'],
+		'settings': ['.snapshot-backups-settings', '.snapshot-vertical-settings'],
+		'notifications': ['.snapshot-notifications', '.snapshot-vertical-notifications']
 	};
 
 	/**
@@ -43,24 +1134,66 @@
 				$('.snapshot-page-main').find(box_selector).hide();
 				$('.snapshot-page-main').find(vertical_selector).removeClass('current');
 			}
-
-			if (tab === 'logs') {
-				reload_logs(false);
-			}
 		}
+
+		if (tab === 'logs') {
+			reload_logs(false);
+		}
+
 		return false;
 	}
 
+	function get_current_storage() {
+		var url = ajaxurl + '?action=snapshot-get_storage';
+		var data = {
+			_wpnonce: $( '#_wpnonce-snapshot_get_storage' ).val()
+		};
+
+		$.ajax({
+			type: 'POST',
+			url: url,
+			data: data,
+			cache: false,
+			dataType: 'json',
+			success: function (response) {
+				if (response.success) {
+					var widget = $('.snapshot-storage-widget');
+					if (response.data.width_float >= 0.95) {
+						widget.addClass('full');
+						if (!$('.insufficient-storage-space-notice').length) {
+							var notice = $('<span class="insufficient-storage-space-notice"></span>')
+								.html(snapshot_messages.insufficient_storage_space_notice);
+							jQuery(window).trigger('snapshot:show_top_notice', ['error', notice]);
+						}
+					} else {
+						widget.removeClass('full');
+						$('.insufficient-storage-space-notice').trigger('snapshot:close_notice');
+					}
+					widget.find('.snapshot-storage-used-value').html(response.data.current_stats.replace(/\//, ' /'));
+					widget.find('.sui-progress-bar > span').css({width: response.data.width});
+					widget.css('visibility', 'visible');
+				}
+			}
+		});
+	}
+
     // Retrieve backups info list.
-    function snapshot_list_backups() {
+    function snapshot_list_backups(force_refresh) {
+        if (force_refresh === undefined) {
+            force_refresh = false;
+        }
+
+        get_current_storage();
+
         var data = {
-            _wpnonce: $( '#_wpnonce-list-backups' ).val()
+            _wpnonce: $( '#_wpnonce-list-backups' ).val(),
+            force_refresh: force_refresh ? 1 : 0
         };
 
         $('.snapshot-listed-backups').hide();
         $('.snapshot-no-backups').hide();
         // $('.wps-backup-list-ajax-error').hide();
-        
+
         var deferred = jQuery.Deferred();
 
         var list_backups_href = ajaxurl + '?action=snapshot-list_backups';
@@ -113,27 +1246,9 @@
                             $('.snapshot-listed-backups .sui-table > tbody:last-child').append(row);
                             $('.snapshot-listed-backups .sui-table > tbody:last-child').append(item.row_content);
 						});
+						update_backup_rows_schedule();
 
-						// Workaround to both show the size tooltip above the icon and to show it when hovering the whole span.
-						$('.snapshot-tooltip-size').hover(function () {
-							$(this).parent().find('.snapshot-icon-tooltip2').show();
-							$(this).parent().find('.snapshot-icon-tooltip').hide();
-						},function () {
-							$(this).parent().find('.snapshot-icon-tooltip').show();
-							$(this).parent().find('.snapshot-icon-tooltip2').hide();
-						});
-
-						// Workaround to both show the export tooltip above the icon and to show it when hovering the whole span.
-						$('.snapshot-export-details-failure').parent().find('.snapshot-export-backup-details').hover(function () {
-							$(this).parent().find('.snapshot-export-details-failure2').show();
-							$(this).parent().find('.snapshot-export-details-failure').hide();
-						},function () {
-							$(this).parent().find('.snapshot-export-details-failure').show();
-							$(this).parent().find('.snapshot-export-details-failure2').hide();
-						});
-
-						// Workaround to hide the destination list tooltip when the i tooltip is hovered.
-						$(window).trigger('snapshot:hide_double_tooltip');
+						fix_export_destination_tooltips();
                     } else {
                         // Deal with the Last Backup section.
                         $('.sui-summary-segment .snapshot-last-backup').text(snapshot_messages.last_backup_unknown_date);
@@ -141,7 +1256,7 @@
                         if (false === reply_data.data.backup_running) {
                             // Deal with the backup listing header.
                             $('.sui-box-header.snapshot-has-backups-title').hide();
-    
+
                             // Deal with the backup listing and loader.
                             $('.snapshot-no-backups').show();
                         } else {
@@ -166,6 +1281,29 @@
 
         return deferred.promise();
     }
+
+	function fix_export_destination_tooltips() {
+		// Workaround to both show the size tooltip above the icon and to show it when hovering the whole span.
+		$('.snapshot-tooltip-size').on('mouseenter', function () {
+			$(this).parent().find('.snapshot-icon-tooltip2').show();
+			$(this).parent().find('.snapshot-icon-tooltip').hide();
+		}).on('mouseleave', function () {
+			$(this).parent().find('.snapshot-icon-tooltip').show();
+			$(this).parent().find('.snapshot-icon-tooltip2').hide();
+		});
+
+		// Workaround to both show the export tooltip above the icon and to show it when hovering the whole span.
+		$('.snapshot-export-details-failure').parent().find('.snapshot-export-backup-details').on('mouseenter', function () {
+			$(this).parent().find('.snapshot-export-details-failure2').show();
+			$(this).parent().find('.snapshot-export-details-failure').hide();
+		}).on('mouseleave', function () {
+			$(this).parent().find('.snapshot-export-details-failure').show();
+			$(this).parent().find('.snapshot-export-details-failure2').hide();
+		});
+
+		// Workaround to hide the destination list tooltip when the i tooltip is hovered.
+		$(window).trigger('snapshot:hide_double_tooltip');
+	}
 
 	function show_api_error() {
 		$('.snapshot-list-backups .api-error').show();
@@ -198,22 +1336,54 @@
 				data: request_data,
 				cache: false,
 				dataType: 'json',
+				beforeSend: function () {
+					last_schedule_info = null;
+					$('.sui-summary-segment .snapshot-next-backup').text('');
+					$('.sui-summary-segment .snapshot-schedule-frequency').text('');
+					$('#snapshot-backup-schedule .button-manage').hide();
+					$('.snapshot-loading-schedule').show();
+				},
 				success: function (response) {
 					if (response.success) {
 						schedule_modal(response.data);
 						$('#snapshot-backup-schedule').data('modalData', response.data);
-						$('.snapshot-listed-backups .open-edit-schedule')
-							.data('modalData', response.data)
-							.find('>span.schedule').text(response.data.text);
+
+						$('.sui-summary-segment .snapshot-next-backup').text(response.data.next_backup_time);
+						$('.sui-summary-segment .snapshot-schedule-frequency').text(response.data.text);
+						$('#snapshot-backup-schedule').data('modalData', response.data);
+						$('#snapshot-backup-schedule .button-manage').show();
+						last_schedule_info = response.data;
+						update_backup_rows_schedule();
 					} else {
-						jQuery(window).trigger('snapshot:show_top_notice', ['error', snapshot_messages.get_schedule_error]);
+						on_load_schedule_error();
 					}
 				},
+				complete: function () {
+					$('.snapshot-loading-schedule').hide();
+				},
 				error: function () {
-					jQuery(window).trigger('snapshot:show_top_notice', ['error', snapshot_messages.get_schedule_error]);
+					on_load_schedule_error();
 				}
 			});
 		}
+	}
+
+	function update_backup_rows_schedule() {
+		if (last_schedule_info) {
+			var line = $('.snapshot-listed-backups .open-edit-schedule');
+			line.data('modalData', last_schedule_info);
+			line.find('>span.schedule').text(last_schedule_info.text);
+			line.show();
+			$('.snapshot-listed-backups .row-current-schedule .sui-loading').hide();
+		}
+	}
+
+	function on_load_schedule_error() {
+		jQuery(window).trigger('snapshot:show_top_notice', ['error', snapshot_messages.get_schedule_error]);
+		$('.sui-summary-segment .snapshot-next-backup').text('-');
+		$('.sui-summary-segment .snapshot-schedule-frequency').text('-');
+
+		$('.snapshot-listed-backups .row-current-schedule .sui-loading').hide();
 	}
 
 	function snapshot_backup_progress(needs_api_call, already_running_backup_status, already_running_backup) {
@@ -256,34 +1426,60 @@
 						backup_is_cancelled();
 					} else if ( true === response.data.backup_failed ) {
 						// Running backup has failed.
-						var notice = $('<span></span>').html(snapshot_messages.running_backup_fail);
-						var a = notice.find('a');
-						a.eq(0).on('click', function (e) {
-							var link = this;
-							$(link).data('backupId', already_running_backup.id);
-							e.preventDefault();
-							notice.trigger('snapshot:close_notice');
-							// reload logs on log tab before switching to it
-							reload_logs(true).then(function () {
-								view_log.bind(link)();
-								toggle_navbar('logs');
-								$(window).trigger('snapshot:close_modal');
+
+						if (response.data.error_message_html) {
+							var notice = $(response.data.error_message_html);
+							var log_link = notice.find('.snapshot-log-link');
+							log_link.on('click', function (e) {
+								var link = this;
+								$(link).data('backupId', already_running_backup.id);
+								e.preventDefault();
+								notice.trigger('snapshot:close_notice');
+								// reload logs on log tab before switching to it
+								reload_logs(true).then(function () {
+									view_log.bind(link)();
+									toggle_navbar('logs');
+									$(window).trigger('snapshot:close_modal');
+								});
 							});
-						});
-						a.eq(1).on('click', function (e) {
-							e.preventDefault();
-							notice.trigger('snapshot:close_notice');
-							
-							jQuery(window).trigger('snapshot:backup_modal');
-						});
-				
-						jQuery(window).trigger('snapshot:show_top_notice', ['error', notice]);
+							jQuery(window).trigger('snapshot:show_top_notice', ['error', notice]);
+						} else {
+							var notice = $('<span></span>').html(snapshot_messages.running_backup_fail);
+							var a = notice.find('a');
+							a.eq(0).on('click', function (e) {
+								var link = this;
+								$(link).data('backupId', already_running_backup.id);
+								e.preventDefault();
+								notice.trigger('snapshot:close_notice');
+								// reload logs on log tab before switching to it
+								reload_logs(true).then(function () {
+									view_log.bind(link)();
+									toggle_navbar('logs');
+									$(window).trigger('snapshot:close_modal');
+								});
+							});
+							a.eq(1).on('click', function (e) {
+								e.preventDefault();
+								notice.trigger('snapshot:close_notice');
+
+								jQuery(window).trigger('snapshot:backup_modal');
+							});
+
+							jQuery(window).trigger('snapshot:show_top_notice', ['error', notice]);
+							var snippet = notice.find('.sui-code-snippet');
+							if (snippet) {
+								snippet.SUICodeSnippet({
+									copyText: '<span class="sui-icon-copy" aria-hidden="true"></span>'
+								});
+							}
+							snippet.closest('.sui-code-snippet-wrapper').find('.sui-button').removeClass('sui-button').addClass('sui-button-icon');
+						}
 
 						$('.button-create-backup').prop('disabled', false);
 
-						reload_logs();
+						reload_logs(true);
 
-						snapshot_list_backups();
+						snapshot_list_backups(true);
 					} else if ( 'snapshot_completed' === response.data.backup_running_status ) {
 						// Running backup is completed, yay.
 						$('#snapshot-modal-cancel-backup #snapshot-cancel-backup').prop('disabled', true);
@@ -308,7 +1504,7 @@
 							if ('None' === response.data.export_text.row) {
 								export_destination_text = snapshot_messages.no_destinations;
 							} else if ('Loading' === response.data.export_text) {
-								export_destination_text = "<i class='sui-icon-loader sui-loading snapshot-destination-loader' aria-hidden='true'></i>" + snapshot_messages.loading_destinations
+								export_destination_text = "<span class='sui-icon-loader sui-loading snapshot-destination-loader' aria-hidden='true'></span>" + snapshot_messages.loading_destinations
 							} else if (typeof response.data.export_text.html !== 'undefined'){
 								var exports = response.data.export_text.html;
 								if ( 1 < exports.exports_count ) {
@@ -432,7 +1628,7 @@
 					setTimeout(function () {
 
                         $('.button-create-backup').prop('disabled', false);
-                        
+
 						row.remove();
 						row = $(item.row);
 						var row_content = $(item.row_content);
@@ -441,6 +1637,7 @@
 						}
 						$('.snapshot-listed-backups .sui-table > tbody:last-child').prepend(row_content);
 						$('.snapshot-listed-backups .sui-table > tbody:last-child').prepend(row);
+						update_backup_rows_schedule();
 
 						// Workaround to hide the destination list tooltip when the i tooltip is hovered.
 						$(window).trigger('snapshot:hide_double_tooltip');
@@ -488,6 +1685,7 @@
 			_wpnonce: $( '#_wpnonce-snapshot_backup_create_manual' ).val(),
 			data: {
 				backup_name: data.backup_name,
+				description: data.backup_description,
 				apply_exclusions: data.apply_exclusions === 'on'
 			}
 		};
@@ -502,6 +1700,8 @@
 			},
 			complete: function () {
 				form.find('.sui-button').removeClass('sui-button-onload-text', true);
+				form.find('#manual-backup-comment').val('');
+				form.find('#snapshot-manual-apply-exclusions').prop('checked', false);
 			},
 			success: function (response) {
                 if ( response.success && false !== response.data.backup_running ) {
@@ -616,9 +1816,9 @@
                 delete_buttons.prop('disabled', false);
                 modal_button.removeClass('sui-button-onload-text').addClass('sui-button-red');
             }
-        });        
+        });
     }
-    
+
     function export_backup(e, backup) {
         if (e && e.preventDefault) e.preventDefault();
 
@@ -627,13 +1827,13 @@
 			_wpnonce: $('#_wpnonce-export-backup').val(),
 			backup_id: backup
         };
-        
+
 		$.ajax({
 			type: 'POST',
 			url: ajaxurl,
 			data: request_data,
 			success: function (response) {
-                if ( response.success ) {					
+                if ( response.success ) {
                     var notice = $('<span></span>').html(snapshot_messages.backup_export_success.replace('%s', response.data.site));
                     jQuery(window).trigger('snapshot:show_top_notice', ['success', notice]);
                 } else {
@@ -645,7 +1845,7 @@
                 var notice = $('<span></span>').html(snapshot_messages.backup_export_error);
                 jQuery(window).trigger('snapshot:show_top_notice', ['error', notice]);
             }
-        });  
+        });
     }
 
 	function cancel_backup_confirm() {
@@ -695,7 +1895,7 @@
 		var container = select.closest('.sui-box').find('.log-items-container');
 		var no_warning = container.find('.no-warning');
 		var no_error = container.find('.no-error');
-		var log_items = container.find('>.log-item');
+		var log_items = container.find('.log-lists > .log-item');
 		var show_items = log_items;
 		var value = select.val();
 
@@ -768,42 +1968,7 @@
 		if (content.data('loaded')) {
 			return;
 		}
-		var backup_id  = row.data('backupId');
-		var append_log = row.data('appendLog');
-
-		jQuery.ajax({
-			type: 'GET',
-			url: ajaxurl,
-			data: {
-				action: 'snapshot-get_backup_log',
-				backup_id: backup_id,
-				append_log: append_log,
-				_wpnonce: $('#_wpnonce-get-backup-log').val()
-			},
-			cache: false,
-			dataType: 'json',
-			beforeSend: function () {
-				content.find('.snapshot-loading').show();
-				content.find('.snapshot-loaded').hide();
-			},
-			complete: function () {
-				content.find('.snapshot-loading').hide();
-				content.find('.snapshot-loaded').show();
-			},
-			success: function (data) {
-				if (data.success) {
-					var container = content.find('.log-items-container');
-					data.data.log.items.forEach(function (item) {
-						var log_item = $('<div class="log-item"></div>');
-						log_item.addClass('log-level-' + item.level);
-						$('<div class="log-item__icon" aria-hidden="true"></div>').appendTo(log_item);
-						$('<div class="log-item__content"></div>').text(item.message).appendTo(log_item);
-						log_item.appendTo(container);
-					});
-					content.data('loaded', true);
-				}
-			}
-		});
+		Log.single(this);
 	}
 
 	function reload_logs(force) {
@@ -844,7 +2009,7 @@
 					$('.snapshot-logs .log-rows').html(data.data.content);
 					$('.logs-list .log-row').on('click', on_log_row_click);
 					$('.logs-list .log-rows select').each(function () {
-						SUI.suiSelect(this);
+						SUI.select.init($(this));
 					});
 					if (data.data.show_log) {
 						$('.snapshot-logs .logs-empty').hide();
@@ -853,6 +2018,7 @@
 						$('.snapshot-logs .logs-empty').show();
 						$('.snapshot-logs .logs-not-empty').hide();
 					}
+					fix_export_destination_tooltips();
 					deferred.resolve();
 				} else {
 					deferred.reject();
@@ -944,7 +2110,7 @@
 		}
 
 		// Remove loader
-		log_container.find('>p.log-item:last-child i.sui-icon-loader').remove();
+		log_container.find('>p.log-item:last-child span.sui-icon-loader').remove();
 
 		if (log && log.items) {
 			// Update log in modal
@@ -960,7 +2126,7 @@
 		if (show_loader && update_log_offset !== false) {
 			// Show loader in the last log row
 			log_container.find('>p.log-item:last-child')
-				.append('<i class="sui-icon-loader sui-loading sui-md" aria-hidden="true"></i>');
+				.append('<span class="sui-icon-loader sui-loading sui-md" aria-hidden="true"></span>');
 		}
 
 		// Autoscrolling only if scrollbar is already at the bottom
@@ -1020,11 +2186,11 @@
 		$('#snapshot-backups-change-region').off('click');
 		$('#snapshot-backups-change-region').on('click', function() {
 			var data = {};
-	
+
 			data._wpnonce = $( '#_wpnonce-snapshot_change_region' ).val();
 			data.no_backups = $( '.snapshot-backups-number .sui-summary-large' ).text() === '0' ? '1' : '0';
 			data.new_region = $('input[name="snapshot-backup-region"]:checked').val();
-	
+
 			var url = ajaxurl + '?action=snapshot_change_region';
 
 			$.ajax({
@@ -1056,7 +2222,7 @@
 								notice.trigger('snapshot:close_notice');
 								$('#snapshot-backup-schedule > a').trigger('click');
 							});
-					
+
 							jQuery(window).trigger('snapshot:show_top_notice', ['info', notice]);
 						} else {
 							// Show notice informing that schedule is active already.
@@ -1085,7 +2251,7 @@
 		return false;
 	}
 
-	function revert_storage_radio() {		
+	function revert_storage_radio() {
 		var selected_value = $('input[name="snapshot-backup-region"]:checked').val();
 		if (selected_value === 'US') {
 			unselected_value = 'EU';
@@ -1148,7 +2314,7 @@
 		return false;
 	}
 
-	function backup_is_cancelled() {		
+	function backup_is_cancelled() {
 		$('.button-create-backup').prop('disabled', false);
 		jQuery(window).trigger('snapshot:show_top_notice', ['error', snapshot_messages.cancel_backup_success, 3000, false]);
 
@@ -1193,11 +2359,13 @@
 
         $.ajax({
             type: 'POST',
-            url: ajaxurl + '?action=snapshot-check_if_region',
+            url: ajaxurl + '?action=snapshot-check_creds',
             data: data,
 			complete: function () {
 				$('.snapshot-region-loading').hide();
+				$('.snapshot-storage-limit-loading').hide();
 				$('.snapshot-region-radio').show();
+				$('.snapshot-storage-limit-input').show();
 			},
             success: function (response) {
                 if (response.success) {
@@ -1208,6 +2376,11 @@
 					if (response.data.region === 'EU') {
 						$("#backup-region-eu").prop("checked", true);
 						$("#backup-region-us").prop("checked", false);
+					}
+
+					if (response.data.rotation_frequency) {
+						$('#snapshot-backup-limit').val(response.data.rotation_frequency);
+						$('#existing_backup_limit').val(response.data.rotation_frequency);
 					}
                 }
             }
@@ -1245,6 +2418,8 @@
 		data.email_settings = {
 			on_fail_send: form.find('#snapshot-notifications-send-email').prop('checked'),
 			on_fail_recipients: recipients,
+			notify_on_fail: form.find('#snapshot-backup-fails').prop('checked'),
+			notify_on_complete: form.find('#snapshot-backup-completes').prop('checked')
 		};
 		data.email_settings = JSON.stringify(data.email_settings);
 
@@ -1267,6 +2442,8 @@
 					response.data.email_settings.on_fail_recipients.forEach(function (item) {
 						add_recipient_html(item.name, item.email);
 					});
+					form.find('#snapshot-backup-fails').prop('checked', response.data.email_settings.notify_on_fail);
+					form.find('#snapshot-backup-completes').prop('checked', response.data.email_settings.notify_on_complete);
 
 					if (response.data.notice_type === 'success') {
 						notice.addClass('sui-notice-success');
@@ -1319,7 +2496,7 @@
 		var recipient = $('<div class="sui-recipient"></div>');
 		$('<div class="sui-recipient-name"></div>').text(name).appendTo(recipient);
 		$('<div class="sui-recipient-email"></div>').text(email).appendTo(recipient);
-		$('<button type="button" class="sui-button-icon snapshot-remove-recipient"><i class="sui-icon-trash" aria-hidden="true"></i></button>').appendTo(recipient);
+		$('<button type="button" class="sui-button-icon snapshot-remove-recipient"><span class="sui-icon-trash" aria-hidden="true"></span></button>').appendTo(recipient);
 		recipient.appendTo(recipients);
 		recipients.find('.email-notification-notice-empty').hide();
 
@@ -1535,6 +2712,57 @@
 		return deferred.promise();
 	}
 
+	/**
+	 * Change the storage limit in the API.
+	 */
+	function change_storage_limit() {
+		$('#error-snapshot-backup-limit').hide();
+		$('#error-snapshot-backup-limit').html("");
+		$('.snapshot-storage-limit-input .sui-form-field').removeClass('sui-form-field-error');
+
+		var request_data = {
+			action: 'snapshot_change_storage_limit',
+			_wpnonce: $('#_wpnonce-snapshot_change_storage_limit').val(),
+			storage_limit: $('#snapshot-backup-limit').val()
+		};
+
+		if (! $.isNumeric(request_data.storage_limit) || request_data.storage_limit < 1 || request_data.storage_limit > 30) {
+			$('#error-snapshot-backup-limit').show();
+			$('#error-snapshot-backup-limit').html(snapshot_messages.storage_limit_invalid);
+			$('.snapshot-storage-limit-input .sui-form-field').addClass('sui-form-field-error');
+			$('#snapshot-backup-limit').trigger('focus');
+
+			return false;
+		}
+
+		$.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			data: request_data,
+			beforeSend: function () {
+				$('#snapshot-backup-limit-button').addClass('sui-button-onload');
+			},
+			complete: function () {
+				$('#snapshot-backup-limit-button').removeClass('sui-button-onload');
+			},
+			success: function (response) {
+				if (response.success && response.data.changed_storage) {
+					$('#snapshot-backup-limit').trigger('focus');
+					jQuery(window).trigger('snapshot:show_top_notice', ['success', snapshot_messages.storage_limit_success]);
+				} else {
+					$('#snapshot-backup-limit').trigger('focus');
+					jQuery(window).trigger('snapshot:show_top_notice', ['error', snapshot_messages.storage_limit_failure]);
+				}
+			},
+			error: function () {
+				$('#snapshot-backup-limit').trigger('focus');
+				jQuery(window).trigger('snapshot:show_top_notice', ['error', snapshot_messages.storage_limit_failure]);
+			}
+		});
+
+		return false;
+	}
+
 	$(window).on('load', function (e) {
 		var matches;
 		if ('#set-schedule' === window.location.hash) {
@@ -1544,9 +2772,17 @@
 			// Open backup logs tab from URL.
 			toggle_navbar('logs');
 			history_replace_state();
+		} else if ('#settings' === window.location.hash) {
+			// Open backup logs tab from URL.
+			toggle_navbar('settings');
+			history_replace_state();
 		} else if (matches = window.location.hash.match(/^#logs\-(.+)/)) {
 			// Open backup log from URL.
 			view_log(e, true, matches[1]);
+			history_replace_state();
+		} else if ('#notifications' === window.location.hash) {
+			// Open notifications tab from URL.
+			toggle_navbar('notifications');
 			history_replace_state();
 		}
 	});
@@ -1555,12 +2791,12 @@
         if ( $( '.snapshot-page-backups' ).length ) {
 			for (var current_tab in navbar_tabs) {
 				var vertical_selector = navbar_tabs[current_tab][1];
-				var mobile_nav_selector = navbar_tabs[current_tab][2];
 				$('.snapshot-page-main').find(vertical_selector)
 					.on('click', toggle_navbar.bind(this, current_tab));
-				$('.snapshot-page-main .sui-mobile-nav').find(mobile_nav_selector)
-					.on('click', toggle_navbar.bind(this, current_tab));
 			}
+			$('.snapshot-page-main .sui-mobile-nav').on('change', function () {
+				toggle_navbar($(this).val());
+			});
 
 			$('#snapshot-backup-schedule > a').on('click', function () {
 				snapshot_get_schedule(true, $(this).parent().data('modalData'));
@@ -1570,6 +2806,8 @@
 			$(window).on('snapshot:get-schedule', function () {
 				snapshot_get_schedule(false);
             });
+
+            snapshot_get_schedule(false);
 
             $('#form-snapshot-create-manual-backup').on('submit', handle_create_manual_backup);
 
@@ -1607,13 +2845,10 @@
             $('#snapshot-cancel-backup').on('click', cancel_backup);
             $('.snapshot-list-backups').on('click', '.button-view-log', view_log_in_modal);
 
-            $('.logs-list').on('change', 'select.log-filter', filter_log);
             $('.logs-list').on('click', '.view-backup', function () {
                 view_backup($(this).data('backupId'));
             });
-            $('.snapshot-list-backups').on('click', '.view-log', function (e) {
-				view_log.bind(this, e, true, $(this).data('backup-id') )();
-			});
+
             $('.logs-list .log-row').on('click', on_log_row_click);
 
             $(window).on('snapshot:open_log_modal', open_log_modal);
@@ -1655,11 +2890,11 @@
 			$('.snapshot-notifications .snapshot-add-recipient').on('click', add_recipient);
 			$('#modal-notification-add-recipient-form').on('submit', handle_add_recipient_form);
 
-			$('#snapshot-default-exclusions').change(function() {
+			$('#snapshot-default-exclusions').on('change', function() {
 				if(this.checked) {
 					$('.snapshot-exclusions-settings-box .sui-accordion-item-body .sui-box-body').removeClass('snapshot-disabled-exclusions');
 				} else {
-					$('.snapshot-exclusions-settings-box .sui-accordion-item-body .sui-box-body').addClass('snapshot-disabled-exclusions');					
+					$('.snapshot-exclusions-settings-box .sui-accordion-item-body .sui-box-body').addClass('snapshot-disabled-exclusions');
 				}
 
 			});
@@ -1667,6 +2902,17 @@
 			populate_snapshot_region();
 
 			$('#snapshot-confirm-wpmudev-password-modal-form').on('submit', on_submit_wpmudev_password);
+
+			$('#snapshot-backup-limit').on('focusin', function () {
+				$('#snapshot-backup-limit-button').prop('disabled', false);
+			}).on('focusout', function () {
+				if (! $('#snapshot-backup-limit-button:active').length && ! $('#snapshot-backup-limit-button:hover').length) {
+					$('#snapshot-backup-limit-button').prop('disabled', true);
+
+				}
+			});
+
+			$('#snapshot-backup-limit-button').on('click', change_storage_limit);
         }
     });
 })(jQuery);

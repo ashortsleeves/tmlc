@@ -28,11 +28,6 @@ class Security_Headers extends Setting {
 	 */
 	public $sh_xframe_mode = 'sameorigin';
 	/**
-	 * @var string
-	 * @defender_property
-	 */
-	public $sh_xframe_urls = '';
-	/**
 	 * @var bool
 	 * @defender_property
 	 */
@@ -114,7 +109,6 @@ class Security_Headers extends Setting {
 		$labels = array(
 			'sh_xframe'                    => __( 'Enable X-Frame-Options', 'wpdef' ),
 			'sh_xframe_mode'               => __( 'X-Frame-Options mode', 'wpdef' ),
-			'sh_xframe_urls'               => __( 'Allow-from', 'wpdef' ),
 			'sh_xss_protection'            => __( 'Enable X-XSS-Protection', 'wpdef' ),
 			'sh_xss_protection_mode'       => __( 'X-XSS-Protection mode', 'wpdef' ),
 			'sh_content_type_options'      => __( 'Enable X-Content-Type-Options', 'wpdef' ),
@@ -144,12 +138,12 @@ class Security_Headers extends Setting {
 	 */
 	public function get_headers() {
 		return array(
-			Sh_X_Frame::$rule_slug              => new Sh_X_Frame(),
-			Sh_XSS_Protection::$rule_slug       => new Sh_XSS_Protection(),
-			Sh_Content_Type_Options::$rule_slug => new Sh_Content_Type_Options(),
-			Sh_Strict_Transport::$rule_slug     => new Sh_Strict_Transport(),
-			Sh_Referrer_Policy::$rule_slug      => new Sh_Referrer_Policy(),
-			Sh_Feature_Policy::$rule_slug       => new Sh_Feature_Policy(),
+			Sh_X_Frame::$rule_slug                 => new Sh_X_Frame(),
+			Sh_XSS_Protection::$rule_slug          => new Sh_XSS_Protection(),
+			Sh_Content_Type_Options::$rule_slug    => new Sh_Content_Type_Options(),
+			Sh_Strict_Transport::$rule_slug        => new Sh_Strict_Transport(),
+			Sh_Referrer_Policy::$rule_slug         => new Sh_Referrer_Policy(),
+			Sh_Feature_Policy::$rule_slug          => new Sh_Feature_Policy(),
 		);
 	}
 
@@ -207,7 +201,7 @@ class Security_Headers extends Setting {
 	public function after_validate() {
 		if ( true === $this->sh_xframe
 			&& ( empty( $this->sh_xframe_mode )
-			|| ! in_array( $this->sh_xframe_mode, array( 'sameorigin', 'allow-from', 'deny' ), true ) )
+			|| ! in_array( $this->sh_xframe_mode, array( 'sameorigin', 'deny' ), true ) )
 		) {
 			$this->errors[] = __( 'X-Frame-Options mode is invalid', 'wpdef' );
 

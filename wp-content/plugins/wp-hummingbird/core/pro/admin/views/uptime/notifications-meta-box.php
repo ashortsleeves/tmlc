@@ -76,9 +76,9 @@ $pending = false;
 							<div class="sui-recipient">
 								<span class="sui-recipient-status sui-tooltip" data-tooltip="<?php echo esc_attr( $tooltip ); ?>">
 									<?php if ( isset( $value['is_pending'] ) && $value['is_pending'] ) : ?>
-										<i class="sui-icon-clock" aria-hidden="true"></i>
+										<span class="sui-icon-clock" aria-hidden="true"></span>
 									<?php else : ?>
-										<i class="sui-icon-check-tick" aria-hidden="true"></i>
+										<span class="sui-icon-check-tick" aria-hidden="true"></span>
 									<?php endif; ?>
 								</span>
 								<input data-id="<?php echo esc_attr( $key ); ?>" type="hidden" id="report-recipient" name="report-recipients[]" value="<?php echo esc_attr( $input_value ); ?>">
@@ -86,11 +86,11 @@ $pending = false;
 								<span class="sui-recipient-email"><?php echo esc_html( $value['email'] ); ?></span>
 								<?php if ( $pending ) : ?>
 									<button type="button" class="sui-button-icon wphb-resend-recipient sui-tooltip" data-tooltip="<?php esc_attr_e( 'Resend email', 'wphb' ); ?>" data-name="<?php echo esc_attr( $value['name'] ); ?>" data-email="<?php echo esc_attr( $value['email'] ); ?>">
-										<i class="sui-icon-send" aria-hidden="true"></i>
+										<span class="sui-icon-send" aria-hidden="true"></span>
 									</button>
 								<?php endif; ?>
 								<button type="button" class="sui-button-icon wphb-remove-recipient <?php echo $pending ? '' : 'wphb-not-pending-recipient'; ?>">
-									<i class="sui-icon-trash" aria-hidden="true"></i>
+									<span class="sui-icon-trash" aria-hidden="true"></span>
 								</button>
 							</div>
 						<?php endforeach; ?>
@@ -104,7 +104,7 @@ $pending = false;
 					<?php endif; ?>
 				</div>
 				<a class="sui-button sui-button-ghost sui-add-recipient" data-modal-open="wphb-add-recipient-modal" data-modal-open-focus="reporting-first-name" data-modal-mask="true">
-					<i class="sui-icon-plus" aria-hidden="true"></i>
+					<span class="sui-icon-plus" aria-hidden="true"></span>
 					<?php esc_html_e( 'Add Recipient', 'wphb' ); ?>
 				</a>
 
@@ -125,7 +125,7 @@ $pending = false;
 				?>
 				<div class="sui-form-field">
 					<label for="threshold" class="sui-label"><?php esc_html_e( 'Threshold', 'wphb' ); ?></label>
-					<select id="threshold" name="threshold">
+					<select id="threshold" name="threshold" class="sui-select" data-width="250">
 						<option <?php selected( 0, $reports_settings['threshold'] ); ?> value="0">
 							<?php esc_html_e( 'Instant', 'wphb' ); ?>
 						</option>

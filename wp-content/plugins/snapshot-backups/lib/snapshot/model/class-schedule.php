@@ -11,6 +11,7 @@ namespace WPMUDEV\Snapshot4\Model;
 
 use WPMUDEV\Snapshot4\Model;
 use WPMUDEV\Snapshot4\Helper;
+use WPMUDEV\Snapshot4\Task;
 use DateTime;
 use DateTimeZone;
 
@@ -42,10 +43,20 @@ class Schedule extends Model {
 	/**
 	 * Returns human-readable schedule details
 	 *
+	 * @param bool $no_cache true if don't need to cache in static var.
+	 * @param bool $return_empty returns empty schedule without request if true.
 	 * @return array
 	 */
-	public static function get_schedule_info() {
-		$active_schedule    = get_site_option( 'wp_snapshot_backup_schedule' );
+	public static function get_schedule_info( $no_cache = false, $return_empty = false ) {
+		if ( $return_empty ) {
+			$active_schedule = null;
+		} else {
+			$active_schedule = Task\Request\Schedule::get_current_schedule( $no_cache );
+			if ( is_wp_error( $active_schedule ) ) {
+				wp_send_json_error( $active_schedule );
+			}
+		}
+
 		$schedule_is_active = true;
 
 		// Only if there's no valid schedule_id, do we create new schedule, in all other cases (even when stored schedule is inactive, we update).

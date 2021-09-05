@@ -15,6 +15,11 @@ button.notice-dismiss {
     cursor: pointer !important;
 }
 
+// Fix select overlapping other elements.
+.wpmud .sui-select.sui-select-dropdown-container--open {
+    z-index: 999;
+}
+
 .wpmud .wphb-dismiss {
     float: right;
 }
@@ -59,11 +64,21 @@ button.notice-dismiss {
     background-image: none !important;
 }
 
-/* Multiselect SUI placeholder width */
-.wpmud .sui-wrap select.sui-select+.select2-container .select2-selection--multiple .select2-selection__rendered .select2-search--inline {
-    min-width: 250px;
-    width: auto;
+/* Upgrade page button issue */
+.wpmud .sui-wrap .sui-upsell-row .sui-upsell-notice a.sui-button.sui-button-purple,
+.wpmud .sui-wrap .sui-upgrade-page .sui-upgrade-page-cta__inner .sui-button-purple:hover { color: #fff; }
+
+.wpmud .box-dashboard-welcome .sui-summary-segment,
+.wrap-wphb-minification .box-minification-summary-meta-box .sui-summary-segment,
+.wpmud .box-performance-welcome .sui-summary-segment,
+.wpmud #wphb-box-summary .sui-summary-segment {
+    overflow: visible !important;
 }
 
-/* Upgrade page button issue */
-.wpmud .sui-wrap .sui-upgrade-page .sui-upgrade-page-cta__inner .sui-button-purple:hover { color: #fff; }
+/* Stacked checkboxes that are hidden */
+.wpmud .sui-checkbox-stacked.sui-hidden { display: none !important; }
+
+/* Async icon in Asset Optimization */
+.wpmud .sui-icon-async:before {
+    content: "\2909";
+}

@@ -29,6 +29,7 @@ if ( ( defined( 'WP_SMUSH_PRESERVE_STATS' ) && WP_SMUSH_PRESERVE_STATS ) || true
 
 global $wpdb;
 
+// Option names prefixed with WP_SMUSH_PREFIX.
 $smushit_keys = array(
 	'resmush-list',
 	'nextgen-resmush-list',
@@ -52,24 +53,30 @@ $smushit_keys = array(
 	'cron_update_running',
 	'hide-conflict-notice',
 	'show_upgrade_modal',
-	// This could have been set in 3.7.1. The UI that set this was removed in 3.7.2.
-	'hide_tutorials_from_bulk_smush',
+	'preset_configs',
+	'webp_hide_wizard',
+	'hide-tutorials',
+	'hide_tutorials_from_bulk_smush', // Possible leftover from 3.8.4.
 );
 
+// Option names without the WP_SMUSH_PREFIX prefix.
 $db_keys = array(
 	'skip-smush-setup',
 	'smush_global_stats',
+	'wp_smush_stats_nextgen',
 );
 
 // Cache Keys.
-$cache_keys = array(
-	'smush_global_stats',
-);
-
 $cache_smush_group = array(
 	'exceeding_items',
+	'wp-smush-resize_count',
 	'wp-smush-resize_savings',
-	'pngjpg_savings',
+	'wp-smush-pngjpg_savings',
+	'wp-smush-smushed_ids',
+	'media_attachments',
+	'skipped_images',
+	'images_with_backups',
+	'wp-smush-dir_total_stats',
 );
 
 $cache_nextgen_group = array(
@@ -93,17 +100,17 @@ if ( ! is_multisite() ) {
 	}
 
 	// Delete Cache data.
-	foreach ( $cache_keys as $key ) {
-		wp_cache_delete( $key );
-	}
-
 	foreach ( $cache_smush_group as $s_key ) {
-		wp_cache_delete( $s_key, 'smush' );
+		wp_cache_delete( $s_key, 'wp-smush' );
 	}
 
 	foreach ( $cache_nextgen_group as $n_key ) {
 		wp_cache_delete( $n_key, 'nextgen' );
 	}
+
+	wp_cache_delete( 'get_image_sizes', 'smush_image_sizes' );
+
+	delete_transient( 'wp-smush-conflict_check' );
 }
 
 // Delete Directory Smush stats.
@@ -143,17 +150,15 @@ if ( is_multisite() ) {
 				}
 
 				// Delete Cache data.
-				foreach ( $cache_keys as $key ) {
-					wp_cache_delete( $key );
-				}
-
 				foreach ( $cache_smush_group as $s_key ) {
-					wp_cache_delete( $s_key, 'smush' );
+					wp_cache_delete( $s_key, 'wp-smush' );
 				}
 
 				foreach ( $cache_nextgen_group as $n_key ) {
 					wp_cache_delete( $n_key, 'nextgen' );
 				}
+
+				wp_cache_delete( 'get_image_sizes', 'smush_image_sizes' );
 			}
 			restore_current_blog();
 		}

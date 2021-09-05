@@ -5,7 +5,7 @@
  * src/resources/postcss/ file. For more information, check out our engineering
  * docs on how we handle CSS in our engineering docs.
  *
- * @see: http://moderntribe.github.io/products-engineering/css/
+ * @see: https://the-events-calendar.github.io/products-engineering/docs/code-standards/css/
  */
 
 /**
@@ -26,7 +26,7 @@
 .tribe-block__attendees__title {
 	display: block;
 	font-style: normal;
-	font-family: 'Helvetica', sans-serif, arial;
+	font-family: 'Helvetica Neue', Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
 	font-size: 21px;
 	font-weight: bold;
 	line-height: normal;

@@ -1,5 +1,4 @@
 <?php
-
 use Tribe\Tickets\Events\Service_Provider as Events_Service_Provider;
 use Tribe\Tickets\Promoter\Service_Provider as Promoter_Service_Provider;
 
@@ -8,7 +7,7 @@ class Tribe__Tickets__Main {
 	/**
 	 * Current version of this plugin
 	 */
-	const VERSION = '5.0.4.2';
+	const VERSION = '5.1.9';
 
 	/**
 	 * Used to store the version history.
@@ -43,7 +42,7 @@ class Tribe__Tickets__Main {
 	*
 	* @since 4.10
 	*/
-	protected $min_tec_version = '5.0.0';
+	protected $min_tec_version = '5.5.0';
 
 	/**
 	 * Name of the provider
@@ -302,8 +301,17 @@ class Tribe__Tickets__Main {
 
 		add_action( 'tribe_common_loaded', [ $this, 'bootstrap' ], 0 );
 
-		// Customizer support.
-		tribe_register_provider( Tribe\Tickets\Service_Providers\Customizer::class );
+		// Customizer support - only loaded on older version of TEC for backwards compatibility.
+		if (
+			class_exists( 'Tribe__Events__Main' )
+			&& (
+				! function_exists( 'tribe_events_views_v2_is_enabled' )
+				|| ! tribe_events_views_v2_is_enabled()
+			)
+		) {
+			tribe_register_provider( Tribe\Tickets\Service_Providers\Customizer::class );
+		}
+
 	}
 
 	/**
@@ -345,6 +353,9 @@ class Tribe__Tickets__Main {
 	public function bind_implementations() {
 		tribe_singleton( 'tickets.main', $this );
 
+		// Tickets Commerce providers.
+		tribe_register_provider( TEC\Tickets\Provider::class );
+
 		tribe_singleton( 'tickets.rsvp', new Tribe__Tickets__RSVP );
 		tribe_singleton( 'tickets.commerce.cart', 'Tribe__Tickets__Commerce__Cart' );
 		tribe_singleton( 'tickets.commerce.currency', 'Tribe__Tickets__Commerce__Currency', [ 'hook' ] );
@@ -372,6 +383,12 @@ class Tribe__Tickets__Main {
 
 		// Views V2
 		tribe_register_provider( Tribe\Tickets\Events\Views\V2\Service_Provider::class );
+
+		// Admin settings.
+		tribe_register_provider( Tribe\Tickets\Admin\Settings\Service_Provider::class );
+
+		// Admin manager.
+		tribe_register_provider( Tribe\Tickets\Admin\Manager\Service_Provider::class );
 
 		// Promoter
 		tribe_register_provider( Promoter_Service_Provider::class );
@@ -603,10 +620,10 @@ class Tribe__Tickets__Main {
 	public function add_help_section_support_content( $help ) {
 		$help->add_section_content( 'support', '<strong>' . esc_html__( 'Support for Event Tickets', 'event-tickets' ) . '</strong>', 20 );
 		$help->add_section_content( 'support', [
-			'<strong><a href="http://m.tri.be/18ne" target="_blank">' . esc_html__( 'Settings overview', 'event-tickets' ) . '</a></strong>',
-			'<strong><a href="http://m.tri.be/18nf" target="_blank">' . esc_html__( 'Features overview', 'event-tickets' ) . '</a></strong>',
-			'<strong><a href="http://m.tri.be/18jb" target="_blank">' . esc_html__( 'Troubleshooting common problems', 'event-tickets' ) . '</a></strong>',
-			'<strong><a href="http://m.tri.be/18ng" target="_blank">' . esc_html__( 'Customizing Event Tickets', 'event-tickets' ) . '</a></strong>',
+			'<strong><a href="https://evnt.is/18ne" target="_blank">' . esc_html__( 'Settings overview', 'event-tickets' ) . '</a></strong>',
+			'<strong><a href="https://evnt.is/18nf" target="_blank">' . esc_html__( 'Features overview', 'event-tickets' ) . '</a></strong>',
+			'<strong><a href="https://evnt.is/18jb" target="_blank">' . esc_html__( 'Troubleshooting common problems', 'event-tickets' ) . '</a></strong>',
+			'<strong><a href="https://evnt.is/18ng" target="_blank">' . esc_html__( 'Customizing Event Tickets', 'event-tickets' ) . '</a></strong>',
 		], 20 );
 	}
 
@@ -623,7 +640,7 @@ class Tribe__Tickets__Main {
 			return;
 		}
 
-		$link = '<a href="http://m.tri.be/18nd" target="_blank">' . esc_html__( 'New User Primer', 'event-tickets' ) . '</a>';
+		$link = '<a href="https://evnt.is/18nd" target="_blank">' . esc_html__( 'New User Primer', 'event-tickets' ) . '</a>';
 
 		$help->add_section_content( 'feature-box', sprintf( _x( 'We are committed to helping you sell %1$s for your event. Check out our handy %2$s to get started.', 'help feature box section', 'event-tickets' ), tribe_get_ticket_label_plural_lowercase( 'help_feature_box_section' ), $link ), 20 );
 	}
@@ -645,16 +662,16 @@ class Tribe__Tickets__Main {
 				$link = '<a href="https://wordpress.org/support/plugin/event-tickets/" target="_blank">' . esc_html__( 'open-source forum on WordPress.org', 'event-tickets' ) . '</a>';
 				$help->add_section_content( 'extra-help', sprintf( __( 'If you have tried the above steps and are still having trouble, you can post a new thread to our %s. Our support staff monitors these forums once a week and would be happy to assist you there.', 'event-tickets' ), $link ), 20 );
 
-				$link_forum = '<a href="http://m.tri.be/4w/" target="_blank">' . esc_html__( 'premium support on our website', 'event-tickets' ) . '</a>';
-				$link_plus = '<a href="http://m.tri.be/18ni" target="_blank">' . esc_html__( 'Event Tickets Plus', 'event-tickets' ) . '</a>';
+				$link_forum = '<a href="https://evnt.is/4w/" target="_blank">' . esc_html__( 'premium support on our website', 'event-tickets' ) . '</a>';
+				$link_plus = '<a href="https://evnt.is/18ni" target="_blank">' . esc_html__( 'Event Tickets Plus', 'event-tickets' ) . '</a>';
 				$help->add_section_content( 'extra-help', sprintf( __( 'Looking for more immediate support? We offer %1$s with the purchase of any of our premium plugins (like %2$s). Pick up a license and you can post there directly and expect a response within 24-48 hours during weekdays.', 'event-tickets' ), $link_forum, $link_plus ), 20 );
 
-				$link = '<a href="http://m.tri.be/4w/" target="_blank">' . esc_html__( 'post a thread', 'event-tickets' ) . '</a>';
+				$link = '<a href="https://evnt.is/4w/" target="_blank">' . esc_html__( 'post a thread', 'event-tickets' ) . '</a>';
 				$help->add_section_content( 'extra-help', sprintf( __( 'Already have Event Tickets Plus? You can %s in our premium support forums. Our support team monitors the forums and will respond to your thread within 24-48 hours (during the week).', 'event-tickets' ), $link ), 20 );
 
 			}  else {
 
-				$link = '<a href="http://m.tri.be/4w/" target="_blank">' . esc_html__( 'post a thread', 'event-tickets' ) . '</a>';
+				$link = '<a href="https://evnt.is/4w/" target="_blank">' . esc_html__( 'post a thread', 'event-tickets' ) . '</a>';
 				$help->add_section_content( 'extra-help', sprintf( __( 'If you have a valid license for one of our paid plugins, you can %s in our premium support forums. Our support team monitors the forums and will respond to your thread within 24-48 hours (during the week).', 'event-tickets' ), $link ), 20 );
 
 			}
@@ -733,7 +750,7 @@ class Tribe__Tickets__Main {
 			return;
 		}
 
-		// If the (boolean) option is not set, and this install predated the modal, let's set the option to false.
+		// If the (bool) option is not set, and this install predated the modal, let's set the option to false.
 		$modal_option = $ar_reg->is_modal_enabled();
 
 		if ( ! $modal_option && $modal_option !== false ) {

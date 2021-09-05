@@ -14,6 +14,8 @@ use WP_Defender\Controller\HUB;
 use WP_Defender\Controller\Mask_Login;
 use WP_Defender\Controller\Notification;
 use WP_Defender\Controller\Onboard;
+use WP_Defender\Controller\Password_Protection;
+use WP_Defender\Controller\Recaptcha;
 use WP_Defender\Controller\Scan;
 use WP_Defender\Controller\Security_Headers;
 use WP_Defender\Controller\Security_Tweaks;
@@ -22,6 +24,7 @@ use WP_Defender\Controller\Main_Setting;
 use WP_Defender\Controller\WAF;
 use WP_Defender\Controller\Tutorial;
 use WP_Defender\Controller\Blocklist_Monitor;
+use WP_Defender\Controller\Password_Reset;
 
 /**
  * Class Bootstrap
@@ -32,46 +35,54 @@ class Bootstrap {
 	 * Activation
 	 */
 	public function activation_hook() {
-		$this->maybe_create_defender_lockout_table();
-		$this->maybe_create_defender_lockout_log_table();
-		$this->maybe_create_defender_scan_table();
-		$this->maybe_create_defender_scan_item_table();
-		$this->maybe_create_audit_log_table();
-		$this->maybe_create_email_logs_table();
+		$this->create_database_tables();
+		$this->on_activation();
 	}
 
 	/**
 	 * Deactivation
 	 */
 	public function deactivation_hook() {
-		wp_clear_scheduled_hook( 'clean_up_old_log' );
+		wp_clear_scheduled_hook( 'firewall_clean_up_logs' );
 		wp_clear_scheduled_hook( 'audit_sync_events' );
+		wp_clear_scheduled_hook( 'audit_clean_up_logs' );
 		wp_clear_scheduled_hook( 'wdf_maybe_send_report' );
+		wp_clear_scheduled_hook( 'wp_defender_clear_logs' );
+		wp_clear_scheduled_hook( 'wpdef_sec_key_gen' );
+
+		// Remove old legacy cron jobs if they exist.
+		wp_clear_scheduled_hook( 'lockoutReportCron' );
+		wp_clear_scheduled_hook( 'auditReportCron' );
+		wp_clear_scheduled_hook( 'cleanUpOldLog' );
+		wp_clear_scheduled_hook( 'scanReportCron' );
+		wp_clear_scheduled_hook( 'tweaksSendNotification' );
 	}
 
-	protected function maybe_create_email_logs_table() {
+	/**
+	 * Creates Defender tables
+	 */
+	protected function create_database_tables() {
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
 		global $wpdb;
-		$table_name      = $wpdb->base_prefix . 'defender_email_log';
+
+		$wpdb->hide_errors();
+		//Email log table
 		$charset_collate = $wpdb->get_charset_collate();
-		$sql             = "CREATE TABLE IF NOT EXISTS `{$table_name}` (
+		$sql             = "CREATE TABLE IF NOT EXISTS {$wpdb->base_prefix}defender_email_log (
  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
  `timestamp` int NOT NULL,
  `source` varchar(255) NOT NULL,
  `to` varchar (255) NOT NULL,
- PRIMARY KEY (`id`)
-) $charset_collate";
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+ PRIMARY KEY  (`id`),
+ KEY `source` (`source`)
+) $charset_collate;";
 		dbDelta( $sql );
-	}
 
-	/**
-	 * Though our data mainly store on API side, we will need a table for caching
-	 */
-	protected function maybe_create_audit_log_table() {
-		global $wpdb;
-		$table_name      = $wpdb->base_prefix . 'defender_audit_log';
-		$charset_collate = $wpdb->get_charset_collate();
-		$sql             = "CREATE TABLE IF NOT EXISTS `{$table_name}` (
+		/**
+		 * Though our data mainly store on API side, we will need a table for caching
+		 */
+		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->base_prefix}defender_audit_log (
  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
  `timestamp` int NOT NULL,
  `event_type` varchar(255) NOT NULL,
@@ -84,33 +95,30 @@ class Bootstrap {
  `blog_id` int NOT NULL,
  `synced` int NOT NULL,
  `ttl` int NOT NULL,
- PRIMARY KEY (`id`)
-) $charset_collate";
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+ PRIMARY KEY  (`id`),
+ KEY `event_type` (`event_type`),
+ KEY `action_type` (`action_type`),
+ KEY `user_id` (`user_id`),
+ KEY `context` (`context`),
+ KEY `ip` (`ip`)
+) $charset_collate;";
 		dbDelta( $sql );
-	}
 
-	protected function maybe_create_defender_scan_item_table() {
-		global $wpdb;
-		$table_name      = $wpdb->base_prefix . 'defender_scan_item';
-		$charset_collate = $wpdb->get_charset_collate();
-		$sql             = "CREATE TABLE IF NOT EXISTS `{$table_name}` (
+		//Scan item table
+		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->base_prefix}defender_scan_item (
  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
  `parent_id` int NOT NULL,
  `type` varchar(255) NOT NULL,
  `status` varchar (255) NOT NULL,
  `raw_data` text NOT NULL,
- PRIMARY KEY (`id`)
-) $charset_collate";
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+ PRIMARY KEY  (`id`),
+ KEY `type` (`type`),
+ KEY `status` (`status`)
+) $charset_collate;";
 		dbDelta( $sql );
-	}
 
-	protected function maybe_create_defender_scan_table() {
-		global $wpdb;
-		$table_name      = $wpdb->base_prefix . 'defender_scan';
-		$charset_collate = $wpdb->get_charset_collate();
-		$sql             = "CREATE TABLE IF NOT EXISTS `{$table_name}` (
+		//Scan table
+		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->base_prefix}defender_scan (
  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
  `percent` float NOT NULL,
  `total_tasks` tinyint(4) NOT NULL,
@@ -119,52 +127,45 @@ class Bootstrap {
  `date_start` datetime NOT NULL,
  `date_end` datetime NOT NULL,
  `is_automation` Bool NOT NULL,
- PRIMARY KEY (`id`)
-) $charset_collate";
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-		dbDelta( $sql );
-	}
-
-	protected function maybe_create_defender_lockout_log_table() {
-		global $wpdb;
-		$table_name      = $wpdb->base_prefix . 'defender_lockout_log';
-		$charset_collate = $wpdb->get_charset_collate();
-		$sql             = "CREATE TABLE IF NOT EXISTS `{$table_name}` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `log` text,
-  `ip` varchar(255) DEFAULT NULL,
-  `date` int(11) DEFAULT NULL,
-  `type` varchar(16) DEFAULT NULL,
-  `user_agent` varchar(255) DEFAULT NULL,
-  `blog_id` int(11) DEFAULT NULL,
-  `tried` VARCHAR (255),
-  PRIMARY KEY (`id`)
+ PRIMARY KEY  (`id`)
 ) $charset_collate;";
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql );
-	}
 
-	/**
-	 * Create the table _defender_lockout for Ip Lockout module
-	 */
-	protected function maybe_create_defender_lockout_table() {
-		global $wpdb;
-		$table_name      = $wpdb->base_prefix . 'defender_lockout';
-		$charset_collate = $wpdb->get_charset_collate();
-		$sql             = "CREATE TABLE IF NOT EXISTS `{$table_name}` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `ip` varchar(255) DEFAULT NULL,
-  `status` varchar(16) DEFAULT NULL,
-  `lockout_message` text,
-  `release_time` int(11) DEFAULT NULL,
-  `lock_time` int(11) DEFAULT NULL,
-  `lock_time_404` int(11) DEFAULT NULL,
-  `attempt` int(11) DEFAULT NULL,
-  `attempt_404` int(11) DEFAULT NULL,
-  `meta` text,
-  PRIMARY KEY (`id`)
+		//Lockout log table
+		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->base_prefix}defender_lockout_log (
+ `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+ `log` text,
+ `ip` varchar(255) DEFAULT NULL,
+ `date` int(11) DEFAULT NULL,
+ `type` varchar(16) DEFAULT NULL,
+ `user_agent` varchar(255) DEFAULT NULL,
+ `blog_id` int(11) DEFAULT NULL,
+ `tried` VARCHAR (255),
+ PRIMARY KEY  (`id`),
+ KEY `ip` (`ip`),
+ KEY `type` (`type`),
+ KEY `tried` (`tried`)
 ) $charset_collate;";
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql );
+
+		//Lockout table
+		$sql = "CREATE TABLE IF NOT EXISTS {$wpdb->base_prefix}defender_lockout (
+ `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+ `ip` varchar(255) DEFAULT NULL,
+ `status` varchar(16) DEFAULT NULL,
+ `lockout_message` text,
+ `release_time` int(11) DEFAULT NULL,
+ `lock_time` int(11) DEFAULT NULL,
+ `lock_time_404` int(11) DEFAULT NULL,
+ `attempt` int(11) DEFAULT NULL,
+ `attempt_404` int(11) DEFAULT NULL,
+ `meta` text,
+ PRIMARY KEY  (`id`),
+ KEY `ip` (`ip`),
+ KEY `status` (`status`),
+ KEY `attempt` (`attempt`),
+ KEY `attempt_404` (`attempt_404`)
+) $charset_collate;";
 		dbDelta( $sql );
 	}
 
@@ -175,9 +176,10 @@ class Bootstrap {
 		//Init main ORM
 		Array_Cache::set( 'orm', new Mapper() );
 		/**
-		 * if this is a fresh install and there were no requests from the Hub before,
-		 * then we should display the onboarding first
-		 */
+		 * Display Onboarding if:
+		 * it's a fresh install and there were no requests from the Hub before,
+		 * after Reset Settings
+		*/
 		$hub_class = wd_di()->get( HUB::class );
 		$hub_class->set_onboarding_status( $this->maybe_show_onboarding() );
 		$hub_class->listen_to_requests();
@@ -197,10 +199,13 @@ class Bootstrap {
 		wd_di()->get( Advanced_Tools::class );
 		wd_di()->get( Mask_Login::class );
 		wd_di()->get( Security_Headers::class );
+		wd_di()->get( Recaptcha::class );
 		wd_di()->get( Notification::class );
 		wd_di()->get( Main_Setting::class );
 		wd_di()->get( Tutorial::class );
 		wd_di()->get( Blocklist_Monitor::class );
+		wd_di()->get( Password_Protection::class );
+		wd_di()->get( Password_Reset::class );
 		$this->init_wpmudev_dashnotice();
 	}
 
@@ -210,12 +215,14 @@ class Bootstrap {
 	private function maybe_show_onboarding() {
 		//first we need to check if the site is newly create
 		global $wpdb;
-		$option = 'wp_defender_shown_activator';
 		if ( ! is_multisite() ) {
-			$res = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = '$option'" );
+			$res = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'wp_defender_shown_activator'" );
 		} else {
-			$network_id = get_current_network_id();
-			$res = $wpdb->get_var( "SELECT meta_value FROM $wpdb->sitemeta WHERE meta_key = '$option' AND site_id = $network_id" );
+			$sql = $wpdb->prepare(
+				"SELECT meta_value FROM $wpdb->sitemeta WHERE meta_key = 'wp_defender_shown_activator' AND site_id = %d",
+				get_current_network_id()
+			);
+			$res = $wpdb->get_var( $sql );
 		}
 		//Get '1' for direct SQL request if Onboarding was already
 		if ( empty( $res ) ) {
@@ -290,7 +297,7 @@ class Bootstrap {
 	 * Register all core assets
 	 */
 	public function register_assets() {
-		$base_url = plugin_dir_url( dirname( __FILE__ ) );
+		$base_url = plugin_dir_url( __DIR__ );
 		wp_enqueue_style( 'defender-menu', $base_url . 'assets/css/defender-icon.css' );
 
 		$css_files = array(
@@ -322,7 +329,7 @@ class Bootstrap {
 			],
 			'def-securitytweaks' => [
 				$base_url . 'assets/app/security-tweak.js',
-				$dependencies,
+				array_merge( $dependencies, [ 'clipboard', 'wpmudev-sui' ] ),
 			],
 			'def-scan'           => [
 				$base_url . 'assets/app/scan.js',
@@ -366,26 +373,7 @@ class Bootstrap {
 			]
 		);
 
-		global $wp_version;
-		$is_older_5_2 = false;
-		if ( version_compare( $wp_version, '5.2', '<' ) ) {
-			// Check clipboard.js is registered or not.
-			// Remove it when the minimum WP version will be increased.
-			if ( ! wp_script_is( 'clipboard', 'registered' ) ) {
-				$js_files['clipboard'] = [
-					$base_url . 'assets/js/clipboard.min.js',
-				];
-			}
-			$js_files['wpmudev-sui'] = [
-				$base_url . 'assets/js/shared-ui.js',
-				[ 'clipboard' ],
-			];
-			$js_files['defender'] = [
-				$base_url . 'assets/js/scripts.js',
-				[ 'wpmudev-sui' ],
-			];
-			$is_older_5_2 = true;
-		}
+		global $wp_defender_central;
 
 		foreach ( $js_files as $slug => $file ) {
 			if ( isset( $file[1] ) ) {
@@ -394,20 +382,25 @@ class Bootstrap {
 				wp_register_script( $slug, $file[0], array( 'jquery' ), DEFENDER_VERSION, true );
 			}
 		}
+
 		$wpmu_dev = new WPMUDEV();
+
 		wp_localize_script( 'def-vue', 'defender', [
-			'whitelabel'    => $wpmu_dev->white_label_status(),
-			'misc'          => [
+			'whitelabel'            => defender_white_label_status(),
+			'misc'                  => [
 				'high_contrast' => $wpmu_dev->maybe_high_contrast(),
 			],
-			'site_url'      => network_site_url(),
-			'admin_url'     => network_admin_url(),
-			'defender_url'  => $base_url,
-			'is_free'       => $wpmu_dev->is_pro() ? 0 : 1,
-			'is_membership' => true,
-			'is_whitelabel' => $wpmu_dev->is_whitelabel_enabled() ? 'enabled' : 'disabled',
-			'is_older_5_2'  => $is_older_5_2,
+			'site_url'              => network_site_url(),
+			'admin_url'             => network_admin_url(),
+			'defender_url'          => $base_url,
+			'is_free'               => $wpmu_dev->is_pro() ? 0 : 1,
+			'is_membership'         => true,
+			'is_whitelabel'         => $wpmu_dev->is_whitelabel_enabled() ? 'enabled' : 'disabled',
+			'opcache_save_comments' => $wp_defender_central->is_opcache_save_comments_disabled() ? 'disabled' : 'enabled',
 		] );
+
+		wp_localize_script( 'defender', 'defenderGetText', $this->defender_gettext_translations() );
+
 		do_action( 'defender_enqueue_assets' );
 	}
 
@@ -420,6 +413,8 @@ class Bootstrap {
 	 */
 	private function table_exists( $table_name ) {
 		global $wpdb;
+		//full table name
+		$table_name = $wpdb->base_prefix . $table_name;
 
 		return $wpdb->get_var( "SHOW TABLES LIKE '{$table_name}'" ) === $table_name;
 	}
@@ -433,25 +428,49 @@ class Bootstrap {
 
 			return;
 		}
-		global $wpdb;
 
-		if ( ! $this->table_exists( $wpdb->base_prefix . 'defender_lockout' ) ) {
-			$this->maybe_create_defender_lockout_table();
+		if (
+			! $this->table_exists( 'defender_lockout' )
+			|| ! $this->table_exists( 'defender_lockout_log' )
+			|| ! $this->table_exists( 'defender_scan' )
+			|| ! $this->table_exists( 'defender_scan_item' )
+			|| ! $this->table_exists( 'defender_audit_log' )
+			|| ! $this->table_exists( 'defender_email_log' )
+		) {
+			$this->create_database_tables();
 		}
-		if ( ! $this->table_exists( $wpdb->base_prefix . 'defender_lockout_log' ) ) {
-			$this->maybe_create_defender_lockout_log_table();
+	}
+
+	/**
+	 * Find all the strings from .mo file
+	 * `wpdef` is our text domain.
+	 */
+	private function defender_gettext_translations() {
+		global $l10n;
+
+		if ( ! isset( $l10n['wpdef'] ) ) {
+			return array();
 		}
-		if ( ! $this->table_exists( $wpdb->base_prefix . 'defender_scan' ) ) {
-			$this->maybe_create_defender_scan_table();
+
+		$items = array();
+
+		foreach ( $l10n['wpdef']->entries as $key => $value ) {
+			$items[ $key ] = count( $value->translations ) ? $value->translations[0] : $key;
 		}
-		if ( ! $this->table_exists( $wpdb->base_prefix . 'defender_scan_item' ) ) {
-			$this->maybe_create_defender_scan_item_table();
-		}
-		if ( ! $this->table_exists( $wpdb->base_prefix . 'defender_audit_log' ) ) {
-			$this->maybe_create_audit_log_table();
-		}
-		if ( ! $this->table_exists( $wpdb->base_prefix . 'defender_email_log' ) ) {
-			$this->maybe_create_email_logs_table();
-		}
+
+		return $items;
+	}
+
+	/**
+	 * Trigger mandatory actions on activation.
+	 */
+	private function on_activation() {
+		add_action(
+			'admin_init',
+			function() {
+				$security_tweaks = wd_di()->get( Security_Tweaks::class );
+				$security_tweaks->get_security_key()->cron_schedule();
+			}
+		);
 	}
 }

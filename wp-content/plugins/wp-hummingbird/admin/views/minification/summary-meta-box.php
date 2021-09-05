@@ -15,15 +15,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$branded_image = apply_filters( 'wpmudev_branding_hero_image', '' );
 ?>
 
-<div class="sui-summary-image-space" aria-hidden="true" style="background-image: url( '<?php echo esc_url( apply_filters( 'wpmudev_branding_hero_image', '' ) ); ?>' )"></div>
+<?php if ( $branded_image ) : ?>
+	<div class="sui-summary-image-space" aria-hidden="true" style="background-image: url('<?php echo esc_url( $branded_image ); ?>')"></div>
+<?php else : ?>
+	<div class="sui-summary-image-space" aria-hidden="true"></div>
+<?php endif; ?>
 <div class="sui-summary-segment">
 	<div class="sui-summary-details">
 		<?php if ( ! $percentage || '0.0' === $percentage ) : ?>
 			<?php if ( 'basic' === $this->mode ) : ?>
 				<span class="sui-tooltip" data-tooltip="<?php esc_attr_e( 'All assets are auto-compressed', 'wphb' ); ?>">
-					<i class="sui-icon-check-tick sui-lg" aria-hidden="true"></i>
+					<span class="sui-icon-check-tick sui-lg" aria-hidden="true"></span>
 				</span>
 			<?php else : ?>
 				&mdash;
@@ -46,9 +51,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="sui-list-label"><?php esc_html_e( 'Filesize reductions', 'wphb' ); ?></span>
 			<span class="sui-list-detail">
 				<?php if ( 'basic' === $this->mode && 0 === (int) $compressed_size ) : ?>
-					<?php esc_html_e( 'Files are compressed', 'wphb' ); ?> <i class="sui-icon-check-tick sui-lg" aria-hidden="true"></i>
+					<?php esc_html_e( 'Files are compressed', 'wphb' ); ?> <span class="sui-icon-check-tick sui-md" aria-hidden="true"></span>
 				<?php else : ?>
-					<?php echo (int) $compressed_size; ?>kb
+					<?php echo $compressed_size; ?>kb
 				<?php endif; ?>
 			</span>
 		</li>
@@ -71,7 +76,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</a>
 				<?php elseif ( $use_cdn && $is_member ) : ?>
 					<span class="sui-tooltip sui-tooltip-top-right" data-tooltip="<?php esc_html_e( 'The Network Admin has the WPMU DEV CDN turned on', 'wphb' ); ?>">
-						<i class="sui-icon-check-tick sui-md sui-info" aria-hidden="true"></i>
+						<span class="sui-icon-check-tick sui-md sui-info" aria-hidden="true"></span>
 					</span>
 				<?php else : ?>
 					<span class="sui-tag sui-tag-disabled sui-tooltip sui-tooltip-top-right" data-tooltip="<?php esc_html_e( 'The Network Admin has the WPMU DEV CDN turned off', 'wphb' ); ?>">

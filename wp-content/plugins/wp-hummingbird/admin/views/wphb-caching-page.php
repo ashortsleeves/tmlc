@@ -13,31 +13,30 @@ if ( $this->has_meta_boxes( 'main' ) ) {
 	$this->do_meta_boxes( 'main' );
 }
 
-if ( $this->has_meta_boxes( 'box-caching' ) ) {
-	$this->do_meta_boxes( 'box-caching' );
-} ?>
+$forms = array( 'page_cache', 'rss', 'settings' );
+?>
 
 <div class="sui-row-with-sidenav">
 	<?php $this->show_tabs(); ?>
 
-	<?php if ( 'page_cache' === $this->get_current_tab() ) : ?>
-		<form id="page-caching-form" method="post">
-			<?php $this->do_meta_boxes( 'page_cache' ); ?>
-		</form>
-	<?php elseif ( 'rss' === $this->get_current_tab() ) : ?>
-		<form id="rss-caching-settings" method="post">
-			<?php $this->do_meta_boxes( 'rss' ); ?>
-		</form>
-	<?php elseif ( 'settings' === $this->get_current_tab() ) : ?>
-		<form id="other-caching-settings" method="post">
-			<?php $this->do_meta_boxes( 'settings' ); ?>
+	<?php if ( 'caching' === $this->get_current_tab() ) : ?>
+		<div class="box-caching-status" id="wrap-wphb-browser-caching"></div><br>
+	<?php endif; ?>
+
+	<?php if ( in_array( $this->get_current_tab(), $forms, true ) ) : ?>
+		<form id="<?php echo esc_attr( $this->get_current_tab() ); ?>-form" method="post">
+			<?php $this->do_meta_boxes( $this->get_current_tab() ); ?>
 		</form>
 	<?php else : ?>
-		<div>
-			<?php $this->do_meta_boxes( $this->get_current_tab() ); ?>
-		</div>
+		<?php $this->do_meta_boxes( $this->get_current_tab() ); ?>
 	<?php endif; ?>
 </div>
+
+<?php
+if ( 'caching' === $this->get_current_tab() || 'integrations' === $this->get_current_tab() ) {
+	$this->modal( 'integration-cloudflare' );
+}
+?>
 
 <script>
 	jQuery(document).ready( function() {

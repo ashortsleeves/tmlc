@@ -232,7 +232,7 @@ class Smush {
 		jQuery('.wp-smush-all').prop('disabled', false);
 		// For bulk process, enable other buttons.
 		jQuery(
-			'button.wp-smush-scan, a.wp-smush-lossy-enable, button.wp-smush-resize-enable, button#wp-smush-save-settings'
+			'button.wp-smush-scan, a.wp-smush-lossy-enable, button.wp-smush-resize-enable, button#save-settings-button'
 		).prop('disabled', false);
 	}
 
@@ -633,6 +633,9 @@ class Smush {
 					.getElementById('wp-smush-pending-to-smush-text')
 					.classList.add('sui-hidden');
 			}
+
+			// Reset the progress when we finish so the next smushing starts from zero.
+			this._updateProgress(0, 0);
 		} else {
 			// Show loader.
 			statusIcon
@@ -1165,7 +1168,7 @@ class Smush {
 		const self = this;
 
 		this.deferred.done( function() {
-			self.button.removeProp( 'continue_smush' );
+			self.button.removeAttr( 'continue_smush' );
 
 			if ( self.errors.length ) {
 				/** @param {string} wp_smush_msgs.error_in_bulk */

@@ -211,14 +211,20 @@ class Sh_Strict_Transport extends Security_Header {
 		$model = $this->get_model();
 		//header is ignored by the browser when your site is accessed using HTTP
 		if ( true === $model->sh_strict_transport ) {
-			$headers = 'Strict-Transport-Security:';
+			$headers         = 'Strict-Transport-Security:';
+			$default_max_age = 604800;
 			if ( isset( $model->hsts_cache_duration ) && ! empty( $model->hsts_cache_duration ) ) {
 				$arr = $this->time_in_seconds();
 				//set default for a week, so RIPs wont waring weak header
-				$seconds = isset( $arr[ $model->hsts_cache_duration ] ) ? $arr[ $model->hsts_cache_duration ] : 604800;
+				$seconds = isset( $arr[ $model->hsts_cache_duration ] )
+					? $arr[ $model->hsts_cache_duration ]
+					: $default_max_age;
 				if ( ! is_null( $seconds ) ) {
 					$headers .= ' max-age=' . $seconds;
 				}
+			} else {
+				//set default for a week
+				$headers .= ' max-age=' . $default_max_age;
 			}
 
 			if ( '1' === (string) $model->include_subdomain ) {

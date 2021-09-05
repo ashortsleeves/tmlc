@@ -4,11 +4,9 @@ namespace WP_Defender\Controller;
 
 use Calotes\Component\Request;
 use Calotes\Component\Response;
-use Calotes\Helper\HTTP;
-use Calotes\Helper\Route;
 use WP_Defender\Controller2;
 use WP_Defender\Model\Notification\Malware_Report;
-use WP_Defender\Model\Scan_Item;
+use Valitron\Validator;
 
 class Scan extends Controller2 {
 	protected $slug = 'wdf-scan';
@@ -42,6 +40,15 @@ class Scan extends Controller2 {
 		add_action( 'defender_enqueue_assets', array( &$this, 'enqueue_assets' ) );
 		add_action( 'wp_ajax_defender_process_scan', array( &$this, 'process' ) );
 		add_action( 'wp_ajax_nopriv_defender_process_scan', array( &$this, 'process' ) );
+		//Clean up data after successful core update
+		add_action( '_core_updated_successfully', array( &$this, 'clean_up_data' ) );
+	}
+
+	/**
+	 * Clean up data after core updating
+	 */
+	public function clean_up_data() {
+		$this->service->clean_up();
 	}
 
 	/**
@@ -141,7 +148,7 @@ class Scan extends Controller2 {
 		$component = new \WP_Defender\Component\Scan();
 		$component->cancel_a_scan();
 		$last = \WP_Defender\Model\Scan::get_last();
-		if ( is_object( $last ) ) {
+		if ( is_object( $last ) && ! is_wp_error( $last ) ) {
 			$last = $last->to_array();
 		}
 
@@ -196,6 +203,11 @@ class Scan extends Controller2 {
 					array(
 						'message' => $result->get_error_message(),
 					)
+				);
+			} elseif ( isset( $result['type_notice'] ) ) {
+				return new Response(
+					true,
+					$result
 				);
 			}
 			//refresh scan instance
@@ -270,16 +282,39 @@ class Scan extends Controller2 {
 	 */
 	public function save_settings( Request $request ) {
 		$data = $request->get_data_by_model( $this->model );
+		//Case#1: enable all child options, if parent and all child options are disabled, so that there is no notice when saving
+		if (
+			! $data['integrity_check']
+			&& ! $data['check_core']
+			&& ! $data['check_plugins']
+		) {
+			$data['check_core']    = true;
+			$data['check_plugins'] = true;
+		}
+
+		//Case#2: Suspicious code is activated BUT File change detection is deactivated then show the notice
+		if ( $data['scan_malware'] && ! $data['integrity_check'] ){
+			$response = array(
+				'type_notice' => 'info',
+				'message'     => __( "To reduce false-positive results, we recommend enabling" .
+					" <strong>File change detection</strong> options for all scan types while the" .
+					" <strong>Suspicious code</strong> option is enabled.", 'wpdef' ),
+			);
+		} else {
+			//Prepare response message for usual successful case
+			$response = array(
+				'message' => __( 'Your settings have been updated.', 'wpdef' ),
+			);
+		}
 
 		$this->model->import( $data );
 		if ( $this->model->validate() ) {
+			//Todo: need to disable Malware_Notification & Malware_Report if all scan settings are deactivated?
 			$this->model->save();
 
 			return new Response(
 				true,
-				array(
-					'message' => __( 'Your settings have been updated.', 'wpdef' ),
-				)
+				$response
 			);
 		} else {
 			return new Response(
@@ -289,6 +324,60 @@ class Scan extends Controller2 {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Get the issues mainly for pagination request
+	 *
+	 * @return Response
+	 * @defender_route
+	 */
+	public function get_issues( Request $request ) {
+		$data      = $request->get_data(
+			array(
+				'scenario' => array(
+					'type'     => 'string',
+					'sanitize' => 'sanitize_text_field',
+				),
+				'type' => array(
+					'type'     => 'string',
+					'sanitize' => 'sanitize_text_field',
+				),
+				'per_page'  => array(
+					'type'     => 'string',
+					'sanitize' => 'sanitize_text_field',
+				),
+				'paged'  	=> array(
+					'type'     => 'int',
+					'sanitize' => 'sanitize_text_field',
+				),
+			)
+		);
+
+		// Validate the request
+		$v = new Validator( $data, array() );
+		$v->rule( 'required', array( 'scenario', 'type', 'per_page', 'paged' ) );
+		if ( ! $v->validate() ) {
+			return new Response(
+				false,
+				array(
+					'message' => '',
+				)
+			);
+		}
+
+		$scan = \WP_Defender\Model\Scan::get_last();
+		$issues = $scan->to_array( $data['per_page'], $data['paged'], $data['type'] );
+
+		return new Response(
+			true,
+			array(
+				'issue' => $issues['issues_items'],
+				'ignored' => $issues['ignored_items'],
+				'paging' => $issues['paging'],
+				'count' => $issues['count'],
+			)
+		);
 	}
 
 	/**
@@ -303,20 +392,26 @@ class Scan extends Controller2 {
 			$url
 		);
 		$this->log( sprintf( 'ping url %s', $url ), 'scan' );
-		$ret = wp_remote_post(
-			$url,
-			array(
-				'body'     => array(),
-				'blocking' => false,
-				'timeout'  => 3,
-				'headers'  => array(
-					'user-agent' => sprintf(
-						'Mozilla/5.0 (compatible; WPMU DEV Defender/%1$s; +https://premium.wpmudev.org)',
-						DEFENDER_VERSION
-					),
+		$body = array(
+			'body'     => array(),
+			'blocking' => false,
+			'timeout'  => 3,
+			'headers'  => array(
+				'user-agent' => sprintf(
+					'Mozilla/5.0 (compatible; WPMU DEV Defender/%1$s; +https://wpmudev.com)',
+					DEFENDER_VERSION
 				),
-			)
+			),
 		);
+		if (
+			isset( $_SERVER['PHP_AUTH_USER'], $_SERVER['HTTP_AUTHORIZATION'] )
+			&& ! empty( $_SERVER['PHP_AUTH_USER'] )
+			&& ! empty( $_SERVER['HTTP_AUTHORIZATION'] )
+		) {
+			$body['headers']['Authorization'] = $_SERVER['HTTP_AUTHORIZATION'];
+		}
+
+		wp_remote_post( $url, $body );
 	}
 
 	/**
@@ -363,6 +458,10 @@ class Scan extends Controller2 {
 			defender_asset_url( '/assets/js/vendor/codemirror/scroll/annotatescrollbar.js' )
 		);
 		wp_enqueue_script(
+			'def-codemirror-simplescrollbars',
+			defender_asset_url( '/assets/js/vendor/codemirror/scroll/simplescrollbars.js' )
+		);
+		wp_enqueue_script(
 			'def-codemirror-searchcursor',
 			defender_asset_url( '/assets/js/vendor/codemirror/search/searchcursor.js' )
 		);
@@ -381,13 +480,16 @@ class Scan extends Controller2 {
 			'def-codemirror-matchonscrollbars',
 			defender_asset_url( '/assets/js/vendor/codemirror/search/matchesonscrollbar.css' )
 		);
+		wp_enqueue_style(
+			'def-codemirror-simplescrollbars',
+			defender_asset_url( '/assets/js/vendor/codemirror/scroll/simplescrollbars.css' )
+		);
 	}
 
 	/**
 	 * @return array[]
 	 */
 	public function to_array() {
-		list( $endpoints, $nonces ) = Route::export_routes( 'scan' );
 		$scan = \WP_Defender\Model\Scan::get_active();
 		$last = \WP_Defender\Model\Scan::get_last();
 		if ( ! is_object( $scan ) && ! is_object( $last ) ) {
@@ -408,18 +510,18 @@ class Scan extends Controller2 {
 		);
 	}
 
-	function remove_settings() {
+	public function remove_settings() {
 		( new \WP_Defender\Model\Setting\Scan() )->delete();
 	}
 
-	function remove_data() {
-
+	public function remove_data() {
+		delete_site_option( \WP_Defender\Model\Scan::IGNORE_INDEXER );
 	}
 
 	/**
 	 * This should setup the optimize configs for this module
 	 */
-	function optimize_configs() {
+	public function optimize_configs() {
 		$settings = new \WP_Defender\Model\Setting\Scan();
 		$settings->save();
 		//schedule it
@@ -431,19 +533,22 @@ class Scan extends Controller2 {
 	 * @return array
 	 */
 	public function data_frontend() {
-		$scan = \WP_Defender\Model\Scan::get_active();
-		$last = \WP_Defender\Model\Scan::get_last();
+		$scan     = \WP_Defender\Model\Scan::get_active();
+		$last     = \WP_Defender\Model\Scan::get_last();
+		$per_page = 10;
+		$paged    = 1;
 		if ( ! is_object( $scan ) && ! is_object( $last ) ) {
 			$scan = null;
 		} else {
-			$scan = is_object( $scan ) ? $scan->to_array() : $last->to_array();
+			$scan = is_object( $scan ) ? $scan->to_array( $per_page, $paged ) : $last->to_array( $per_page, $paged );
 		}
 		$settings    = new \WP_Defender\Model\Setting\Scan();
 		$report      = wd_di()->get( Malware_Report::class );
 		$report_text = __( 'Automatic scans are disabled', 'wpdef' );
 		if ( Malware_Report::STATUS_ACTIVE === $report->status ) {
-			$report_text = sprintf( __( 'Automatic scans are running %s', 'wpdef' ), $report->frequency );
+			$report_text = sprintf( __( 'Automatic scans are <br/>running %s', 'wpdef' ), $report->frequency );
 		}
+		//Todo: add logic for deactivated scan settings
 		$data = array(
 			'scan'         => $scan,
 			'settings'     => $settings->export(),
@@ -471,10 +576,11 @@ class Scan extends Controller2 {
 	 */
 	private function is_any_active( $is_pro ) {
 		$settings = new \WP_Defender\Model\Setting\Scan();
-		if ( ! $settings->integrity_check && ! $is_pro ) {
+		$integrity_check = $settings->is_any_filetypes_checked();
+		if ( ! $integrity_check && ! $is_pro ) {
 			return false;
 		} elseif (
-			( ! $settings->integrity_check && ! $settings->check_known_vuln && ! $settings->scan_malware )
+			( ! $integrity_check && ! $settings->check_known_vuln && ! $settings->scan_malware )
 			&& ! $is_pro
 		) {
 			return false;
@@ -507,6 +613,37 @@ class Scan extends Controller2 {
 			);
 		} elseif ( ! $is_pro ) {
 			$strings[] = sprintf(
+				__( 'Email report inactive %s', 'wpdef' ),
+				'<span class="sui-tag sui-tag-pro">Pro</span>'
+			);
+		}
+
+		return $strings;
+	}
+
+	/**
+	 * @param array $config
+	 * @param bool $is_pro
+	 *
+	 * @return array
+	 */
+	public function config_strings( $config, $is_pro ) {
+		$strings[] = $this->service->is_any_scan_active( $config, $is_pro )
+			? __( 'Active', 'wpdef' )
+			: __( 'Inactive', 'wpdef' );
+
+		if ( 'enabled' === $config['notification'] ) {
+			$strings[] = __( 'Email notifications active', 'wpdef' );
+		}
+		if ( $is_pro && 'enabled' === $config['report'] ) {
+			$strings[] = sprintf(
+			/* translators: ... */
+				__( 'Email reports sending %s', 'wpdef' ),
+				$config['frequency']
+			);
+		} elseif ( ! $is_pro ) {
+			$strings[] = sprintf(
+			/* translators: ... */
 				__( 'Email report inactive %s', 'wpdef' ),
 				'<span class="sui-tag sui-tag-pro">Pro</span>'
 			);

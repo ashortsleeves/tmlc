@@ -1,10 +1,12 @@
+/* global wphb */
+
 /**
  * Strings internationalization
  *
  * @param {string} str
- * @return {*|string}
+ * @return {*|string} String
  */
-export const __ = ( str ) => {
+export const getString = ( str ) => {
 	return wphb.strings[ str ] || '';
 };
 

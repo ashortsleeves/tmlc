@@ -103,6 +103,8 @@ class Tables extends Model {
 		}
 
 		if ( 0 === $start ) {
+			// Make sure that identifiers get backticked, so we can safely do the RegEx replace in modify_create_view_query().
+			$wpdb->query( 'SET SESSION SQL_QUOTE_SHOW_CREATE=1;' ); // db call ok; no-cache ok.
 			// Use of esc_sql() instead of $wpdb->prepare() because of backticks in query.
 			$table_create = $wpdb->get_row( esc_sql( "SHOW CREATE TABLE `{$table}`" ), ARRAY_A ); // db call ok; no-cache ok.
 
@@ -114,6 +116,7 @@ class Tables extends Model {
 				);
 
 				$drop_result = '' .
+				/* translators: %s - DB table name */
 				'# ' . sprintf( __( 'Snapshot table export for %s', 'snapshot' ), $table ) . "\n" .
 				"DROP TABLE IF EXISTS {$quoted_table};" .
 				$db_model->get_statement_delimiter() .
@@ -121,6 +124,17 @@ class Tables extends Model {
 				$db_model->get_statement_delimiter();
 
 				file_put_contents( $temp_sql_file, $drop_result, FILE_APPEND ); // phpcs:ignore
+			} elseif ( isset( $table_create['Create View'] ) ) {
+				/* translators: %s - DB view name */
+				$query = '# ' . sprintf( __( 'Snapshot view export for %s', 'snapshot' ), $table ) . "\n" .
+					self::modify_create_view_query( $table_create['Create View'] ) .
+					$db_model->get_statement_delimiter();
+
+				file_put_contents( $temp_sql_file, $query, FILE_APPEND ); // phpcs:ignore
+
+				$result['current_row'] = 0;
+				$result['done']        = true;
+				return $result;
 			}
 		}
 
@@ -164,6 +178,20 @@ class Tables extends Model {
 		$result['current_row'] = 0;
 		$result['done']        = true;
 		return $result;
+	}
+
+	/**
+	 * Modifies CREATE VIEW query.
+	 *
+	 * @param string $query CREATE VIEW query.
+	 * @return string
+	 */
+	private static function modify_create_view_query( $query ) {
+		$query = preg_replace( '/^CREATE\s+/', 'CREATE OR REPLACE ', $query );
+
+		$query = preg_replace( '/DEFINER\s*=\s*`[^`]+`@`[^`]+`/u', 'DEFINER=CURRENT_USER', $query );
+
+		return $query;
 	}
 
 	/**

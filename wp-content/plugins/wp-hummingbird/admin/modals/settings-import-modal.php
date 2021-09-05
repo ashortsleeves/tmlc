@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<div class="sui-box-header sui-flatten sui-content-center sui-spacing-top--60 sui-spacing-sides--20">
 
 				<button class="sui-button-icon sui-button-float--right" data-modal-close="">
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text"><?php esc_attr_e( 'Close this modal', 'wphb' ); ?></span>
 				</button>
 
@@ -52,13 +52,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<span class="sui-button-text-default"><?php esc_html_e( 'BEGIN IMPORT', 'wphb' ) ?></span>
 						<!-- Loading State Content -->
 						<span class="sui-button-text-onload">
-							<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+							<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 							<?php esc_html_e( 'IMPORTING', 'wphb' ) ?>
 						</span>
 					</span>
 				</div>
 				<div class="sui-box">
-					<?php esc_html_e( 'Note : This will override your existing Hummingbird asset optimization configuration.', 'wphb' ) ?>
+					<?php esc_html_e( 'Note: This will override your existing Hummingbird asset optimization configuration.', 'wphb' ) ?>
 				</div>
 
 				<figure aria-hidden="true" style="padding: 0px; margin: 0px; height: 130px; overflow: hidden;text-align: center;">

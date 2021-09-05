@@ -4,10 +4,8 @@ namespace WP_Defender\Controller;
 
 use Calotes\Component\Request;
 use Calotes\Component\Response;
-use Calotes\Helper\HTTP;
-use Calotes\Helper\Route;
+use WP_Defender\Component\Config\Config_Hub_Helper;
 use WP_Defender\Component\Security_Tweaks\Servers\Server;
-use WP_Defender\Controller;
 use Calotes\Helper\Array_Cache;
 use WP_Defender\Component\Security_Tweaks\WP_Version;
 use WP_Defender\Component\Security_Tweaks\Hide_Error;
@@ -30,6 +28,25 @@ class Security_Tweaks extends Controller2 {
 	 */
 	protected $model;
 
+	/**
+	 * @var \WP_Defender\Component\Scan
+	 */
+	public $scan;
+
+	/**
+	 * Components instance array.
+	 *
+	 * @var array
+	 */
+	private $component_instances;
+
+	/**
+	 * Instance of Security_Key.
+	 *
+	 * @var Security_Key
+	 */
+	private $security_key;
+
 	const STATUS_ISSUES = 'issues', STATUS_RESOLVE = 'fixed', STATUS_IGNORE = 'ignore', STATUS_RESTORE = 'restore';
 
 	public function __construct() {
@@ -44,9 +61,14 @@ class Security_Tweaks extends Controller2 {
 		);
 		$this->model = wd_di()->get( \WP_Defender\Model\Setting\Security_Tweaks::class );
 		$this->register_routes();
-		$this->log( 'Init class ' . self::class );
-		//init all the tweaks, should happen one time
-		$this->init_tweaks();
+
+		// Init all the tweaks, should happen one time.
+		$this->component_instances = $this->init_tweaks();
+
+		$this->scan = wd_di()->get( \WP_Defender\Component\Scan::class );
+
+		$this->security_key = $this->component_instances['security-key'];
+
 		//now shield up
 		$this->boot();
 		//add addition hooks
@@ -91,12 +113,13 @@ class Security_Tweaks extends Controller2 {
 				'file_paths'     => array(
 					'type'     => 'string',
 					'sanitize' => 'sanitize_textarea_field',
-				)
+				),
 			)
 		);
 
 		$slug  = isset( $data['slug'] ) ? $data['slug'] : false;
 		$tweak = $this->get_tweak( $slug );
+
 		if ( ! is_object( $tweak ) ) {
 			return new Response(
 				false,
@@ -127,6 +150,7 @@ class Security_Tweaks extends Controller2 {
 		}
 
 		if ( true === $ret ) {
+			Config_Hub_Helper::set_clear_active_flag();
 			$this->model->mark( self::STATUS_RESOLVE, $slug );
 			$this->ajax_response( __( 'Security recommendation successfully resolved.', 'wpdef' ) );
 		}
@@ -147,7 +171,7 @@ class Security_Tweaks extends Controller2 {
 	 * @defender_route
 	 */
 	public function revert( Request $request ) {
-		$data  = $request->get_data(
+		$data    = $request->get_data(
 			array(
 				'slug'           => array(
 					'type'     => 'string',
@@ -159,14 +183,13 @@ class Security_Tweaks extends Controller2 {
 				),
 			)
 		);
-		$slug  = isset( $data['slug'] ) ? $data['slug'] : false;
-		$tweak = $this->get_tweak( $slug );
+		$slug    = isset( $data['slug'] ) ? $data['slug'] : false;
+		$tweak   = $this->get_tweak( $slug );
+		$invalid = array( 'message' => __( 'Invalid request', 'wpdef' ) );
 		if ( ! is_object( $tweak ) ) {
 			return new Response(
 				false,
-				array(
-					'message' => __( 'Invalid request', 'wpdef' ),
-				)
+				$invalid
 			);
 		}
 		if ( in_array( $slug, array( 'prevent-php-executed', 'protect-information' ), true ) ) {
@@ -174,9 +197,7 @@ class Security_Tweaks extends Controller2 {
 			if ( ! $current_server ) {
 				return new Response(
 					false,
-					array(
-						'message' => __( 'Invalid request', 'wpdef' ),
-					)
+					$invalid
 				);
 			}
 			$ret = $tweak->revert( $current_server );
@@ -184,19 +205,18 @@ class Security_Tweaks extends Controller2 {
 			$ret = $tweak->revert();
 		}
 
-		if ( true === $ret ) {
-			$this->model->mark( self::STATUS_ISSUES, $slug );
-			$this->ajax_response( __( 'Security recommendation successfully reverted.', 'wpdef' ) );
-		}
 		if ( is_wp_error( $ret ) ) {
 			$this->ajax_response( $ret->get_error_message(), false );
+		}
+		if ( true === $ret ) {
+			Config_Hub_Helper::set_clear_active_flag();
+			$this->model->mark( self::STATUS_ISSUES, $slug );
+			$this->ajax_response( __( 'Security recommendation successfully reverted.', 'wpdef' ) );
 		}
 
 		return new Response(
 			false,
-			array(
-				'message' => __( 'Invalid request', 'wpdef' ),
-			)
+			$invalid
 		);
 	}
 
@@ -224,11 +244,15 @@ class Security_Tweaks extends Controller2 {
 			);
 		}
 		$this->model->mark( self::STATUS_IGNORE, $slug );
+
+		$this->security_key->cron_unschedule();
+
 		$this->ajax_response( __( 'Security recommendation successfully ignored.', 'wpdef' ) );
 	}
 
 	/**
-	 * An endpoint for ignore
+	 * An endpoint for restore
+	 *
 	 * @defender_route
 	 */
 	public function restore( Request $request ) {
@@ -251,6 +275,12 @@ class Security_Tweaks extends Controller2 {
 			);
 		}
 		$this->model->mark( self::STATUS_RESTORE, $slug );
+
+		if ( $this->security_key->get_is_autogenerate_keys() ) {
+			$this->security_key->cron_unschedule(); // Mandatory: cron_schedule method bypass scheduling if already a schedule for this job.
+			$this->security_key->cron_schedule();
+		}
+
 		$this->ajax_response( __( 'Security recommendation successfully restored.', 'wpdef' ) );
 	}
 
@@ -310,48 +340,71 @@ class Security_Tweaks extends Controller2 {
 		$data        = $request->get_data();
 		$remind_date = isset( $data['remind_date'] ) ? $data['remind_date'] : false;
 
+		$is_autogen_flag = isset( $data['is_autogenerate_keys'] ) ?
+			filter_var( $data['is_autogenerate_keys'], FILTER_VALIDATE_BOOLEAN ) :
+			false;
+
 		if ( ! $remind_date ) {
-			return new Response( false, array(
-				'message' => __( 'Invalid Reminder frequency', 'wpdef' )
-			) );
+			return new Response(
+				false,
+				array(
+					'message' => __( 'Invalid Reminder frequency', 'wpdef' ),
+				)
+			);
 		}
-		$security_key = new Security_Key();
-		$values       = array(
-			'reminder_duration' => $remind_date,
-			'reminder_date'     => strtotime( '+' . $remind_date, current_time( 'timestamp' ) ),
+
+		$values = array(
+			'reminder_duration'    => $remind_date,
+			'reminder_date'        => strtotime( '+' . $remind_date, current_time( 'timestamp' ) ),// phpcs:ignore
+			'is_autogenerate_keys' => $is_autogen_flag,
 		);
 
-		if ( update_site_option( 'defender_security_tweaks_' . $security_key->slug, $values ) ) {
-			return new Response( true, array(
-				'message' => __( 'Security recommendation successfully updated.', 'wpdef' )
-			) );
+		if ( update_site_option( 'defender_security_tweaks_' . $this->security_key->slug, $values ) ) {
+
+			if ( true === $is_autogen_flag ) {
+				$this->security_key->cron_unschedule(); // Mandatory: cron_schedule method bypass scheduling if already a schedule for this job.
+				$this->security_key->cron_schedule();
+			}
+
+			return new Response(
+				true,
+				array(
+					'message' => __( 'Security recommendation successfully updated.', 'wpdef' ),
+				)
+			);
 		} else {
-			return new Response( false, array(
-				'message' => __( 'Error while updating.', 'wpdef' )
-			) );
+			return new Response(
+				false,
+				array(
+					'message' => __( 'Error while updating.', 'wpdef' ),
+				)
+			);
 		}
 	}
 
 	/**
-	 * @param $message
+	 * @param string $message
 	 * @param bool $is_success
 	 * @param bool|int $interval
+	 *
+	 * @return Response
 	 */
 	private function ajax_response( $message, $is_success = true, $interval = false ) {
 		global $wp_version;
 		$settings = new \WP_Defender\Model\Setting\Security_Tweaks();
 		$data     = array(
-			'message' => $message,
-			'summary' => array(
+			'message'      => $message,
+			'summary'      => array(
 				'issues_count' => count( $settings->issues ),
 				'fixed_count'  => count( $settings->fixed ),
 				'ignore_count' => count( $settings->ignore ),
 				'php_version'  => phpversion(),
 				'wp_version'   => $wp_version,
 			),
-			'issues'  => $this->init_tweaks( self::STATUS_ISSUES, 'array' ),
-			'fixed'   => $this->init_tweaks( self::STATUS_RESOLVE, 'array' ),
-			'ignored' => $this->init_tweaks( self::STATUS_IGNORE, 'array' ),
+			'issues'       => $this->init_tweaks( self::STATUS_ISSUES, 'array' ),
+			'fixed'        => $this->init_tweaks( self::STATUS_RESOLVE, 'array' ),
+			'ignored'      => $this->init_tweaks( self::STATUS_IGNORE, 'array' ),
+			'issues_slugs' => $settings->issues,
 		);
 		if ( $interval ) {
 			$data['interval'] = $interval;
@@ -367,7 +420,6 @@ class Security_Tweaks extends Controller2 {
 		if ( ! $this->is_page_active() ) {
 			return;
 		}
-		$this->log( 'Prepare data' );
 
 		wp_localize_script( 'def-securitytweaks', 'security_tweaks', $this->data_frontend() );
 		wp_enqueue_script( 'def-securitytweaks' );
@@ -387,21 +439,20 @@ class Security_Tweaks extends Controller2 {
 			$not_allowed_bulk[] = 'prevent-php-executed';
 		}
 		$data = array(
-			'summary'          => array(
+			'summary'               => array(
 				'fixed_count'  => count( $this->model->fixed ),
 				'ignore_count' => count( $this->model->ignore ),
 				'issues_count' => count( $this->model->issues ),
 				'php_version'  => phpversion(),
 				'wp_version'   => $wp_version,
 			),
-			'issues'           => $this->init_tweaks( self::STATUS_ISSUES, 'array' ),
-			'fixed'            => $this->init_tweaks( self::STATUS_RESOLVE, 'array' ),
-			'ignored'          => $this->init_tweaks( self::STATUS_IGNORE, 'array' ),
-			'not_allowed_bulk' => $not_allowed_bulk,
-			'model'            => array(
-				//Todo: need?
-				'notification'        => $this->model->notification,
-			),
+			'issues'                => $this->init_tweaks( self::STATUS_ISSUES, 'array' ),
+			'fixed'                 => $this->init_tweaks( self::STATUS_RESOLVE, 'array' ),
+			'ignored'               => $this->init_tweaks( self::STATUS_IGNORE, 'array' ),
+			'not_allowed_bulk'      => $not_allowed_bulk,
+			'indicator_issue_count' => $this->scan->indicator_issue_count(),
+			'is_autogenerate_keys'  => $this->security_key->get_is_autogenerate_keys(),
+			'reminder_frequencies'  => $this->security_key->reminder_frequencies(),
 		);
 
 		return array_merge( $data, $this->dump_routes_and_nonces() );
@@ -412,6 +463,8 @@ class Security_Tweaks extends Controller2 {
 	}
 
 	/**
+	 * @param Request $request
+	 * @return Response
 	 * @defender_route
 	 */
 	public function bulk_hub( Request $request ) {
@@ -429,6 +482,7 @@ class Security_Tweaks extends Controller2 {
 		);
 		$slugs     = isset( $data['slugs'] ) ? $data['slugs'] : array();
 		$intention = isset( $data['intention'] ) ? $data['intention'] : false;
+		//get processed and unprocessed tweaks
 		list( $processed, $unprocessed ) = $this->security_tweaks_auto_action( $slugs, $intention );
 
 		$message = sprintf(
@@ -448,17 +502,19 @@ class Security_Tweaks extends Controller2 {
 				),
 				$processed
 			);
+
+			Config_Hub_Helper::set_clear_active_flag();
 		}
 		$this->ajax_response( $message );
 	}
 
 	/**
-	 * This will use on onboarding
+	 * Mass processing.
 	 *
-	 * @param $slugs
-	 * @param $intention
+	 * @param array $slugs
+	 * @param string $intention
 	 *
-	 * @return int[]
+	 * @return array
 	 */
 	public function security_tweaks_auto_action( $slugs, $intention ) {
 		$processed   = 0;
@@ -584,14 +640,12 @@ class Security_Tweaks extends Controller2 {
 		$tweaks = Array_Cache::get( 'tweaks', 'tweaks' );
 
 		if ( ! is_array( $tweaks ) ) {
-			$this->log( 'Initial tweaks, should happen 1 time each request' );
 			foreach ( $classes as $class ) {
 				$obj                  = new $class;
 				$tweaks[ $obj->slug ] = $obj;
 			}
 			Array_Cache::set( 'tweaks', $tweaks, 'tweaks' );
 		}
-		$this->log( 'Get tweaks, method: ' . $type );
 		$tmp = array();
 		if ( is_null( $type ) ) {
 			$tmp = $tweaks;
@@ -647,7 +701,7 @@ class Security_Tweaks extends Controller2 {
 	}
 
 	public function remove_settings() {
-		//rever it first
+		//revert it first
 		$tweaks = $this->init_tweaks( self::STATUS_RESOLVE );
 		//assign this so internal can use the current server
 		$_POST['current_server'] = Server::get_current_server();
@@ -659,6 +713,7 @@ class Security_Tweaks extends Controller2 {
 
 		delete_site_transient( 'defender_current_server' );
 		delete_site_transient( 'defender_apache_version' );
+		wp_clear_scheduled_hook( 'wpdef_sec_key_gen' );
 	}
 
 	public function remove_data() {
@@ -781,5 +836,74 @@ class Security_Tweaks extends Controller2 {
 		}
 
 		return $strings;
+	}
+
+	/**
+	 * @param array $config
+	 * @param bool $is_pro
+	 *
+	 * @return array
+	 */
+	public function config_strings( $config, $is_pro ) {
+		if ( empty( $config['issues'] ) ) {
+			$strings[] = __( 'All available recommendations activated', 'wpdef' );
+		} else {
+			$strings[] = sprintf(
+			/* translators: ... */
+				__( '%1$d/%2$d recommendations activated', 'wpdef' ),
+				count( $config['fixed'] ),
+				count( $config['fixed'] ) + count( $config['issues'] ) + count( $config['ignore'] )
+			);
+		}
+		if ( 'enabled' === $config['notification'] ) {
+			$strings[] = __( 'Email notifications active', 'wpdef' );
+		}
+
+		return $strings;
+	}
+
+	/**
+	 * An endpoint for updating auto regenerate flag
+	 *
+	 * @defender_route
+	 */
+	public function update_autogenerate_flag( Request $request ) {
+		$data = $request->get_data();
+
+		$is_autogen_flag = isset( $data['is_autogenerate_keys'] ) ?
+			filter_var( $data['is_autogenerate_keys'], FILTER_VALIDATE_BOOLEAN ) :
+			false;
+
+		$is_success = false;
+		$message    = __( 'An error occured, try again.', 'wpdef' );
+
+		if ( $this->security_key->set_is_autogenrate_keys( $is_autogen_flag ) ) {
+			$is_success = true;
+
+			if ( $is_autogen_flag ) {
+				$this->security_key->cron_schedule();
+				$message = __( 'Security key/salt autogenerate enabled.', 'wpdef' );
+			} else {
+				$this->security_key->cron_unschedule();
+				$message = __( 'Security key/salt autogenerate disabled.', 'wpdef' );
+			}
+		}
+
+		return new Response(
+			$is_success,
+			array(
+				'message' => $message,
+			)
+		);
+
+	}
+
+	/**
+	 * Get component security key instance.
+	 *
+	 * @return \WP_Defender\Component\Security_Tweaks\Security_Key
+	 */
+	public function get_security_key() {
+		return $this->security_key;
 	}
 }

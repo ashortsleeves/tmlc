@@ -16,13 +16,15 @@ $cross-sell-3: 'smartcrawl';
  * MAIN APP SCSS FILE
  */
 
+$sui-image-path: '~@wpmudev/shared-ui/dist/images/';
+$sui-font-path: '~@wpmudev/shared-ui/dist/fonts/';
+
 /**
  * Shared UI CSS. To minimize the end CSS file, we take only the modules that we use.
  */
 @import "~@wpmudev/shared-ui/scss/functions";
 @import "~@wpmudev/shared-ui/scss/colors";
 @import "~@wpmudev/shared-ui/scss/variables";
-$sui-font-path: '~@wpmudev/shared-ui/dist/fonts/';
 @import "~@wpmudev/shared-ui/scss/mixins";
 @import "~@wpmudev/shared-ui/scss/accessibility";
 @import "~@wpmudev/shared-ui/scss/animations";
@@ -62,6 +64,7 @@ $sui-font-path: '~@wpmudev/shared-ui/dist/fonts/';
 @import "~@wpmudev/shared-ui/scss/reviews";
 @import "~@wpmudev/shared-ui/scss/colorpickers";
 @import "~@wpmudev/shared-ui/scss/upload";
+@import "~@wpmudev/shared-ui/scss/dropdowns";
 
 // Common
 @import "common/variables";
@@ -75,12 +78,12 @@ $sui-font-path: '~@wpmudev/shared-ui/dist/fonts/';
 @import "components/pills";
 @import "components/border_frame";
 @import "components/accordions";
+@import "components/performance_summary";
 
 // Modules
 @import "modules/dashboard";
 @import "modules/performance";
 @import "modules/caching";
-@import "modules/gzip";
 @import "modules/minification";
 @import "modules/uptime";
 @import "modules/advanced";

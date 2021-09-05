@@ -1,4 +1,9 @@
 <?php
+/**
+ * Index file.
+ *
+ * @package Hummingbird
+ */
 
 use Hummingbird\Core\Pro\Modules\Reports;
 

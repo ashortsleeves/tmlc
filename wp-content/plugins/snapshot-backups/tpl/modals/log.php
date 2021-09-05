@@ -19,8 +19,8 @@
 			<div class="sui-box-header sui-spacing-top--15 sui-spacing-bottom--15">
 				<h3 class="sui-box-title"><?php esc_html_e( 'View Logs', 'snapshot' ); ?></h3>
 				<div class="sui-actions-right">
-					<button class="sui-button-icon">
-						<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<button class="sui-button-icon" data-modal-close>
+						<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					</button>
 				</div>
 			</div>
@@ -29,7 +29,7 @@
 					<div class="log-container">
 					</div>
 					<div class="log-loader">
-						<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+						<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 					</div>
 				</div>
 			</div>

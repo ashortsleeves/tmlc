@@ -12,6 +12,7 @@ use Hummingbird\Core\Module;
 use Hummingbird\Core\Settings;
 use Hummingbird\Core\Traits\Module as ModuleContract;
 use Hummingbird\Core\Traits\WPConfig;
+use Hummingbird\Core\Utils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -32,6 +33,8 @@ class Redis extends Module {
 	 */
 	public function init() {
 		add_filter( 'wp_hummingbird_is_active_module_redis', array( $this, 'module_status' ) );
+
+		add_filter( 'wp_hummingbird_redis_error', array( $this, 'process_error' ) );
 
 		if ( $this->module_status( null ) ) {
 			add_action( 'wphb_deactivate', array( $this, 'disable' ) );
@@ -86,8 +89,9 @@ class Redis extends Module {
 	 * @param string $host      Redis host.
 	 * @param int    $port      Redis port.
 	 * @param string $password  Password.
+	 * @param int    $db        Database ID.
 	 */
-	public function enable( $host, $port, $password ) {
+	public function enable( $host, $port, $password, $db ) {
 		$this->set_enabled_option( true );
 
 		$this->wpconfig_add( 'WPHB_REDIS_HOST', $host );
@@ -97,10 +101,14 @@ class Redis extends Module {
 			$this->wpconfig_add( 'WPHB_REDIS_PASSWORD', $password );
 		}
 
+		if ( $db ) {
+			$this->wpconfig_add( 'WPHB_REDIS_DB_ID', $db );
+		}
+
 		$this->toggle_object_cache( true );
 
 		// Clear redis cache.
-		$this->test_redis_connection( $host, $port, $password, true );
+		$this->test_redis_connection( $host, $port, $password, $db, true );
 	}
 
 	/**
@@ -114,6 +122,7 @@ class Redis extends Module {
 		$this->wpconfig_remove( 'WPHB_REDIS_HOST' );
 		$this->wpconfig_remove( 'WPHB_REDIS_PORT' );
 		$this->wpconfig_remove( 'WPHB_REDIS_PASSWORD' );
+		$this->wpconfig_remove( 'WPHB_REDIS_DB_ID' );
 
 		$this->toggle_object_cache( false );
 	}
@@ -172,14 +181,15 @@ class Redis extends Module {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param string $host         Redis host.
-	 * @param int    $port         Redis port.
-	 * @param string $password     Password.
-	 * @param bool   $clear_cache  Clear cache.
+	 * @param string   $host         Redis host.
+	 * @param int      $port         Redis port.
+	 * @param string   $password     Password.
+	 * @param int|bool $db           Database ID.
+	 * @param bool     $clear_cache  Clear cache.
 	 *
 	 * @return array
 	 */
-	public function test_redis_connection( $host, $port, $password, $clear_cache = false ) {
+	public function test_redis_connection( $host, $port, $password, $db = false, $clear_cache = false ) {
 		$parameters = array(
 			'host'           => $host,
 			'port'           => $port,
@@ -196,7 +206,13 @@ class Redis extends Module {
 			$client = defined( 'HHVM_VERSION' ) ? 'hhvm' : 'pecl';
 		}
 
+		$scheme = '/' === substr( $host, 0, 1 ) ? 'unix' : 'tcp';
+
 		try {
+			if ( 'unix' === $scheme && ( 'hhvm' === $client || 'pecl' === $client ) ) {
+				$parameters['port'] = null;
+			}
+
 			if ( 'hhvm' === $client ) {
 				$redis = new \Redis();
 				$redis->connect( $parameters['host'], $parameters['port'], $parameters['timeout'], null, $parameters['retry_interval'] );
@@ -207,10 +223,8 @@ class Redis extends Module {
 			}
 
 			if ( 'pecl' === $client ) {
-				$phpredis_version = phpversion( 'redis' );
-
 				$redis = new \Redis();
-				if ( version_compare( $phpredis_version, '3.1.3', '>=' ) ) {
+				if ( version_compare( phpversion( 'redis' ), '3.1.3', '>=' ) ) {
 					$redis->connect( $parameters['host'], $parameters['port'], $parameters['timeout'], null, $parameters['retry_interval'], $parameters['read_timeout'] );
 				} else {
 					$redis->connect( $parameters['host'], $parameters['port'], $parameters['timeout'], null, $parameters['retry_interval'] );
@@ -219,6 +233,10 @@ class Redis extends Module {
 
 			if ( ( 'hhvm' === $client || 'pecl' === $client ) ) {
 				$redis->auth( $password );
+
+				if ( $db ) {
+					$redis->select( $db );
+				}
 			}
 
 			if ( 'predis' === $client ) {
@@ -234,12 +252,23 @@ class Redis extends Module {
 
 				$options = array();
 
+				if ( 'unix' === $scheme ) {
+					unset( $parameters['host'] );
+					unset( $parameters['port'] );
+					$parameters['scheme'] = $scheme;
+					$parameters['path']   = $host;
+				}
+
 				if ( $parameters['read_timeout'] ) {
 					$parameters['read_write_timeout'] = $parameters['read_timeout'];
 				}
 
 				if ( $password ) {
 					$options['parameters']['password'] = $password;
+				}
+
+				if ( $db ) {
+					$options['parameters']['database'] = (int) $db;
 				}
 
 				$redis = new \Predis\Client( $parameters, $options );
@@ -286,9 +315,9 @@ class Redis extends Module {
 		switch ( $updated ) {
 			case 'redis-auth':
 				if ( $vars['redis_connected'] ) {
-					$notice = __( 'Redis is connected successfully.', 'wphb' );
+					$notice = __( 'Redis was connected successfully.', 'wphb' );
 				} else {
-					$notice = __( 'Redis is not connected.', 'wphb' );
+					$notice = __( 'Redis was not connected.', 'wphb' );
 				}
 				break;
 			case 'redis-disconnect':
@@ -349,7 +378,7 @@ class Redis extends Module {
 
 		$object_cache = file_exists( WP_CONTENT_DIR . '/object-cache.php' );
 
-		$vars = array(
+		return array(
 			'options'               => $options,
 			'redis_connected'       => $redis_connected,
 			'redis_enabled'         => $options['enabled'],
@@ -357,8 +386,29 @@ class Redis extends Module {
 			'disable_redis'         => isset( $_SERVER['WPMUDEV_HOSTED'] ) && $_SERVER['WPMUDEV_HOSTED'],
 			'connection_error'      => $connection_error,
 		);
+	}
 
-		return $vars;
+	/**
+	 * Process error message from Redis server.
+	 *
+	 * @since 2.7.2
+	 *
+	 * @param string $error  Error message.
+	 *
+	 * @return string
+	 */
+	public function process_error( $error ) {
+		// Invalid password error.
+		if ( strpos( $error, 'ERR invalid password' ) || strpos( $error, 'Connection refused' ) ) {
+			return sprintf( /* translators: %1$s - opening a tag with support link, %2$s - closing a tag */
+				__( "We couldn't authorize your Redis account. Please fill in your account information again. If you continue to have connection issues, our %1\$ssupport team%2\$s is ready to help.", 'wphb' ),
+				'<a href=' . Utils::get_link( 'support' ) . ' target="_blank">',
+				'</a>'
+			);
+		}
+
+		/* translators: %s - error message */
+		return sprintf( __( 'Redis connection error : %s', 'wphb' ), $error );
 	}
 
 }

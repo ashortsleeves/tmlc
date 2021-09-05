@@ -14,7 +14,6 @@ namespace Hummingbird\Core\Modules;
 use Hummingbird\Core\Module;
 use Hummingbird\Core\Settings;
 use Hummingbird\Core\Traits\Module as ModuleContract;
-use Hummingbird\Core\Utils;
 use stdClass;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -89,6 +88,9 @@ class Advanced extends Module {
 		// DNS prefetch.
 		add_filter( 'wp_resource_hints', array( $this, 'prefetch_dns' ), 10, 2 );
 
+		// Preconnect.
+		add_filter( 'wp_resource_hints', array( $this, 'add_preconnect_urls' ), 10, 2 );
+
 		// Filter comment template if lazy load is enabled.
 		if ( isset( $options['lazy_load'] ) && $options['lazy_load']['enabled'] ) {
 			add_filter( 'comments_template', array( $this, 'filter_comments_template' ), 100 );
@@ -161,6 +163,10 @@ class Advanced extends Module {
 	 * @return array
 	 */
 	public function prefetch_dns( $hints, $relation_type ) {
+		if ( 'dns-prefetch' !== $relation_type ) {
+			return $hints;
+		}
+
 		$urls = Settings::get_setting( 'prefetch', 'advanced' );
 
 		// If not urls set, return default WP hints array.
@@ -170,10 +176,8 @@ class Advanced extends Module {
 
 		$urls = array_map( 'esc_url', $urls );
 
-		if ( 'dns-prefetch' === $relation_type ) {
-			foreach ( $urls as $url ) {
-				$hints[] = $url;
-			}
+		foreach ( $urls as $url ) {
+			$hints[] = $url;
 		}
 
 		return $hints;
@@ -198,6 +202,44 @@ class Advanced extends Module {
 		if ( 'all' === $options['cart_fragments'] || ( ! is_woocommerce() && ! is_cart() && ! is_checkout() ) ) {
 			wp_dequeue_script( 'wc-cart-fragments' );
 		}
+	}
+
+	/**
+	 * Add preconnect resource hints to URLs.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param array  $hints          URLs to print for resource hints.
+	 * @param string $relation_type  The relation type the URLs are printed for, e.g. 'preconnect' or 'prerender'.
+	 *
+	 * @return array
+	 */
+	public function add_preconnect_urls( $hints, $relation_type ) {
+		if ( 'preconnect' !== $relation_type ) {
+			return $hints;
+		}
+
+		$urls = Settings::get_setting( 'preconnect', 'advanced' );
+
+		// If not urls set, return default WP hints array.
+		if ( ! is_array( $urls ) || empty( $urls ) ) {
+			return $hints;
+		}
+
+		foreach ( $urls as $url ) {
+			$attr = explode( ' ', $url );
+			$hint = array(
+				'href' => esc_url( $attr[0] ),
+			);
+
+			if ( isset( $attr[1] ) && 'crossorigin' === $attr[1] ) {
+				$hint['crossorigin'] = '';
+			}
+
+			$hints[] = $hint;
+		}
+
+		return $hints;
 	}
 
 	/**
@@ -675,9 +717,9 @@ class Advanced extends Module {
 
 		$dump_server[ __( 'Software Name', 'wphb' ) ]     = $server[0];
 		$dump_server[ __( 'Software Version', 'wphb' ) ]  = $server_version;
-		$dump_server[ __( 'Server IP', 'wphb' ) ]         = @$_SERVER['SERVER_ADDR'];
-		$dump_server[ __( 'Server Hostname', 'wphb' ) ]   = @$_SERVER['SERVER_NAME'];
-		$dump_server[ __( 'Server Admin', 'wphb' ) ]      = @$_SERVER['SERVER_ADMIN'];
+		$dump_server[ __( 'Server IP', 'wphb' ) ]         = isset( $_SERVER['SERVER_ADDR'] ) ? wp_unslash( $_SERVER['SERVER_ADDR'] ) : __( 'undefined', 'wphb' );
+		$dump_server[ __( 'Server Hostname', 'wphb' ) ]   = isset( $_SERVER['SERVER_NAME'] ) ? wp_unslash( $_SERVER['SERVER_NAME'] ) : __( 'undefined', 'wphb' );
+		$dump_server[ __( 'Server Admin', 'wphb' ) ]      = isset( $_SERVER['SERVER_ADMIN'] ) ? wp_unslash( $_SERVER['SERVER_ADMIN'] ) : __( 'undefined', 'wphb' );
 		$dump_server[ __( 'Server local time', 'wphb' ) ] = date( 'Y-m-d H:i:s (\U\T\C P)' );
 		$dump_server[ __( 'Operating System', 'wphb' ) ]  = @php_uname( 's' );
 		$dump_server[ __( 'OS Hostname', 'wphb' ) ]       = @php_uname( 'n' );
@@ -708,39 +750,6 @@ class Advanced extends Module {
 		} else {
 			return __( 'TRUE', 'wphb' );
 		}
-	}
-
-	/**
-	 * Get database data and index sizes.
-	 *
-	 * @since 2.7.0
-	 *
-	 * @return array
-	 */
-	public function get_db_size() {
-		global $wpdb;
-
-		if ( ! defined( 'DB_NAME' ) ) {
-			return array(
-				'data_size'  => 0,
-				'index_size' => 0,
-			);
-		}
-
-		$table_info = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT SUM( DATA_LENGTH ) as data, SUM( INDEX_LENGTH ) as 'index'
-					   FROM information_schema.TABLES
-					   WHERE TABLE_SCHEMA = %s AND TABLE_NAME LIKE %s;",
-				DB_NAME,
-				$wpdb->get_blog_prefix( get_current_blog_id() ) . '%'
-			)
-		); // DB call ok; no-cache ok.
-
-		return array(
-			'data_size'  => Utils::format_bytes( $table_info->data ),
-			'index_size' => Utils::format_bytes( $table_info->index ),
-		);
 	}
 
 	/**

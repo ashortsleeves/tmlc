@@ -5,14 +5,14 @@ namespace WP_Defender\Controller;
 use Calotes\Component\Request;
 use Calotes\Component\Response;
 use Calotes\Helper\HTTP;
+use WP_Defender\Component\Config\Config_Hub_Helper;
 use WP_Defender\Controller2;
-use WP_Defender\Model\Notification\Audit_Report;
 use WP_Defender\Traits\Formats;
 use WP_Defender\Traits\User;
-use WP_Defender\Traits\WPMU;
+use WP_Defender\Model\Notification as Model_Notification;
 
 class Notification extends Controller2 {
-	use User, Formats, WPMU;
+	use User, Formats;
 
 	public $slug = 'wdf-notification';
 
@@ -38,54 +38,79 @@ class Notification extends Controller2 {
 		$this->service = wd_di()->get( \WP_Defender\Component\Notification::class );
 		add_action( 'defender_enqueue_assets', array( &$this, 'enqueue_assets' ) );
 		//we use custom ajax endpoint here as the nonce would fail with other user
-		add_action( 'wp_ajax_defender_listen_user_subscribe', [ &$this, 'verify_subscriber' ] );
-		add_action( 'wp_ajax_nopriv_defender_listen_user_subscribe', [ &$this, 'verify_subscriber' ] );
-		add_action( 'defender_notify', [ &$this, 'send_notify' ], 10, 2 );
+		add_action( 'wp_ajax_defender_listen_user_subscribe', array( &$this, 'verify_subscriber' ) );
+		add_action( 'wp_ajax_nopriv_defender_listen_user_subscribe', array( &$this, 'verify_subscriber' ) );
+		add_action( 'defender_notify', array( &$this, 'send_notify' ), 10, 2 );
+		add_filter( 'cron_schedules', array( &$this, 'add_cron_schedules' ) );
+		// We will schedule the time to send reports.
 		if ( ! wp_next_scheduled( 'wdf_maybe_send_report' ) ) {
-			$this->service->add_hooks();
 			$timestamp = gmmktime( gmdate( 'H' ), 0, 0 );
 			wp_schedule_event( $timestamp, 'thirty_minutes', 'wdf_maybe_send_report' );
 		}
 		add_action( 'wdf_maybe_send_report', array( &$this, 'report_sender' ) );
-		add_action( 'admin_notices', [ &$this, 'show_subscribed_confirmation' ] );
+		add_action( 'admin_notices', array( &$this, 'show_subscribed_confirmation' ) );
+	}
+
+	/**
+	 * Add a new cron schedule to send reports.
+	 *
+	 * @param array $schedules
+	 *
+	 * @return array $schedules
+	 */
+	public function add_cron_schedules( $schedules ) {
+		$schedules['thirty_minutes'] = array(
+			'interval' => 30 * MINUTE_IN_SECONDS,
+			'display'  => esc_html__( 'Every Half Hour', 'wpdef' ),
+		);
+		return $schedules;
 	}
 
 	/**
 	 * @return null
 	 */
 	public function show_subscribed_confirmation() {
-		if ( ! defined( 'IS_PROFILE_PAGE' ) || constant( 'IS_PROFILE_PAGE' ) === false ) {
+		if ( ! defined( 'IS_PROFILE_PAGE' ) || false === constant( 'IS_PROFILE_PAGE' ) ) {
 			return null;
 		}
-		$slug = isset( $_GET['slug'] ) ? $_GET['slug'] : false;
-		$slug = sanitize_text_field( $slug );
-		if ( $slug === false ) {
+		$slug = isset( $_GET['slug'] ) ? sanitize_text_field( $_GET['slug'] ) : false;
+		if ( empty( $slug ) ) {
 			return null;
 		}
 		$m = $this->service->find_module_by_slug( $slug );
 		if ( ! is_object( $m ) ) {
 			return null;
 		}
-		$context = isset( $_GET['context'] ) ? $_GET['context'] : false;
-		$strings = '';
-		if ( $context === 'subscribed' ) {
+		$context = isset( $_GET['context'] ) ? sanitize_text_field( $_GET['context'] ) : false;
+		if ( 'subscribed' === $context ) {
 			$unsubscribe_link = $this->service->create_unsubscribe_url( $m, $this->get_current_user_email() );
-			$strings          = sprintf( __( 'You are now subscribed to receive <strong>%s</strong>. Made a mistake? <a href="%s">Unsubscribe</a>', 'wpdef' ), $m->title, $unsubscribe_link );
-		} elseif ( $context === 'unsubscribe' ) {
-			$strings = sprintf( __( 'You are now unsubscribed from <strong>%s</strong>.', 'wpdef' ), $m->title );
+			$strings          = sprintf(
+			/* translators: %s - module title, %s - unsubscribed link */
+				__( 'You are now subscribed to receive <strong>%1$s</strong>. Made a mistake? <a href="%2$s">Unsubscribe</a>', 'wpdef' ),
+				$m->title,
+				$unsubscribe_link
+			);
+		} elseif ( 'unsubscribe' === $context ) {
+			$strings = sprintf(
+			/* translators: %s - module title */
+				__( 'You are now unsubscribed from <strong>%s</strong>.', 'wpdef' ),
+				$m->title
+			);
+		} else {
+			return null;
 		}
 		?>
-        <div class="notice notice-success" style="position:relative;">
-            <p><?php echo $strings ?></p>
-            <a href="<?php echo get_edit_profile_url() ?>" class="notice-dismiss" style="text-decoration: none">
-                <span class="screen-reader-text">Dismiss this notice.</span>
-            </a>
-        </div>
+		<div class="notice notice-success" style="position:relative;">
+			<p><?php echo $strings; ?></p>
+			<a href="<?php echo get_edit_profile_url(); ?>" class="notice-dismiss" style="text-decoration: none">
+				<span class="screen-reader-text"><?php _e( 'Dismiss this notice.', 'wpdef' ); ?></span>
+			</a>
+		</div>
 		<?php
 	}
 
 	/**
-	 * Trigger report check signals
+	 * Trigger report check signals.
 	 */
 	public function report_sender() {
 		$this->service->maybe_dispatch_report();
@@ -96,7 +121,7 @@ class Notification extends Controller2 {
 	}
 
 	/**
-	 * Dispatch notification
+	 * Dispatch notification.
 	 *
 	 * @param string $slug
 	 * @param object $args
@@ -109,24 +134,33 @@ class Notification extends Controller2 {
 	 * @param Request $request
 	 *
 	 * @defender_route
+	 * @return Response
 	 */
 	public function validate_email( Request $request ) {
-		$data  = $request->get_data( [
-			'email' => [
-				'type'     => 'string',
-				'sanitize' => 'sanitize_text_field'
-			]
-		] );
+		$data  = $request->get_data(
+			array(
+				'email' => array(
+					'type'     => 'string',
+					'sanitize' => 'sanitize_text_field',
+				),
+			)
+		);
 		$email = isset( $data['email'] ) ? $data['email'] : false;
 		if ( filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
-			return new Response( true, [
-				'error'  => false,
-				'avatar' => get_avatar_url( $data['email'] )
-			] );
+			return new Response(
+				true,
+				array(
+					'error'  => false,
+					'avatar' => get_avatar_url( $data['email'] ),
+				)
+			);
 		} else {
-			return new Response( false, [
-				'error' => __( 'Invalid email address', 'wpdef' )
-			] );
+			return new Response(
+				false,
+				array(
+					'error' => __( 'Invalid email address', 'wpdef' ),
+				)
+			);
 		}
 	}
 
@@ -159,7 +193,7 @@ class Notification extends Controller2 {
 				if ( $email !== $this->get_current_user_email() ) {
 					wp_die( __( 'Invalid request', 'wpdef' ) );
 				}
-				$recipient['status'] = \WP_Defender\Model\Notification::USER_SUBSCRIBE_CANCELED;
+				$recipient['status'] = Model_Notification::USER_SUBSCRIBE_CANCELED;
 				$m->save();
 				$inhouse = true;
 				//send email
@@ -168,22 +202,27 @@ class Notification extends Controller2 {
 			}
 		}
 
-		if ( $inhouse === false ) {
+		if ( false === $inhouse ) {
 			//no match on inhouse, check the outhouse list
 			foreach ( $m->out_house_recipients as &$recipient ) {
 				$email = $recipient['email'];
 				if ( hash_equals( $hash, hash( 'sha256', $email . AUTH_SALT ) ) ) {
-					$recipient['status'] = \WP_Defender\Model\Notification::USER_SUBSCRIBE_CANCELED;
+					$recipient['status'] = Model_Notification::USER_SUBSCRIBE_CANCELED;
 					$m->save();
 					$this->service->send_unsubscribe_email( $m, $email, $inhouse );
 				}
 			}
 		}
 		if ( $inhouse ) {
-			wp_redirect( add_query_arg( [
-				'slug'    => $slug,
-				'context' => 'unsubscribe'
-			], get_edit_profile_url() ) );
+			wp_redirect(
+				add_query_arg(
+					array(
+						'slug'    => $slug,
+						'context' => 'unsubscribe',
+					),
+					get_edit_profile_url()
+				)
+			);
 		} else {
 			wp_redirect( get_home_url() );
 		}
@@ -191,12 +230,11 @@ class Notification extends Controller2 {
 	}
 
 	/**
-	 * An endpoint for saving single config from frontend
+	 * An endpoint for saving single config from frontend.
 	 *
 	 * @param Request $request
 	 *
 	 * @defender_route
-	 *
 	 * @return Response
 	 */
 	public function save( Request $request ) {
@@ -210,9 +248,9 @@ class Notification extends Controller2 {
 		}
 		$data = $request->get_data_by_model( $model );
 		$model->import( $data );
-		$model->status = \WP_Defender\Model\Notification::STATUS_ACTIVE;
+		$model->status = Model_Notification::STATUS_ACTIVE;
 		if ( $model->validate() ) {
-			if ( $model->last_sent === 0 ) {
+			if ( 0 === $model->last_sent ) {
 				//this mean that the notification or report never sent, we will use the moment that it get activate
 				$model->last_sent = time();
 			}
@@ -221,6 +259,7 @@ class Notification extends Controller2 {
 				$model,
 				$this->dump_routes_and_nonces()
 			);
+			Config_Hub_Helper::set_clear_active_flag();
 
 			return new Response(
 				true,
@@ -236,14 +275,19 @@ class Notification extends Controller2 {
 			);
 		}
 
-		return new Response( false, [
-			'message' => $model->get_formatted_errors()
-		] );
+		return new Response(
+			false,
+			array(
+				'message' => $model->get_formatted_errors(),
+			)
+		);
 	}
 
 	/**
+	 * @param Request $request
 	 *
 	 * @defender_route
+	 * @return Response
 	 */
 	public function save_bulk( Request $request ) {
 		$data = $request->get_data(
@@ -260,6 +304,7 @@ class Notification extends Controller2 {
 		);
 		$this->save_reports( $data['reports'] );
 		$this->save_notifications( $data['notifications'] );
+		Config_Hub_Helper::set_clear_active_flag();
 
 		return new Response(
 			true,
@@ -276,9 +321,9 @@ class Notification extends Controller2 {
 	}
 
 	/**
-	 * Process bulk reports saving
+	 * Process bulk reports saving.
 	 *
-	 * @param $data
+	 * @param array $data
 	 */
 	private function save_reports( $data ) {
 		foreach ( $data['configs'] as $datum ) {
@@ -290,7 +335,7 @@ class Notification extends Controller2 {
 
 			$import = array(
 				//bulk saving must always enabled
-				'status'               => \WP_Defender\Model\Notification::STATUS_ACTIVE,
+				'status'               => Model_Notification::STATUS_ACTIVE,
 				'configs'              => $datum,
 				'in_house_recipients'  => $data['in_house_recipients'],
 				'out_house_recipients' => $data['out_house_recipients'],
@@ -316,7 +361,7 @@ class Notification extends Controller2 {
 	}
 
 	/**
-	 * @param $data
+	 * @param array $data
 	 *
 	 * @throws \DI\DependencyException
 	 * @throws \DI\NotFoundException
@@ -330,7 +375,7 @@ class Notification extends Controller2 {
 				continue;
 			}
 			$import = array(
-				'status'               => \WP_Defender\Model\Notification::STATUS_ACTIVE,
+				'status'               => Model_Notification::STATUS_ACTIVE,
 				'configs'              => $datum,
 				'in_house_recipients'  => $data['in_house_recipients'],
 				'out_house_recipients' => $data['out_house_recipients'],
@@ -352,13 +397,13 @@ class Notification extends Controller2 {
 	}
 
 	/**
-	 * Bulk activate
+	 * Bulk activate.
 	 *
 	 * @param Request $request
 	 *
+	 * @defender_route
 	 * @return Response
 	 * @throws \Exception
-	 * @defender_route
 	 */
 	public function bulk_activate( Request $request ) {
 		$data  = $request->get_data(
@@ -377,8 +422,8 @@ class Notification extends Controller2 {
 		foreach ( $slugs as $slug ) {
 			$model = $this->service->find_module_by_slug( $slug );
 			if ( is_object( $model ) ) {
-				$model->status = \WP_Defender\Model\Notification::STATUS_ACTIVE;
-				if ( $model->last_sent === 0 ) {
+				$model->status = Model_Notification::STATUS_ACTIVE;
+				if ( 0 === $model->last_sent ) {
 					//this mean that the notification or report never sent, we will use the moment that it get activate
 					$model->last_sent = time();
 				}
@@ -400,8 +445,8 @@ class Notification extends Controller2 {
 	/**
 	 * @param Request $request
 	 *
-	 * @return Response
 	 * @defender_route
+	 * @return Response
 	 */
 	public function bulk_deactivate( Request $request ) {
 		$data  = $request->get_data(
@@ -420,7 +465,7 @@ class Notification extends Controller2 {
 		foreach ( $slugs as $slug ) {
 			$model = $this->service->find_module_by_slug( $slug );
 			if ( is_object( $model ) ) {
-				$model->status = \WP_Defender\Model\Notification::STATUS_DISABLED;
+				$model->status = Model_Notification::STATUS_DISABLED;
 				$model->save();
 			}
 		}
@@ -458,7 +503,7 @@ class Notification extends Controller2 {
 			// NEVER HERE
 			die;
 		}
-		$model->status = \WP_Defender\Model\Notification::STATUS_DISABLED;
+		$model->status = Model_Notification::STATUS_DISABLED;
 		$model->save();
 
 		return new Response(
@@ -473,15 +518,14 @@ class Notification extends Controller2 {
 	}
 
 	/**
-	 * This is a receiver, to process subscribe confirmation from email
-	 *
+	 * This is a receiver to process subscribe confirmation from email.
 	 */
 	public function verify_subscriber() {
 		$hash    = HTTP::get( 'hash', false );
 		$slug    = HTTP::get( 'uid', false );
 		$inhouse = HTTP::get( 'inhouse', 0 );
 		if ( $inhouse && ! is_user_logged_in() ) {
-			//this is inhouse so we need rdirect
+			//this is inhouse so we need to redirect
 			auth_redirect();
 		}
 		if ( false === $hash || false === $slug ) {
@@ -494,25 +538,25 @@ class Notification extends Controller2 {
 		if ( $inhouse ) {
 			$processed = false;
 			foreach ( $m->in_house_recipients as &$recipient ) {
-				if ( $recipient['status'] === \WP_Defender\Model\Notification::USER_SUBSCRIBED ) {
+				if ( Model_Notification::USER_SUBSCRIBED === $recipient['status'] ) {
 					continue;
 				}
 				$email = $recipient['email'];
 				if ( hash_equals( $hash, hash( 'sha256', $email . AUTH_SALT ) )
-				     && $email === $this->get_current_user_email() ) {
-					$recipient['status'] = \WP_Defender\Model\Notification::USER_SUBSCRIBED;
+					&& $email === $this->get_current_user_email() ) {
+					$recipient['status'] = Model_Notification::USER_SUBSCRIBED;
 					$this->service->send_subscribed_email( $email, $m );
 					$processed = true;
 				}
 			}
 		} else {
 			foreach ( $m->out_house_recipients as &$recipient ) {
-				if ( $recipient['status'] === \WP_Defender\Model\Notification::USER_SUBSCRIBED ) {
+				if ( Model_Notification::USER_SUBSCRIBED === $recipient['status'] ) {
 					continue;
 				}
 				$email = $recipient['email'];
 				if ( hash_equals( $hash, hash( 'sha256', $email . AUTH_SALT ) ) ) {
-					$recipient['status'] = \WP_Defender\Model\Notification::USER_SUBSCRIBED;
+					$recipient['status'] = Model_Notification::USER_SUBSCRIBED;
 					$this->service->send_subscribed_email( $email, $m );
 				}
 			}
@@ -520,10 +564,15 @@ class Notification extends Controller2 {
 		$m->save();
 		if ( $inhouse ) {
 			if ( $processed ) {
-				wp_redirect( add_query_arg( [
-					'slug'    => $m->slug,
-					'context' => 'subscribed'
-				], get_edit_profile_url() ) );
+				wp_redirect(
+					add_query_arg(
+						array(
+							'slug'    => $m->slug,
+							'context' => 'subscribed',
+						),
+						get_edit_profile_url()
+					)
+				);
 			} else {
 				wp_redirect( home_url() );
 			}
@@ -534,7 +583,7 @@ class Notification extends Controller2 {
 	}
 
 	/**
-	 * Enqueue assets & output data
+	 * Enqueue assets & output data.
 	 */
 	public function enqueue_assets() {
 		if ( ! $this->is_page_active() ) {
@@ -548,44 +597,94 @@ class Notification extends Controller2 {
 		wp_enqueue_script( 'def-momentjs', defender_asset_url( '/assets/js/vendor/moment/moment.min.js' ) );
 		wp_enqueue_script( 'def-notification' );
 		$this->enqueue_main_assets();
+		wp_enqueue_style(
+			'def-select2',
+			defender_asset_url( '/assets/css/select2.min.css' )
+		);
 	}
 
 	/**
-	 * An endpoint for fetching users pool
+	 * An endpoint for fetching users pool.
+	 *
+	 * @param Request $request Request data.
 	 *
 	 * @defender_route
 	 */
 	public function get_users( Request $request ) {
 		$data     = $request->get_data(
 			array(
-				'paged'   => array(
+				'paged'            => array(
 					'type'     => 'int',
 					'sanitize' => 'sanitize_text_field',
 				),
-				'search'  => array(
+				'search'           => array(
 					'type'     => 'string',
 					'sanitize' => 'sanitize_text_field',
 				),
-				'exclude' => array(
+				'exclude'          => array(
 					'type' => 'array',
 				),
-				'module'  => array(
+				'module'           => array(
 					'type'     => 'string',
-					'sanitize' => 'sanitize_text_field'
-				)
+					'sanitize' => 'sanitize_text_field',
+				),
+				'user_role_filter' => array(
+					'type'     => 'string',
+					'sanitize' => 'sanitize_text_field',
+				),
+				'user_sort'        => array(
+					'type'     => 'string',
+					'sanitize' => 'sanitize_text_field',
+				),
 			)
 		);
-		$paged    = isset( $data['paged'] ) ? $data['paged'] : 1;
-		$exclude  = isset( $data['exclude'] ) ? $data['exclude'] : [];
+		$paged    = 1;
+		$exclude  = isset( $data['exclude'] ) ? $data['exclude'] : array();
 		$username = isset( $data['search'] ) ? $data['search'] : '';
 		$slug     = isset( $data['module'] ) ? $data['module'] : null;
+		$role     = '';
+
+		if (
+			isset( $data['user_role_filter'] ) &&
+			'all' !== $data['user_role_filter']
+		) {
+			$role = $data['user_role_filter'];
+		}
+
+		$order_by = 'ID';
+		$order    = 'DESC';
+		if ( isset( $data['user_sort'] ) ) {
+			switch ( $data['user_sort'] ) {
+				case 'recent':
+					$order_by = 'registered';
+					$order    = 'DESC';
+					break;
+				case 'alpha_asc':
+					$order_by = 'display_name';
+					$order    = 'ASC';
+					break;
+				case 'alpha_desc':
+					$order_by = 'display_name';
+					$order    = 'DESC';
+					break;
+			}
+		}
+
 		if ( strlen( $username ) ) {
 			$username = "*$username*";
 		}
 
-		$users = $this->service->get_users_pool( $exclude, '', $username, 'ID', 'DESC', 10, $paged );
+		$users = $this->service->get_users_pool(
+			$exclude,
+			$role,
+			$username,
+			$order_by,
+			$order,
+			10,
+			$paged
+		);
 
-		if ( $slug !== null ) {
+		if ( ! is_null( $slug ) ) {
 			$notification = $this->service->find_module_by_slug( $slug );
 			if ( is_object( $notification ) ) {
 				foreach ( $notification->in_house_recipients as $recipient ) {
@@ -601,21 +700,18 @@ class Notification extends Controller2 {
 		wp_send_json_success( $users );
 	}
 
-	function remove_settings() {
+	public function remove_settings() {
 		foreach ( $this->service->get_modules_as_objects() as $module ) {
 			$module->delete();
 		}
-
 	}
 
-	function remove_data() {
-	}
+	public function remove_data() {}
 
-	function to_array() {
-	}
+	public function to_array() {}
 
 	/**
-	 * All the variables that we will show on frontend, both in the main page, or dashboard widget
+	 * All the variables that we will show on frontend, both in the main page, or dashboard widget.
 	 *
 	 * @return array
 	 */
@@ -629,12 +725,13 @@ class Notification extends Controller2 {
 				'days_of_week'      => $this->get_days_of_week(),
 				'times_of_day'      => $this->get_times(),
 				'timezone_text'     => sprintf(
+				/* translators: %s - timezone, %s - time */
 					__(
 						'Your timezone is set to <strong>%1$s</strong>, so your current time is <strong>%2$s</strong>.',
 						'wpdef'
 					),
 					wp_timezone_string(),
-					date( 'H:i', current_time( 'timestamp' ) )
+					date( 'H:i', current_time( 'timestamp' ) )// phpcs:ignore
 				),
 				'default_recipient' => $this->get_default_recipient(),
 			),
@@ -642,34 +739,99 @@ class Notification extends Controller2 {
 	}
 
 	/**
-	 * Import the data of other source into this, it can be when HUB trigger the import, or user apply a preset
+	 * Import the data of other source into this, it can be when HUB trigger the import, or user apply a preset.
 	 *
-	 * @param $data array
-	 *
-	 * @return boolean
+	 * @param array $data
 	 */
-	public function import_data( $data ) {
-		// TODO: Implement import_data() method.
-	}
+	public function import_data( $data ) {}
 
 	/**
 	 * @return array
 	 */
 	public function export_strings() {
 		$modules = wd_di()->get( Notification::class )->service->get_modules_as_objects();
-		$strings = [];
+		$strings = array();
 		foreach ( $modules as $module ) {
-			$string = __( '%s: %s', 'wpdef' );
-			if ( $module->type === 'notification' ) {
-				$string = sprintf( $string, $module->title, $module->status === \WP_Defender\Model\Notification::STATUS_ACTIVE ?
-					__( 'Enabled', 'wpdef' ) : __( 'Disabled', 'wpdef' ) );
+			/* translators: %s - module title, %s - module status */
+			$string = __( '%1$s: %2$s', 'wpdef' );
+			if ( 'notification' === $module->type ) {
+				$string = sprintf(
+					$string,
+					$module->title,
+					Model_Notification::STATUS_ACTIVE === $module->status ? __( 'Enabled', 'wpdef' ) : __( 'Disabled', 'wpdef' )
+				);
 			} else {
-				$string = sprintf( $string, $module->title, $module->status === \WP_Defender\Model\Notification::STATUS_ACTIVE ?
-					$module->to_string() : __( 'Disabled', 'wpdef' ) );
+				$string = sprintf(
+					$string,
+					$module->title,
+					Model_Notification::STATUS_ACTIVE === $module->status ? $module->to_string() : __( 'Disabled', 'wpdef' )
+				);
 			}
 			$strings[] = $string;
 		}
 
 		return $strings;
+	}
+
+	/**
+	 * Resend invite email.
+	 *
+	 * @param Request $request
+	 *
+	 * @defender_route
+	 * @return Response
+	 */
+	public function resend_invite_email( Request $request ) {
+		$data = $request->get_data( [
+			'slug'  => [
+				'type'     => 'string',
+				'sanitize' => 'sanitize_textarea_field',
+			],
+			'email' => [
+				'type'     => 'string',
+				'sanitize' => 'sanitize_text_field',
+			],
+			'id'    => [
+				'type' => 'integer',
+			],
+		] );
+
+		$model = $this->service->find_module_by_slug( $data['slug'] );
+
+		if ( ! is_object( $model ) ) {
+			return new Response( false, [
+				'message' => __( 'Module not found.', 'wpdef' ),
+			] );
+		}
+
+		$subscriber = [ 'email' => $data['email'], ];
+
+		if ( ! empty( $data['id'] ) ) {
+			$subscriber['id'] = $data['id'];
+		}
+
+		// Resend invite email now.
+		$sent = $this->service->send_email( $subscriber, $model );
+
+		if ( $sent ) {
+			return new Response( true, [
+				'message' => __( 'Invitation sent successfully.', 'wpdef' ),
+			] );
+		}
+
+		return new Response( false, [
+			'message' => __( 'Sorry! We could not send the invitation, Please try again later.', 'wpdef' ),
+		] );
+	}
+
+	/**
+	 * Get user roles with count.
+	 *
+	 * @defender_route
+	 */
+	public function get_user_roles() {
+		$user_roles = $this->service->get_user_roles();
+
+		wp_send_json_success( $user_roles );
 	}
 }

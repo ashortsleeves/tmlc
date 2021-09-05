@@ -63,7 +63,6 @@ class Gutenberg {
 		global $wp_version;
 
 		if ( ! function_exists( 'is_plugin_active' ) ) {
-			/* @noinspection PhpIncludeInspection */
 			include_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 

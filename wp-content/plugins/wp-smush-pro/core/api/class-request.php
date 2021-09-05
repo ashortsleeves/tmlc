@@ -77,7 +77,7 @@ class Request {
 	 * @throws Exception  Init exception.
 	 */
 	public function __construct( $service ) {
-		if ( ! $service instanceof API ) {
+		if ( ! $service instanceof Abstract_API ) {
 			throw new Exception( __( 'Invalid API service.', 'wp-smushit' ), 404 );
 		}
 
@@ -255,7 +255,7 @@ class Request {
 	 * @return string
 	 */
 	private function get_api_url( $path = '' ) {
-		$url = 'https://premium.wpmudev.org/api/' . $this->service->name . '/' . $this->service->version . '/';
+		$url = 'https://wpmudev.com/api/' . $this->service->name . '/' . $this->service->version . '/';
 		$url = trailingslashit( $url . $path );
 
 		return $url;

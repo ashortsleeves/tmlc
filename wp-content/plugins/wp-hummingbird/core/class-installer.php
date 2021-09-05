@@ -102,6 +102,18 @@ class Installer {
 				if ( version_compare( $version, '2.6.2', '<' ) ) {
 					self::upgrade_2_6_2_multi();
 				}
+
+				if ( version_compare( $version, '2.7.1', '<' ) ) {
+					self::upgrade_2_7_1_multi();
+				}
+
+				if ( version_compare( $version, '2.7.2', '<' ) ) {
+					self::upgrade_2_7_2_multi();
+				}
+
+				if ( version_compare( $version, '3.0.0', '<' ) ) {
+					self::upgrade_3_0_0_multi();
+				}
 			}
 		}
 
@@ -110,24 +122,35 @@ class Installer {
 				define( 'WPHB_UPGRADING', true );
 			}
 
-			if ( version_compare( $version, '2.5.0', '<' ) ) {
-				self::upgrade_2_5_0();
-			}
-
-			if ( version_compare( $version, '2.5.1', '<' ) ) {
-				self::upgrade_2_5_1();
-			}
-
-			if ( version_compare( $version, '2.5.2', '<' ) ) {
-				self::upgrade_2_5_2();
-			}
-
 			if ( version_compare( $version, '2.6.0', '<' ) ) {
 				self::upgrade_2_6_0();
 			}
 
 			if ( version_compare( $version, '2.6.2', '<' ) ) {
 				self::upgrade_2_6_2();
+			}
+
+			if ( version_compare( $version, '2.7.1', '<' ) ) {
+				self::upgrade_2_7_1();
+				self::upgrade_2_7_1_multi();
+			}
+
+			if ( version_compare( $version, '2.7.2', '<' ) ) {
+				// Need to refresh the data.
+				delete_option( 'wphb-caching-data' );
+				self::upgrade_2_7_2_multi();
+			}
+
+			if ( version_compare( $version, '3.0.0', '<' ) ) {
+				self::upgrade_3_0_0();
+			}
+
+			if ( version_compare( $version, '3.0.1', '<' ) ) {
+				self::upgrade_3_0_1();
+			}
+
+			if ( version_compare( $version, '3.1.0', '<' ) ) {
+				self::upgrade_3_1_0();
 			}
 
 			update_site_option( 'wphb_version', WPHB_VERSION );
@@ -148,54 +171,12 @@ class Installer {
 	}
 
 	/**
-	 * Upgrade to 2.5.0
-	 *
-	 * Update advanced-cache.php file.
-	 *
-	 * @since 2.5.0
-	 */
-	private static function upgrade_2_5_0() {
-		// Force new quick setup (with tracking option).
-		delete_option( 'wphb-quick-setup' );
-
-		$adv_cache_file = dirname( get_theme_root() ) . '/advanced-cache.php';
-		if ( Settings::get_settings( 'page_cache' ) && file_exists( $adv_cache_file ) ) {
-			unlink( $adv_cache_file );
-		}
-	}
-
-	/**
-	 * Upgrade to 2.5.1
-	 *
-	 * Remove possible cron schedule loop.
-	 *
-	 * @since 2.5.1
-	 */
-	private static function upgrade_2_5_1() {
-		if ( ! function_exists( 'wp_unschedule_hook' ) ) {
-			return;
-		}
-
-		wp_unschedule_hook( 'wphb_performance_fetch_report' );
-	}
-
-	/**
-	 * Upgrade to 2.5.2
-	 *
-	 * Change default value for "File change detection".
-	 *
-	 * @since 2.5.2
-	 */
-	private static function upgrade_2_5_2() {
-		Settings::update_setting( 'detection', 'auto', 'page_cache' );
-	}
-
-	/**
 	 * This is a fixed up mechanism for only updating the required stuff.
 	 *
 	 * Common for both subsites and single sites.
 	 *
 	 * @since 2.6.0
+	 * @deprecated
 	 */
 	private static function upgrade_2_6_0_multi() {
 		add_option( 'wphb-minification-show-config_modal', true );
@@ -211,6 +192,7 @@ class Installer {
 	 * Upgrade to 2.6.0
 	 *
 	 * @since 2.6.0
+	 * @deprecated
 	 */
 	private static function upgrade_2_6_0() {
 		// Show upgrade summary, Currently only for v2.6.0.
@@ -249,6 +231,7 @@ class Installer {
 	 * Upgrade the pre 2.5 settings to new 2.6 format.
 	 *
 	 * @since 2.6.0
+	 * @deprecated
 	 */
 	private static function upgrade_minification_structure() {
 		$options = Settings::get_settings( 'minify' );
@@ -276,6 +259,7 @@ class Installer {
 	 * Upgrade sub sites to 2.6.2
 	 *
 	 * @since 2.6.2
+	 * @deprecated
 	 */
 	private static function upgrade_2_6_2_multi() {
 		// Remove AO upgrade modal for sub sites that do not have AO enabled.
@@ -288,6 +272,7 @@ class Installer {
 	 * Upgrade to 2.6.2
 	 *
 	 * @since 2.6.2
+	 * @deprecated
 	 */
 	private static function upgrade_2_6_2() {
 		Logger::cleanup();
@@ -320,6 +305,139 @@ class Installer {
 				$settings['exclude']['url_strings'][] = 'sitemap[^\/.]*\.(?:xml|xsl)';
 				Utils::get_module( 'page_cache' )->save_settings( $settings );
 			}
+		}
+	}
+
+	/**
+	 * Upgrade to 2.7.1
+	 *
+	 * @since 2.7.1
+	 */
+	private static function upgrade_2_7_1() {
+		if ( Settings::get_setting( 'enabled', 'page_cache' ) ) {
+			unlink( WP_CONTENT_DIR . '/advanced-cache.php' );
+		}
+	}
+
+	/**
+	 * Upgrade to 2.7.1
+	 *
+	 * @since 2.7.1
+	 */
+	private static function upgrade_2_7_1_multi() {
+		wp_cache_delete( 'wphb_process_queue', 'options' );
+	}
+
+	/**
+	 * Upgrade to 2.7.1 (single and subsites).
+	 *
+	 * @since 2.7.2
+	 */
+	private static function upgrade_2_7_2_multi() {
+		$minify  = Utils::get_module( 'minify' );
+		$options = $minify->get_options();
+
+		// Asset optimization not enabled - skip.
+		if ( ! $options['enabled'] ) {
+			return;
+		}
+
+		// If not enabled on subsites - skip.
+		if ( is_multisite() && ! is_network_admin() && ! $options['minify_blog'] ) {
+			return;
+		}
+
+		// Not Auto Basic mode - exit.
+		if ( ! isset( $options['type'] ) || 'basic' !== $options['type'] ) {
+			return;
+		}
+
+		$collections = \Hummingbird\Core\Modules\Minify\Sources_Collector::get_collection();
+
+		// Fix styles and scripts from combining on basic mode.
+		$options['dont_combine']['styles']  = array_keys( $collections['styles'] );
+		$options['dont_combine']['scripts'] = array_keys( $collections['scripts'] );
+
+		$minify->update_options( $options );
+		$minify->clear_cache( false );
+	}
+
+	/**
+	 * Upgrade to 3.0.0.
+	 *
+	 * @since 3.0.0
+	 */
+	private static function upgrade_3_0_0() {
+		// Summary upgrade modal.
+		add_site_option( 'wphb_show_upgrade_summary', true );
+
+		// Force browser caching refresh.
+		delete_site_option( 'wphb-caching-data' );
+
+		// Force performance report refresh.
+		Settings::delete( 'wphb-last-report' );
+
+		// Remove deprecated hub options.
+		$options = Utils::get_module( 'performance' )->get_options();
+		if ( isset( $options['hub'] ) ) {
+			unset( $options['hub'] );
+		}
+
+		unset( $options['widget'] );
+
+		Utils::get_module( 'performance' )->update_options( $options );
+	}
+
+	/**
+	 * Upgrade to 3.0.0 on multisite.
+	 *
+	 * @since 3.0.0
+	 */
+	private static function upgrade_3_0_0_multi() {
+		// Force performance report refresh.
+		Settings::delete( 'wphb-last-report' );
+	}
+
+	/**
+	 * Upgrade to 3.0.1
+	 */
+	private static function upgrade_3_0_1() {
+		// Move cache control from Caching - Settings to Settings - General.
+		$settings = Settings::get_settings();
+
+		if ( ! isset( $settings['page_cache']['control'] ) ) {
+			return;
+		}
+
+		$settings['settings']['control'] = $settings['page_cache']['control'];
+		unset( $settings['page_cache']['control'] );
+
+		Settings::update_settings( $settings );
+	}
+
+	/**
+	 * Upgrade to 3.1.0
+	 */
+	private static function upgrade_3_1_0() {
+		// Summary upgrade modal.
+		add_site_option( 'wphb_show_upgrade_summary', true );
+
+		// For account where no zone_key defined, we need to refresh the zone data.
+		$settings = Settings::get_settings( 'cloudflare' );
+
+		if ( ! $settings['enabled'] ) {
+			return;
+		}
+
+		// Account ID already set.
+		if ( isset( $settings['account_id'] ) && ! empty( $settings['account_id'] ) ) {
+			return;
+		}
+
+		$zones = Utils::get_module( 'cloudflare' )->get_zones_list();
+
+		if ( ! is_wp_error( $zones ) ) {
+			Utils::get_module( 'cloudflare' )->process_zones( $zones, $settings['zone_name'] );
 		}
 	}
 

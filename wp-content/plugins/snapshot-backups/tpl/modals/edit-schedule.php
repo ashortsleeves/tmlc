@@ -19,7 +19,7 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 		aria-labelledby="modal-snapshot-edit-schedule-title"
 		aria-describedby="modal-snapshot-edit-schedule-description"
 	>
-		<div class="sui-box">
+		<div class="sui-box" style="margin-bottom: 0;">
 			<div class="sui-box-header sui-flatten sui-content-center">
 				<figure class="sui-box-banner" role="banner" aria-hidden="true">
 					<img
@@ -27,8 +27,8 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 						srcset="<?php echo esc_attr( $assets->get_asset( 'img/modal-banner-create-backup.png' ) ); ?> 1x, <?php echo esc_attr( $assets->get_asset( 'img/modal-banner-create-backup@2x.png' ) ); ?> 2x"
 					/>
 				</figure>
-				<button class="sui-button-icon sui-button-float--right" onclick="jQuery(window).trigger('snapshot:close_modal')">
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+				<button class="sui-button-icon sui-button-float--right" data-modal-close>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 				</button>
 				<h3 class="sui-box-title sui-lg" id="modal-snapshot-edit-schedule-title"><?php echo esc_html( $modal_title ); ?></h3>
 				<span id="modal-snapshot-edit-schedule-description" class="sui-description"><?php echo esc_html( $message ); ?></span>
@@ -59,7 +59,7 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 
 									<div class="sui-tab-boxed">
 										<label for="snapshot-daily-time" class="sui-label"><?php esc_html_e( 'Time of the day', 'snapshot' ); ?></label>
-										<select id="snapshot-daily-time" name="daily_time">
+										<select class="sui-select" id="snapshot-daily-time" name="daily_time">
 											<?php foreach ( Helper\Datetime::get_hour_list() as $value => $text ) { ?>
 											<option value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $text ); ?></option>
 											<?php } ?>
@@ -70,7 +70,7 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 										<div class="sui-row">
 											<div class="sui-col-sm-6">
 												<label for="snapshot-weekly-dow" class="sui-label"><?php esc_html_e( 'Day of the week', 'snapshot' ); ?></label>
-												<select id="snapshot-weekly-dow" name="frequency_weekday">
+												<select class="sui-select" id="snapshot-weekly-dow" name="frequency_weekday">
 													<option value="1"><?php esc_html_e( 'Sunday', 'snapshot' ); ?></option>
 													<option value="2"><?php esc_html_e( 'Monday', 'snapshot' ); ?></option>
 													<option value="3"><?php esc_html_e( 'Tuesday', 'snapshot' ); ?></option>
@@ -82,7 +82,7 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 											</div>
 											<div class="sui-col-sm-6">
 												<label for="snapshot-weekly-time" class="sui-label"><?php esc_html_e( 'Time of the day', 'snapshot' ); ?></label>
-												<select id="snapshot-weekly-time" name="weekly_time">
+												<select class="sui-select" id="snapshot-weekly-time" name="weekly_time">
 													<?php foreach ( Helper\Datetime::get_hour_list() as $value => $text ) { ?>
 													<option value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $text ); ?></option>
 													<?php } ?>
@@ -95,7 +95,7 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 										<div class="sui-row">
 											<div class="sui-col-sm-6">
 												<label for="snapshot-monthly-day" class="sui-label"><?php esc_html_e( 'Day of the month', 'snapshot' ); ?></label>
-												<select id="snapshot-monthly-day" name="frequency_monthday">
+												<select class="sui-select" id="snapshot-monthly-day" name="frequency_monthday">
 													<?php foreach ( range( 1, 28 ) as $day ) { ?>
 													<option value="<?php echo esc_attr( $day ); ?>"><?php echo esc_html( $day ); ?></option>
 													<?php } ?>
@@ -103,7 +103,7 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 											</div>
 											<div class="sui-col-sm-6">
 												<label for="snapshot-monthly-time" class="sui-label"><?php esc_html_e( 'Time of the day', 'snapshot' ); ?></label>
-												<select id="snapshot-monthly-time" name="monthly_time">
+												<select class="sui-select" id="snapshot-monthly-time" name="monthly_time">
 													<?php foreach ( Helper\Datetime::get_hour_list() as $value => $text ) { ?>
 													<option value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $text ); ?></option>
 													<?php } ?>
@@ -140,10 +140,10 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 					<div class="sui-block-content-center">
 						<button type="submit" class="sui-button sui-button-blue" aria-live="polite">
 							<span class="sui-button-text-default">
-								<i class="sui-icon-save" aria-hidden="true"></i><?php echo esc_attr( $button ); ?>
+								<span class="sui-icon-save" aria-hidden="true"></span><?php echo esc_attr( $button ); ?>
 							</span>
 							<span class="sui-button-text-onload">
-								<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+								<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 								<?php echo esc_attr( $button_saving ); ?>
 							</span>
 						</button>

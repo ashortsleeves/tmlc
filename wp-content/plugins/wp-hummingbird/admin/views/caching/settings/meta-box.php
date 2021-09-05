@@ -5,57 +5,14 @@
  * @since 1.8.1
  * @package Hummingbird
  *
- * @var bool   $enabled    Page cache enabled.
- * @var bool   $control    Page cache control.
  * @var string $detection  File change detection. Accepts: 'manual', 'auto' and 'none'.
  */
-
-use Hummingbird\Core\Utils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 ?>
-
-<div class="sui-box-settings-row">
-	<div class="sui-box-settings-col-1">
-		<span class="sui-settings-label"><?php esc_html_e( 'Admin Cache Control', 'wphb' ); ?></span>
-		<span class="sui-description">
-			<?php
-			if ( is_network_admin() ) {
-				esc_html_e( 'This feature adds a Clear Page Cache button to the WordPress Admin Bar for Network and Subsite Admin users. ', 'wphb' );
-			} else {
-				esc_html_e( 'This feature adds a Clear Page Cache button to the WordPress Admin Top Bar area for admin users.', 'wphb' );
-			}
-			?>
-		</span>
-	</div>
-	<div class="sui-box-settings-col-2">
-		<div class="sui-form-field">
-			<label for="cc_button" class="sui-toggle">
-				<input type="checkbox" id="cc_button" name="cc_button" aria-labelledby="cc_button-label" <?php checked( $control ); ?><?php disabled( ! $enabled ); ?>>
-				<span class="sui-toggle-slider" aria-hidden="true"></span>
-				<span id="cc_button-label" class="sui-toggle-label"><?php esc_html_e( 'Show Clear Page Cache button in Admin Bar', 'wphb' ); ?></span>
-			</label>
-			<?php if ( ! $enabled ) : ?>
-			<span class="sui-description sui-toggle-description">
-				<?php
-				$this->admin_notices->show_inline(
-					sprintf(
-						/* translators: %1$s - opening a tag, %2$s - closing a tag */
-						esc_html__( 'Activate %1$sPage Caching%2$s to use this feature.', 'wphb' ),
-						'<a href="' . esc_url( Utils::get_admin_menu_url( 'caching' ) ) . '">',
-						'</a>'
-					),
-					'grey'
-				);
-				?>
-			</span>
-			<?php endif; ?>
-		</div>
-	</div>
-</div>
 
 <div class="sui-box-settings-row">
 	<div class="sui-box-settings-col-1">

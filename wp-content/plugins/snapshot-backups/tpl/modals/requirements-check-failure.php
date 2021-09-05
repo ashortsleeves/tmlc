@@ -5,7 +5,10 @@
  * @package snapshot
  */
 
-$assets = new \WPMUDEV\Snapshot4\Helper\Assets();
+use WPMUDEV\Snapshot4\Helper\Assets;
+use WPMUDEV\Snapshot4\Helper\Settings;
+
+$assets = new Assets();
 ?>
 
 <div class="sui-modal sui-modal-md">
@@ -29,8 +32,8 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 						srcset="<?php echo esc_attr( $assets->get_asset( 'img/modal-requirement-fail.png' ) ); ?> 1x, <?php echo esc_attr( $assets->get_asset( 'img/modal-requirement-fail@2x.png' ) ); ?> 2x"
 					/>
 				</figure>
-				<button class="sui-button-icon sui-button-float--right" onclick="jQuery(window).trigger('snapshot:close_modal')">
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+				<button class="sui-button-icon sui-button-float--right" data-modal-close>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 				</button>
 				<h3 class="sui-box-title sui-lg" ><?php esc_html_e( 'Requirement failed', 'snapshot' ); ?></h3>
 				<span class="sui-description"><?php esc_html_e( 'You have 1 requirement warning. It is likely that the backup will fail due to the issue. Please fix the isssue to run a backup.', 'snapshot' ); ?></span>
@@ -41,12 +44,12 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 				<div class="sui-accordion-item sui-error sui-accordion-item--open">
 
 					<div class="sui-accordion-item-header">
-						<div class="sui-accordion-item-title"><i aria-hidden="true" class="sui-icon-warning-alert sui-error"></i>
+						<div class="sui-accordion-item-title"><span aria-hidden="true" class="sui-icon-warning-alert sui-error"></span>
 						<?php esc_html_e( 'PHP v.7.0 or newer required', 'snapshot' ); ?>
 						</div>
 
 						<div>
-							<button class="sui-button-icon sui-accordion-open-indicator" aria-label="Open item"><i class="sui-icon-chevron-down" aria-hidden="true"></i></button>
+							<button class="sui-button-icon sui-accordion-open-indicator" aria-label="Open item"><span class="sui-icon-chevron-down" aria-hidden="true"></span></button>
 						</div>
 					</div>
 
@@ -57,13 +60,15 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 								<span class="sui-description"><?php echo sprintf( esc_html__( 'Your site is running on PHP v%s, and Snapshot requires v7.0 or newer. Update your PHP version to proceed. If you use a managed host, contact them directly to have it updated.', 'snapshot' ), esc_html( phpversion() ) ); ?></span>
 							</div>
 							<div class="sui-box-footer" style="justify-content: space-between;padding-top: 0;border-top: none;">
-								<a href="https://premium.wpmudev.org/docs/wpmu-dev-plugins/snapshot-4-0/" target="_blank" class="sui-button sui-button-ghost"><i class="sui-icon-academy" aria-hidden="true"></i><?php esc_html_e( 'Documentation', 'snapshot' ); ?></a>
+								<?php if ( ! Settings::get_branding_hide_doc_link() ) { ?>
+									<a href="https://wpmudev.com/docs/wpmu-dev-plugins/snapshot-4-0/" target="_blank" class="sui-button sui-button-ghost"><span class="sui-icon-academy" aria-hidden="true"></span><?php esc_html_e( 'Documentation', 'snapshot' ); ?></a>
+								<?php } ?>
 								<button role="button" class="sui-button sui-button-ghost snapshot-recheck-requirements" aria-live="polite">
 									<span class="sui-button-text-default">
-										<i class="sui-icon-update" aria-hidden="true"></i><?php esc_html_e( 'Re-check', 'snapshot' ); ?>
+										<span class="sui-icon-update" aria-hidden="true"></span><?php esc_html_e( 'Re-check', 'snapshot' ); ?>
 									</span>
 									<span class="sui-button-text-onload">
-										<i class="sui-icon-loader sui-loading" aria-hidden="true"></i><?php esc_html_e( 'Re-checking', 'snapshot' ); ?>
+										<span class="sui-icon-loader sui-loading" aria-hidden="true"></span><?php esc_html_e( 'Re-checking', 'snapshot' ); ?>
 									</span>
 								</button>
 							</div>
@@ -78,10 +83,10 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 				<div class="sui-block-content-center">
 					<button role="button" class="sui-button snapshot-recheck-requirements" aria-live="polite">
 						<span class="sui-button-text-default">
-							<i class="sui-icon-update" aria-hidden="true"></i><?php esc_html_e( 'Re-check', 'snapshot' ); ?>
+							<span class="sui-icon-update" aria-hidden="true"></span><?php esc_html_e( 'Re-check', 'snapshot' ); ?>
 						</span>
 						<span class="sui-button-text-onload">
-							<i class="sui-icon-loader sui-loading" aria-hidden="true"></i><?php esc_html_e( 'Re-checking', 'snapshot' ); ?>
+							<span class="sui-icon-loader sui-loading" aria-hidden="true"></span><?php esc_html_e( 'Re-checking', 'snapshot' ); ?>
 						</span>
 					</button>
 				</div>

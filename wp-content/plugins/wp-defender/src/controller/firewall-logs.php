@@ -53,21 +53,24 @@ class Firewall_Logs extends Controller2 {
 						case 'ban':
 							$bl->remove_from_list( $model->ip, 'allowlist' );
 							$bl->add_to_list( $model->ip, 'blocklist' );
-							$ips[] = $model->ip;
+							$ips[ $model->ip ] = $model->ip;
 							break;
 						case 'allowlist':
 							$bl->remove_from_list( $model->ip, 'blocklist' );
 							$bl->add_to_list( $model->ip, 'allowlist' );
-							$ips[] = $model->ip;
+							$ips[ $model->ip ] = $model->ip;
 							break;
 						case 'delete':
-							$ips[] = $model->ip;
+							$ips[ $model->ip ] = $model->ip;
 							$model->delete();
+							break;
+						default:
 							break;
 					}
 				}
 			}
 		}
+
 		switch ( $data['action'] ) {
 			case 'allowlist':
 				$messages = sprintf( __( "IP %s has been added to your allowlist. You can control your allowlist in <a href=\"%s\">IP Lockouts.</a>",
@@ -218,6 +221,10 @@ class Firewall_Logs extends Controller2 {
 					'type'     => 'int',
 					'sanitize' => 'sanitize_text_field',
 				),
+				'per_page'     => array(
+					'type'     => 'int',
+					'sanitize' => 'sanitize_text_field',
+				),
 			)
 		);
 		$logs        = Lockout_Log::get_logs_and_format(
@@ -228,7 +235,10 @@ class Firewall_Logs extends Controller2 {
 				// if this is all, then we set to null to exclude it from the filter
 				'type' => $filter_data['type'] === 'all' ? '' : $filter_data['type'],
 			),
-			$filter_data['paged']
+			$filter_data['paged'],
+			'id',
+			'desc',
+			$filter_data['per_page']
 		);
 
 		return new Response(
@@ -358,10 +368,10 @@ class Firewall_Logs extends Controller2 {
 	}
 
 	/**
-	 * @param $order_by
-	 * @param $order
-	 * @param $filters
-	 * @param $paged
+	 * @param array $filters
+	 * @param int $paged
+	 * @param string $order
+	 * @param string $order_by
 	 *
 	 * @return array
 	 */
@@ -382,41 +392,26 @@ class Firewall_Logs extends Controller2 {
 	}
 
 	/**
-	 * Export the data of this module, we will use this for export to HUB, create a preset etc
-	 *
-	 * @return array
+	 * Export the data of this module, we will use this for export to HUB, create a preset etc.
 	 */
-	public function to_array() {
-	}
+	public function to_array() {}
 
 	/**
-	 * Import the data of other source into this, it can be when HUB trigger the import, or user apply a preset
+	 * Import the data of other source into this, it can be when HUB trigger the import, or user apply a preset.
 	 *
-	 * @param $data array
-	 *
-	 * @return boolean
+	 * @param array $data
 	 */
-	public function import_data( $data ) {
-		// TODO: Implement import_data() method.
-	}
+	public function import_data( $data ) {}
 
 	/**
-	 * Remove all settings, configs generated in this container runtime
-	 *
-	 * @return mixed
+	 * Remove all settings, configs generated in this container runtime.
 	 */
-	public function remove_settings() {
-		// TODO: Implement remove_settings() method.
-	}
+	public function remove_settings() {}
 
 	/**
-	 * Remove all data
-	 *
-	 * @return mixed
+	 * Remove all data.
 	 */
-	public function remove_data() {
-		// TODO: Implement remove_data() method.
-	}
+	public function remove_data() {}
 
 	/**
 	 * @return array

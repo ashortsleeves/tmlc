@@ -5,7 +5,7 @@
  * src/resources/postcss/ file. For more information, check out our engineering
  * docs on how we handle CSS in our engineering docs.
  *
- * @see: http://moderntribe.github.io/products-engineering/css/
+ * @see: https://the-events-calendar.github.io/products-engineering/docs/code-standards/css/
  */
 
 .events-cal #fs_connect, .toplevel_page_tribe-common #fs_connect, .toplevel_page_tribe-help #fs_connect, .toplevel_page_tribe-app-shop #fs_connect {
@@ -77,7 +77,7 @@
 					visibility: hidden;
 				}
 
-		.events-cal #fs_connect .fs-visual .fs-site-icon::before, .toplevel_page_tribe-common #fs_connect .fs-visual .fs-site-icon::before, .toplevel_page_tribe-help #fs_connect .fs-visual .fs-site-icon::before, .toplevel_page_tribe-app-shop #fs_connect .fs-visual .fs-site-icon::before {
+		.events-cal #fs_connect .fs-visual .fs-site-icon:before, .toplevel_page_tribe-common #fs_connect .fs-visual .fs-site-icon:before, .toplevel_page_tribe-help #fs_connect .fs-visual .fs-site-icon:before, .toplevel_page_tribe-app-shop #fs_connect .fs-visual .fs-site-icon:before {
 					background-image: url( ../images/event-tickets.svg );
 					background-position: center center;
 					background-repeat: no-repeat;
@@ -93,7 +93,7 @@
 					visibility: hidden;
 				}
 
-		.events-cal #fs_connect .fs-visual .fs-plugin-icon::before, .toplevel_page_tribe-common #fs_connect .fs-visual .fs-plugin-icon::before, .toplevel_page_tribe-help #fs_connect .fs-visual .fs-plugin-icon::before, .toplevel_page_tribe-app-shop #fs_connect .fs-visual .fs-plugin-icon::before {
+		.events-cal #fs_connect .fs-visual .fs-plugin-icon:before, .toplevel_page_tribe-common #fs_connect .fs-visual .fs-plugin-icon:before, .toplevel_page_tribe-help #fs_connect .fs-visual .fs-plugin-icon:before, .toplevel_page_tribe-app-shop #fs_connect .fs-visual .fs-plugin-icon:before {
 					background-image: url( ../icons/stethoscope.svg );
 					background-position: center center;
 					background-repeat: no-repeat;
@@ -226,7 +226,7 @@
 						background-size: 65%;
 					}
 
-		.events-cal #fs_connect .fs-permissions.fs-open ul .dashicons::before, .toplevel_page_tribe-common #fs_connect .fs-permissions.fs-open ul .dashicons::before, .toplevel_page_tribe-help #fs_connect .fs-permissions.fs-open ul .dashicons::before, .toplevel_page_tribe-app-shop #fs_connect .fs-permissions.fs-open ul .dashicons::before {
+		.events-cal #fs_connect .fs-permissions.fs-open ul .dashicons:before, .toplevel_page_tribe-common #fs_connect .fs-permissions.fs-open ul .dashicons:before, .toplevel_page_tribe-help #fs_connect .fs-permissions.fs-open ul .dashicons:before, .toplevel_page_tribe-app-shop #fs_connect .fs-permissions.fs-open ul .dashicons:before {
 							content: '';
 						}
 

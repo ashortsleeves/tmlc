@@ -7,42 +7,42 @@ use WP_Error;
 class Apache {
 
 	/**
-	 * Exclude file paths
+	 * Exclude file paths.
 	 *
-	 * @var array|bool|mixed
+	 * @var array
 	 */
 	public $exclude_file_paths = [];
 
 	/**
-	 * Exclude file paths
+	 * Exclude file paths.
 	 *
-	 * @var array|bool|mixed
+	 * @var array
 	 */
 	public $new_htaccess_config = [];
 
 	/**
-	 * The htaccess inside wp-content
+	 * The htaccess inside wp-content.
 	 *
 	 * @var string
 	 */
 	public $contentdir_path = null;
 
 	/**
-	 * The htaccess path inside wp-includes
+	 * The htaccess path inside wp-includes.
 	 *
 	 * @var null
 	 */
 	public $includedir_path = null;
 
 	/**
-	 * Service type
+	 * Service type.
 	 *
 	 * @var string
 	 */
 	private $type = null;
 
 	/**
-	 * Constructor method
+	 * Constructor method.
 	 *
 	 * @param void
 	 */
@@ -51,7 +51,7 @@ class Apache {
 	}
 
 	/**
-	 * Check whether the issue has been resolved or not
+	 * Check whether the issue has been resolved or not.
 	 *
 	 * @return bool
 	 */
@@ -71,7 +71,7 @@ class Apache {
 	}
 
 	/**
-	 * Process the rule
+	 * Process the rule.
 	 * @param bool|string $file_paths
 	 *
 	 * @return bool|\WP_Error
@@ -122,7 +122,7 @@ class Apache {
 		}
 
 		if ( 'prevent-php-executed' === $this->type ) {
-			if ( 'apache' !== Server::get_current_server() ) {
+			if ( ! in_array( Server::get_current_server(), array( 'apache', 'litespeed' ), true ) ) {
 				return new WP_Error(
 					'defender_unable_to_apply_rules',
 					__( 'The rules can\'t be applied. This can be either because your host doesn\'t allow editing the file, or you\'ve selected the wrong server type.', 'wpdef' )
@@ -162,7 +162,7 @@ class Apache {
 	}
 
 	/**
-	 * Revert the rules
+	 * Revert the rules.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -224,8 +224,9 @@ class Apache {
 			return delete_site_option( "defender_security_tweeks_{$this->type}" );
 		}
 	}
+
 	/**
-	 * Get Apache rule depending on the version
+	 * Get Apache rule depending on the version.
 	 *
 	 * @return array
 	 */
@@ -265,10 +266,79 @@ class Apache {
 	}
 
 	/**
-	 * Determine the Apache version
-	 * Most web servers have apache_get_version disabled, so we just get a simple curl of the headers
+	 * Get Apache rule depending on the version for instruction on browser.
 	 *
-	 * @return String
+	 * @return string
+	 */
+	public function get_rules_for_instruction() {
+		$rules = '';
+
+		if ( 'prevent-php-executed' === $this->type ) {
+			$rules = '## WP Defender - Protect PHP Executed ##' . PHP_EOL;
+			$rules .= PHP_EOL;
+			$rules .= '<Files *.php>' . PHP_EOL;
+			$rules .= 'Require all denied' . PHP_EOL;
+			$rules .= '</Files>' . PHP_EOL;
+			$rules .= PHP_EOL;
+			$rules .= '## WP Defender - End ##' . PHP_EOL;
+
+			if ( version_compare( $this->get_version(), '2.4', '<' ) ) {
+				$rules = '## WP Defender - Protect PHP Executed ##' . PHP_EOL;
+				$rules .= PHP_EOL;
+				$rules .= '<Files *.php>' . PHP_EOL;
+				$rules .= 'Order allow,deny' . PHP_EOL;
+				$rules .= 'Deny from all' . PHP_EOL;
+				$rules .= '</Files>' . PHP_EOL;
+				$rules .= PHP_EOL;
+				$rules .= '## WP Defender - End ##' . PHP_EOL;
+			}
+		}
+
+		if ( 'protect-information' === $this->type ) {
+			$rules = '## WP Defender - Prevent information disclosure ##' . PHP_EOL;
+			$rules .= PHP_EOL;
+			$rules .= '<FilesMatch "\.(md|exe|sh|bak|inc|pot|po|mo|log|sql)$">' . PHP_EOL;
+			$rules .= 'Require all denied' . PHP_EOL;
+			$rules .= '</FilesMatch>' . PHP_EOL;
+			$rules .= PHP_EOL;
+			$rules .= '<Files robots.txt>' . PHP_EOL;
+			$rules .= 'Require all granted' . PHP_EOL;
+			$rules .= '</Files>' . PHP_EOL;
+			$rules .= PHP_EOL;
+			$rules .= '<Files ads.txt>' . PHP_EOL;
+			$rules .= 'Require all granted' . PHP_EOL;
+			$rules .= '</Files>' . PHP_EOL;
+			$rules .= PHP_EOL;
+			$rules .= '## WP Defender - End ##';
+
+			if ( version_compare( $this->get_version(), '2.4', '>' ) ) {
+				$rules = '## WP Defender - Prevent information disclosure ##' . PHP_EOL;
+				$rules .= PHP_EOL;
+				$rules .= '<FilesMatch "\.(md|exe|sh|bak|inc|pot|po|mo|log|sql)$">' . PHP_EOL;
+				$rules .= 'Order allow,deny' . PHP_EOL;
+				$rules .= 'Deny from all' . PHP_EOL;
+				$rules .= '</FilesMatch>' . PHP_EOL;
+				$rules .= PHP_EOL;
+				$rules .= '<Files robots.txt>' . PHP_EOL;
+				$rules .= 'Allow from all' . PHP_EOL;
+				$rules .= '</Files>' . PHP_EOL;
+				$rules .= PHP_EOL;
+				$rules .= '<Files ads.txt>' . PHP_EOL;
+				$rules .= 'Allow from all' . PHP_EOL;
+				$rules .= '</Files>' . PHP_EOL;
+				$rules .= PHP_EOL;
+				$rules .= '## WP Defender - End ##';
+			}
+		}
+
+		return $rules;
+	}
+
+	/**
+	 * Determine the Apache version.
+	 * Most web servers have apache_get_version disabled, so we just get a simple curl of the headers.
+	 *
+	 * @return string
 	 */
 	public function get_version() {
 		if ( ! function_exists( 'apache_get_version' ) ) {
@@ -302,14 +372,13 @@ class Apache {
 		} else {
 			$version = apache_get_version();
 			$version = explode( '/', $version );
-			$version = $version[1];
+			$version = ! empty( $version[1] ) ? $version[1] : $version[0];
 		}
-
 		return $version;
 	}
 
 	/**
-	 * Protect content directory
+	 * Protect content directory.
 	 *
 	 * @return void
 	 */
@@ -353,7 +422,7 @@ class Apache {
 	}
 
 	/**
-	 * Protect includes directory
+	 * Protect includes directory.
 	 *
 	 * @return void
 	 */
@@ -396,7 +465,7 @@ class Apache {
 	}
 
 	/**
-	 * Return the correct apache rules for allow/deny
+	 * Return the correct apache rules for allow/deny.
 	 *
 	 * @return String
 	 */
@@ -418,8 +487,8 @@ class Apache {
 	}
 
 	/**
-	 * Protect uploads directory
-	 * This only when user provide a custom uploads
+	 * Protect uploads directory.
+	 * This only when user provide a custom uploads.
 	 *
 	 * @return void
 	 */
@@ -431,7 +500,7 @@ class Apache {
 	}
 
 	/**
-	 * UnProtect content directory
+	 * UnProtect content directory.
 	 *
 	 * @return void
 	 */
@@ -475,7 +544,7 @@ class Apache {
 	}
 
 	/**
-	 * UnProtect upload directory
+	 * UnProtect upload directory.
 	 *
 	 * @return void
 	 */
@@ -487,18 +556,18 @@ class Apache {
 	}
 
 	/**
-	 * Get the exclude file paths
+	 * Get the exclude file paths.
 	 *
-	 * @return Array - $exclude_file_paths
+	 * @return array - $exclude_file_paths
 	 */
 	public function get_excluded_file_paths() {
 		return $this->exclude_file_paths;
 	}
 
 	/**
-	 * Set the exclude file paths
+	 * Set the exclude file paths.
 	 *
-	 * @param String $paths
+	 * @param string $paths
 	 */
 	public function set_exclude_file_paths( $paths ) {
 		if ( ! empty( $paths ) ) {
@@ -507,9 +576,9 @@ class Apache {
 	}
 
 	/**
-	 * Set the exclude file paths
+	 * Set the exclude file paths.
 	 *
-	 * @param String $paths
+	 * @param string $paths
 	 */
 	public function get_new_htaccess_config( $config = [] ) {
 		if ( ! empty( $config ) ) {
@@ -518,7 +587,7 @@ class Apache {
 	}
 
 	/**
-	 * Get the new HT config
+	 * Get the new HT config.
 	 *
 	 * @return Array - $new_htaccess_config
 	 */

@@ -81,6 +81,9 @@ class Progress extends Model\Request {
 			$backup_status = $running_backup['snapshot_status'];
 			$exports       = $running_backup['tpd_exp_status'];
 
+			$backup_status = apply_filters( 'snapshot_custom_service_error', $backup_status );
+			Controller\Service\Backup::save_backup_error( $backup['id'], $backup_status, time() );
+
 			$export_text = Model\Request\Listing::get_backup_export_texts( $exports, true );
 
 			$this->set( 'backup_running_status', $backup_status );
@@ -97,13 +100,14 @@ class Progress extends Model\Request {
 			// Lets see if we're stuck in just_triggered stage for more than 30 mins. If so, we can safely assume that backup to have failed.
 			$manual_trigger_time = get_site_option( Controller\Ajax\Backup::SNAPSHOT_MANUAL_BACKUP_TRIGGER_TIME );
 
-			if ( time() - $manual_trigger_time > 30 * 60 ) {
+			if ( time() - $manual_trigger_time > SNAPSHOT4_BACKUP_TIMEOUT ) {
 				delete_site_option( Controller\Ajax\Backup::SNAPSHOT_RUNNING_BACKUP );
 				delete_site_option( Controller\Ajax\Backup::SNAPSHOT_RUNNING_BACKUP_STATUS );
 				delete_site_option( Controller\Ajax\Backup::SNAPSHOT_MANUAL_BACKUP_TRIGGER_TIME );
 
 				$this->set( 'backup_failed', true );
 				delete_transient( 'snapshot_listed_backups' );
+				delete_transient( 'snapshot_current_stats' );
 			}
 		}
 
@@ -135,39 +139,39 @@ class Progress extends Model\Request {
 	data-step-max="' . $step_max . '"
 	>
 	<td class="sui-hidden-xs sui-table-item-title">
-		<i class="sui-icon-snapshot" aria-hidden="true"></i>
+		<span class="sui-icon-snapshot" aria-hidden="true"></span>
 		<span class="backup-name">' . $name . '</span>
 	</td>
 	<td class="sui-hidden-xs sui-table-item-title gray">
-		<i class="sui-icon-wpmudev-logo" aria-hidden="true"></i>
+		<span class="sui-icon-wpmudev-logo" aria-hidden="true"></span>
 		WPMU DEV
 	</td>
 	<td class="sui-hidden-xs snapshot-backup-export-destinations sui-table-item-title gray">
 			<span style="display:inline-block;">
-				<i class="sui-icon-loader sui-loading snapshot-destination-loader" aria-hidden="true"></i>'
+				<span class="sui-icon-loader sui-loading snapshot-destination-loader" aria-hidden="true"></span>'
 				. __( 'Loading...', 'snapshot' ) . '
 			</span>
 	</td>
 	<td class="sui-hidden-xs last-child">
 		<div class="sui-progress" style="width: 130px; float: left;">
-			<span class="sui-progress-icon" aria-hidden="true"><i class="sui-icon-loader sui-loading"></i></span>
+			<span class="sui-progress-icon" aria-hidden="true"><span class="sui-icon-loader sui-loading"></span></span>
 			<span class="sui-progress-text"><span class="progress-text">' . $progress_text . '</span></span>
 			<div class="sui-progress-bar" aria-hidden="true"><span class="percent-width" style="width: ' . $percent_width . ';"></span></div>
 		</div>
-		<span class="sui-accordion-open-indicator" aria-label="Expand"><i class="sui-icon-chevron-down" aria-hidden="true"></i></span>
+		<span class="sui-accordion-open-indicator" aria-label="Expand"><span class="sui-icon-chevron-down" aria-hidden="true"></span></span>
 	</td>
 
 	<td class="sui-hidden-sm sui-hidden-md sui-hidden-lg sui-table-item-title mobile-row" colspan="4">
 		<div class="sui-table-item-title">
 			<div class="sui-progress" style="width: 90%; float: left;">
 				<div class="sui-table-item-title">
-					<i class="sui-icon-snapshot sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-snapshot sui-md" aria-hidden="true"></span>
 				</div>
-				<span class="sui-progress-icon" aria-hidden="true"><i class="sui-icon-loader sui-loading"></i></span>
+				<span class="sui-progress-icon" aria-hidden="true"><span class="sui-icon-loader sui-loading"></span></span>
 				<span class="sui-progress-text"><span class="progress-text">' . $progress_text . '</span></span>
 				<div class="sui-progress-bar" aria-hidden="true"><span class="percent-width" style="width: ' . $percent_width . ';"></span></div>
 			</div>
-			<span class="sui-accordion-open-indicator" aria-label="Expand"><i class="sui-icon-chevron-down" aria-hidden="true"></i></span>
+			<span class="sui-accordion-open-indicator" aria-label="Expand"><span class="sui-icon-chevron-down" aria-hidden="true"></span></span>
 			<div style="clear: both;"></div>
 		</div>
 
@@ -175,7 +179,7 @@ class Progress extends Model\Request {
 			<div class="sui-col-xs-6">
 				<div class="sui-table-item-title snapshot-mobile-title">' . esc_html__( 'Storage', 'snapshot' ) . '</div>
 				<div class="sui-table-item-title gray">
-					<i class="sui-icon-wpmudev-logo" aria-hidden="true"></i>
+					<span class="sui-icon-wpmudev-logo" aria-hidden="true"></span>
 					WPMU DEV
 				</div>
 			</div>
@@ -183,7 +187,7 @@ class Progress extends Model\Request {
 				<div class="sui-table-item-title snapshot-mobile-title">' . esc_html__( 'Export Destination', 'snapshot' ) . '</div>
 				<div class="sui-table-item-title gray snapshot-backup-export-destinations">
 					<span style="display:inline-block;">
-						<i class="sui-icon-loader sui-loading snapshot-destination-loader" aria-hidden="true"></i>'
+						<span class="sui-icon-loader sui-loading snapshot-destination-loader" aria-hidden="true"></span>'
 						. __( 'Loading...', 'snapshot' ) . '
 					</span>
 				</div>
@@ -213,13 +217,13 @@ class Progress extends Model\Request {
 						</div>
 						<ul class="progress-circles" aria-hidden="true">
 							<li class="circle sui-tooltip ci-step-1" data-tooltip="' . esc_attr__( 'Backup initiated', 'snapshot' ) . '">
-								<i class="sui-icon-check"></i>
+								<span class="sui-icon-check"></span>
 							</li>
 							<li class="circle sui-tooltip ci-step-2" data-tooltip="' . esc_attr__( 'Files have been backed up successfully', 'snapshot' ) . '">
-								<i class="sui-icon-check"></i>
+								<span class="sui-icon-check"></span>
 							</li>
 							<li class="circle sui-tooltip ci-step-3" data-tooltip="' . esc_attr__( 'Database has been backed up successfully', 'snapshot' ) . '">
-								<i class="sui-icon-check"></i>
+								<span class="sui-icon-check"></span>
 							</li>
 						</ul>
 					</div>
@@ -236,7 +240,7 @@ class Progress extends Model\Request {
 			</div>
 			<div class="sui-box-footer" style="justify-content: space-between;">
 				<button role="button" class="sui-button sui-button-ghost button-cancel-backup" disabled>' . esc_html__( 'Cancel', 'snapshot' ) . '</button>
-				<button role="button" class="sui-button sui-button-ghost button-view-log" disabled><i class="sui-icon-eye" aria-hidden="true"></i>' . esc_html__( 'View logs', 'snapshot' ) . '</button>
+				<button role="button" class="sui-button sui-button-ghost button-view-log" disabled><span class="sui-icon-eye" aria-hidden="true"></span>' . esc_html__( 'View logs', 'snapshot' ) . '</button>
 			</div>
 		</div>
 	</td>
@@ -248,7 +252,7 @@ class Progress extends Model\Request {
 					<div class="sui-col-xs-6">
 						<div class="sui-table-item-title sui-table-item-title snapshot-mobile-title">' . esc_html__( 'Storage', 'snapshot' ) . '</div>
 						<div class="sui-table-item-title gray">
-							<i class="sui-icon-wpmudev-logo" aria-hidden="true"></i>
+							<span class="sui-icon-wpmudev-logo" aria-hidden="true"></span>
 							WPMU DEV
 						</div>
 					</div>
@@ -256,7 +260,7 @@ class Progress extends Model\Request {
 						<div class="sui-table-item-title snapshot-mobile-title">' . esc_html__( 'Export Destination', 'snapshot' ) . '</div>
 						<div class="sui-table-item-title gray snapshot-backup-export-destinations">
 							<span style="display:inline-block;">
-								<i class="sui-icon-loader sui-loading snapshot-destination-loader" aria-hidden="true"></i>'
+								<span class="sui-icon-loader sui-loading snapshot-destination-loader" aria-hidden="true"></span>'
 								. __( 'Loading...', 'snapshot' ) . '
 							</span>
 						</div>

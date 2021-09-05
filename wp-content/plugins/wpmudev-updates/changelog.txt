@@ -2,7 +2,87 @@ Plugin Name: WPMU DEV Dashboard
 Author: Aaron Edwards
 
 Change Log:
+
 ----------------------------------------------------------------------
+----------------------------------------------------------------------
+
+4.11.3 - 26/08/2021 - Joel
+- Enhance: Update analytics metrics.
+- Enhance: White label improvements.
+- Enhance: User search UX in permission settings.
+- Enhance: Hide the unwanted activate button on Dashboard.
+- Enhance: Remove extra confirmation modal when installing plugins.
+- Fix: SSO not working when activated from Hub.
+- Fix: Error messages on analytics API.
+- Fix: Conflict with Mailster plugin.
+- Fix: Scroll bar is hidden after closing modals.
+- Fix: Wrong message for Install bulk action.
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+
+4.11.2 - 19/07/2021 - Joel
+- New: Option to hide "What's new" model in Whitelabel settings.
+- Enhance: Allow auto-updates to be disabled from WP plugins page.
+- Enhance: Easier management of user permissions.
+- Enhance: Allow limited HTML tags in Whitelabel footer text.
+- Enhance: Whitelabel settings tabs.
+- Enhance: Hub APIs.
+- Enhance: PHP 8.0 support.
+- Fix: Permissions reset during plugin activation.
+- Fix: Empty search results notice always shown.
+- Fix: Unable to remove original admin from permission settings.
+- Fix: The site is being removed from Hub after the cron job.
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+
+4.11.1 - 22/06/2021 - Joel
+- New: White label plugin menu labels and icons.
+- New: "Install & Activate" bulk option for plugins.
+- Enhance: Compatibility with premium plugins and themes updates in Hub.
+- Enhance: Upgrade Shared UI library.
+- Enhance: Log errors only if WPMUDEV_API_DEBUG is defined as true.
+- Enhance: Update plugin icons for consistency.
+- Enhance: Bulk actions select.
+- Enhance: Removed unused styles and scripts.
+- Fix: Support link is broken in the notice.
+- Fix: Wrong translation update notification.
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+
+4.11.0 - 10/05/2021 - Ivan, Joel
+- New: Link logo by URL for whitelabelling.
+- New: New features highlights on plugin updates.
+- New: Hub endpoint for enabling SSO.
+- Enhance: Update changelog modal design.
+- Enhance: WP 5.8 support.
+- Enhance: New plans support.
+- Enhance: Analytics page for restricted membership plans.
+- Fix: Whitelabel not working as expected in WP 5.5
+- Fix: Extend access button not working for new membership plans.
+- Fix: Main menu title is not translatable.
+- Fix: SSO not working for some memberships.
+- Fix: Custom logo is not appearing in after enabling whitelabel.
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+
+4.10.8.1 - 15/04/2021 - Aaron, Ivan
+- Fix: access to undefined index in template
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+
+4.10.8 - 15/04/2021 - Aaron, Ivan
+- Add: correct error message for sign in with banned account
+
+----------------------------------------------------------------------
+
+4.10.7 - 12/03/2021 - Aaron, Ivan
+- Enhance: Change all URLs to wpmudev.com
+
 ----------------------------------------------------------------------
 
 4.10.6 - 12/02/2020 - Aaron, Ivan
@@ -679,3 +759,6 @@ Added option to disable admin notices.
 1.0.0 - 12/15/2009
 ----------------------------------------------------------------------
 Initial Release.
+
+
+704644-1630851893-au

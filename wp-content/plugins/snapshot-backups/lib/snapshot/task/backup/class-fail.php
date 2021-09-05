@@ -29,9 +29,13 @@ class Fail extends Task {
 	const ERROR_TOO_LARGE_TABLE_HANGED              = 'snapshot_failed_TooLargeTableHanged';
 	const ERROR_SITE_NOT_RESPONDED_ERROR            = 'snapshot_failed_SiteNotRespondedError';
 	const ERROR_UNKNOWN_ERROR                       = 'snapshot_failed_UnknownError';
+	const ERROR_GENERIC_ERROR                       = 'snapshot_failed_genericError';
+	const ERROR_NONCE_FAILED                        = 'snapshot_failed_nonce_failed';
+	const ERROR_EXPORT_FAILED                       = 'export_failed';
 
-	const URL_CONTACT_SUPPORT   = 'https://premium.wpmudev.org/hub/support/#get-support';
-	const URL_ADD_STORAGE_SPACE = 'https://premium.wpmudev.org/hub/account/#dash2-modal-add-storage';
+	const URL_CONTACT_SUPPORT     = 'https://wpmudev.com/hub2/support#get-support';
+	const URL_ADD_STORAGE_SPACE   = 'https://wpmudev.com/hub/account/#dash2-modal-add-storage';
+	const URL_GUIDE_BACKUP_FAILED = 'https://wpmudev.com/docs/wpmu-dev-plugins/snapshot-4-0/#backup-failed';
 
 	/**
 	 * Send email notifications when a backup fails
@@ -46,7 +50,8 @@ class Fail extends Task {
 				$args['service_error'],
 				$args['timestamp'],
 				$args['backup_type'],
-				$args['backup_id']
+				$args['backup_id'],
+				isset( $args['error_message'] ) ? $args['error_message'] : null
 			);
 		}
 	}
@@ -60,8 +65,9 @@ class Fail extends Task {
 	 * @param int    $timestamp         Error time.
 	 * @param string $backup_type       Type of backup ("scheduled" or "manual").
 	 * @param string $backup_id         Backup ID.
+	 * @param string $error_message     Custom error message.
 	 */
-	private function send( $email, $name, $service_error, $timestamp, $backup_type, $backup_id ) {
+	private function send( $email, $name, $service_error, $timestamp, $backup_type, $backup_id, $error_message = null ) {
 		$site_host_html = wp_parse_url( get_site_url(), PHP_URL_HOST );
 
 		$dt = new \DateTime();
@@ -72,7 +78,8 @@ class Fail extends Task {
 		$params = array(
 			'name'   => $name,
 			'error1' => "[$time_human]",
-			'error2' => "ERROR: $service_error",
+			/* translators: %s - Service's backup error message */
+			'error2' => sprintf( __( 'ERROR: %s', 'snapshot' ), ( $error_message ? $error_message : $service_error ) ),
 		);
 
 		$params += $this->get_texts( $service_error, $backup_type, $backup_id );
@@ -122,6 +129,8 @@ class Fail extends Task {
 			$backup_type_html = esc_html__( 'scheduled backup', 'snapshot' );
 		} elseif ( 'manual' === $backup_type ) {
 			$backup_type_html = esc_html__( 'manual backup', 'snapshot' );
+		} elseif ( empty( $backup_type ) ) {
+			$backup_type_html = esc_html__( 'backup', 'snapshot' );
 		}
 
 		switch ( $service_error ) {
@@ -187,6 +196,12 @@ class Fail extends Task {
 				$result['p2_html'] = sprintf( __( 'We recommend <a href="%1$s">checking the logs</a> to see which table that was, in case it makes sense to exclude it from the backup and <a href="%2$s">contact our support</a> team to do so.', 'snapshot' ), $logs_url, self::URL_CONTACT_SUPPORT );
 				break;
 			case self::ERROR_SITE_NOT_RESPONDED_ERROR:
+				/* translators: %1$s - manual/scheduled backup, %2$s - site domain name */
+				$result['p1_html'] = sprintf( __( 'The %1$s for %2$s failed. Here is the error log the backup shows:', 'snapshot' ), $backup_type_html, $site_host_html );
+				/* translators: %s - support link */
+				$result['p2_html'] = sprintf( __( 'We recommend re-running a backup and <a href="%s">contacting our support</a> team if the issue persists.', 'snapshot' ), self::URL_CONTACT_SUPPORT );
+				break;
+			case self::ERROR_EXPORT_FAILED:
 				/* translators: %1$s - manual/scheduled backup, %2$s - site domain name */
 				$result['p1_html'] = sprintf( __( 'The %1$s for %2$s failed. Here is the error log the backup shows:', 'snapshot' ), $backup_type_html, $site_host_html );
 				/* translators: %s - support link */

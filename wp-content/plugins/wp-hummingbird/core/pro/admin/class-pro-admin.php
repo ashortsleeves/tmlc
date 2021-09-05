@@ -197,7 +197,7 @@ class Pro_Admin {
 
 		$performance_is_active = false;
 
-		if ( $options['reports']['enabled'] ) {
+		if ( isset( $options['reports']['enabled'] ) && $options['reports']['enabled'] ) {
 			$performance_is_active = true;
 
 			$frequency = $options['reports']['frequency'];
@@ -517,7 +517,7 @@ class Pro_Admin {
 		$notifications_settings = Settings::get_setting( 'notifications', 'uptime' );
 
 		$notice_class   = 'grey';
-		$notice_message = __( "Email notifications are off which means you won't get notified if visitors can't access this website.", 'wphb' );
+		$notice_message = __( "Email notifications are off which means you won't get notified if visitors can't access this website.", 'wphb' );		 		 	     							 	
 
 		if ( $notifications_settings['enabled'] ) {
 			$recipients_count = count( $notifications_settings['recipients'] );

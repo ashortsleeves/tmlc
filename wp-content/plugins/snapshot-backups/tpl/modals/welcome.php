@@ -8,6 +8,7 @@
 use WPMUDEV\Snapshot4\Helper;
 use WPMUDEV\Snapshot4\Model;
 use WPMUDEV\Snapshot4\Model\Env;
+use WPMUDEV\Snapshot4\Helper\Settings;
 
 $button_class = ! empty( $button_class ) ? $button_class : 'sui-button-ghost';
 $modal_title  = ! empty( $modal_title ) ? $modal_title : '';
@@ -17,14 +18,14 @@ $button       = ! empty( $button ) ? $button : '';
 
 $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 
-$schedule  = Model\Schedule::get_schedule_info();
+$schedule  = Model\Schedule::get_schedule_info( false, true );
 $frequency = $schedule['values']['frequency'];
 
 $has_hosting_backups = Env::is_wpmu_hosting();
 
 if ( $has_hosting_backups ) {
 	/* translators: %s - Admin name */
-	$message = sprintf( __( '%s, welcome to the hottest backup plugin for WordPress. We\'ve detected you\'re hosting this website with us. Great! Both Hosting and Snapshot backups are available within the plugin.', 'snapshot' ), wp_get_current_user()->display_name );
+	$message = Settings::get_branding_hide_doc_link() ? sprintf( __( '%s, welcome to the hottest backup plugin for WordPress. Both Hosting and plugin backups are available within the plugin.', 'snapshot' ), wp_get_current_user()->display_name ) : sprintf( __( '%s, welcome to the hottest backup plugin for WordPress. We\'ve detected you\'re hosting this website with us. Great! Both Hosting and Snapshot backups are available within the plugin.', 'snapshot' ), wp_get_current_user()->display_name );
 }
 
 ?>
@@ -42,11 +43,12 @@ if ( $has_hosting_backups ) {
 
 				<div class="sui-box-header sui-flatten sui-content-center">
 
-					<div class="sui-box-banner" role="banner" aria-hidden="true"></div>
+					<div class="sui-box-banner <?php echo ! empty( $is_branding_hidden ) ? esc_html( 'snapshot-hidden-branding' ) : esc_html( '' ); ?>" role="banner" aria-hidden="true"></div>
 
 					<h3 class="sui-box-title sui-lg"><?php echo esc_html( $modal_title ); ?></h3>
-					<span class="sui-description"><?php echo esc_html( $message ); ?></span>
-
+					<span class="sui-description">
+						<?php echo esc_html( $message ); ?>
+					</span>
 				</div>
 
 				<div class="sui-box-body">
@@ -60,8 +62,15 @@ if ( $has_hosting_backups ) {
 						<p class="list-header"><strong><span class="bullet">•</span><?php esc_html_e( 'Hosting Backups', 'snapshot' ); ?></strong></p>
 						<p><?php esc_html_e( 'Hosting backups run nightly on a 30 day storage cycle. Backups are available to download within the plugin whereas restoring and any additional configuration is done via the Hub.', 'snapshot' ); ?></p>
 
-						<p class="list-header" style="margin-top: 20px;"><strong><span class="bullet">•</span><?php esc_html_e( 'Snapshot Backups', 'snapshot' ); ?></strong></p>
-						<p><?php esc_html_e( 'Snapshot backups can be scheduled and stored for 50 days on WPMU DEV\'s Storage Cloud.', 'snapshot' ); ?></p>
+						<p class="list-header" style="margin-top: 20px;"><strong><span class="bullet">•</span><?php Settings::get_branding_hide_doc_link() ? esc_html_e( 'Plugin Backups', 'snapshot' ) : esc_html_e( 'Snapshot Backups', 'snapshot' ); ?></strong></p>
+						<p><?php Settings::get_branding_hide_doc_link() ? esc_html_e( 'Plugin backups are incremental, allowing you to back up your site more frequently. You can set a storage limit, up to 30 manual backups and 30 scheduled backups (60 in total), and keep them on WPMU DEV\'s Storage Cloud until you reach our 50-days expiry policy for backups.', 'snapshot' ) : esc_html_e( 'Snapshot backups are incremental, allowing you to back up your site more frequently. You can set a storage limit, up to 30 manual backups and 30 scheduled backups (60 in total), and keep them on WPMU DEV\'s Storage Cloud until you reach our 50-days expiry policy for backups.', 'snapshot' ); ?></p>
+					</div>
+					<?php } else { ?>
+
+					<div class="hosting-backups-description">
+						<p class="list-header" ><strong><span class="bullet">•</span><?php Settings::get_branding_hide_doc_link() ? esc_html_e( 'Plugin Backups', 'snapshot' ) : esc_html_e( 'Snapshot Backups', 'snapshot' ); ?></strong></p>
+						<p><?php Settings::get_branding_hide_doc_link() ? esc_html_e( 'Plugin backups are incremental, allowing you to back up your site more frequently. You can set a storage limit, up to 30 manual backups and 30 scheduled backups (60 in total), and keep them on WPMU DEV\'s Storage Cloud until you reach our 50-days expiry policy for backups.', 'snapshot' ) : esc_html_e( 'Snapshot backups are incremental, allowing you to back up your site more frequently. You can set a storage limit, up to 30 manual backups and 30 scheduled backups (60 in total), and keep them on WPMU DEV\'s Storage Cloud until you reach our 50-days expiry policy for backups.', 'snapshot' ); ?>
+						</p>
 					</div>
 					<?php } ?>
 
@@ -69,19 +78,23 @@ if ( $has_hosting_backups ) {
 						<div class="sui-notice-content">
 							<div class="sui-notice-message">
 								<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
-								<?php /* translators: %s - link */ ?>
-								<p><?php echo wp_kses_post( sprintf( __( 'A connection with the API couldn\'t be established. Give it another try below, and if you continue having connection issues, our <a href="%s" target="_blank">support team</a> is ready to help.', 'snapshot' ), 'https://premium.wpmudev.org/hub/support/#get-support' ) ); ?></p>
+								<?php if ( Settings::get_branding_hide_doc_link() ) { ?>
+									<p><?php esc_html_e( 'A connection with the API couldn\'t be established. Give it another try below, and if you continue having connection issues, contact support.', 'snapshot' ); ?></p>
+								<?php } else { ?>
+									<?php /* translators: %s - link */ ?>
+									<p><?php echo wp_kses_post( sprintf( __( 'A connection with the API couldn\'t be established. Give it another try below, and if you continue having connection issues, our <a href="%s" target="_blank">support team</a> is ready to help.', 'snapshot' ), 'https://wpmudev.com/hub2/support#get-support' ) ); ?></p>
+								<?php } ?>
 							</div>
 						</div>
 					</div>
 					<div class="sui-block-content-center on-error" style="display: none;">
 						<button class="sui-button sui-button-ghost snapshot-get-started" role="button" onclick="jQuery(window).trigger('snapshot:check_if_region_modal')">
 							<span class="sui-button-text-default">
-								<i class="sui-icon-refresh" aria-hidden="true"></i>
+								<span class="sui-icon-refresh" aria-hidden="true"></span>
 								<?php esc_html_e( 'Reload', 'snapshot' ); ?>
 							</span>
 							<span class="sui-button-text-onload">
-								<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+								<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 								<?php esc_html_e( 'Reload', 'snapshot' ); ?>
 							</span>
 						</button>
@@ -91,7 +104,7 @@ if ( $has_hosting_backups ) {
 						<button class="sui-button <?php echo sanitize_html_class( $button_class ); ?> snapshot-get-started" onclick="jQuery(window).trigger('snapshot:check_if_region_modal')" >
 							<span class="sui-button-text-default"><?php echo esc_html( $button ); ?></span>
 							<span class="sui-button-text-onload">
-								<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+								<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 								<?php echo esc_html( $button ); ?>
 							</span>
 						</button>
@@ -110,9 +123,9 @@ if ( $has_hosting_backups ) {
 
 				<div class="sui-box-header sui-flatten sui-content-center">
 
-					<div class="sui-box-banner" role="banner" aria-hidden="true"></div>
+					<div class="sui-box-banner <?php echo ! empty( $is_branding_hidden ) ? esc_html( 'snapshot-hidden-branding' ) : esc_html( '' ); ?>" role="banner" aria-hidden="true"></div>
 
-					<h3 class="sui-box-title sui-lg"><?php echo esc_html( __( 'Welcome to Snapshot Pro', 'snapshot' ) ); ?></h3>
+					<h3 class="sui-box-title sui-lg"><?php echo esc_html( Settings::get_branding_hide_doc_link() ? __( 'Welcome!', 'snapshot' ) : __( 'Welcome to Snapshot Pro', 'snapshot' ) ); ?></h3>
 					<span class="sui-description"><?php echo esc_html( __( 'Please choose the backup storage region to continue.', 'snapshot' ) ); ?></span>
 
 				</div>
@@ -122,8 +135,12 @@ if ( $has_hosting_backups ) {
 						<div class="sui-notice-content">
 							<div class="sui-notice-message">
 								<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
-								<?php /* translators: %s - link */ ?>
-								<p><?php echo wp_kses_post( sprintf( __( 'We were unable to proceed due to a connection problem. Please choose the storage region again, or <a href="%s" target="_blank">contact our support team</a> if the problem persists.', 'snapshot' ), 'https://premium.wpmudev.org/hub/support/#get-support' ) ); ?></p>
+								<?php if ( Settings::get_branding_hide_doc_link() ) { ?>
+									<p><?php esc_html_e( 'We were unable to proceed due to a connection problem. Please change the storage region again, or contact support if the problem persists.', 'snapshot' ); ?></p>
+								<?php } else { ?>
+									<?php /* translators: %s - link */ ?>
+									<p><?php echo wp_kses_post( sprintf( __( 'We were unable to proceed due to a connection problem. Please choose the storage region again, or <a href="%s" target="_blank">contact our support team</a> if the problem persists.', 'snapshot' ), 'https://wpmudev.com/hub2/support#get-support' ) ); ?></p>
+								<?php } ?>
 							</div>
 						</div>
 					</div>
@@ -136,7 +153,7 @@ if ( $has_hosting_backups ) {
 
 							<label for="onboarding-select-region" id="label-onboarding-select-region" class="sui-label"><?php echo esc_html( __( 'Storage Region', 'snapshot' ) ); ?></label>
 
-							<select id="onboarding-select-region" placeholder="Choose storage region" aria-labelledby="label-onboarding-select-region" aria-describedby="description-onboarding-select-region">
+							<select class="sui-select" id="onboarding-select-region" placeholder="Choose storage region" aria-labelledby="label-onboarding-select-region" aria-describedby="description-onboarding-select-region">
 								<option value="us"><?php echo esc_html( __( 'United States (better performance, recommended)', 'snapshot' ) ); ?></option>
 								<option value="eu"><?php echo esc_html( __( 'Europe (EU data protection directive compliant)', 'snapshot' ) ); ?></option>
 							</select>
@@ -147,7 +164,7 @@ if ( $has_hosting_backups ) {
 							<button type="button" id="snapshot-set-initial-region" class="sui-button" onclick="jQuery(window).trigger('snapshot:save_region')">
 								<span class="sui-button-text-default"><?php esc_html_e( 'Continue', 'snapshot' ); ?></span>
 								<span class="sui-button-text-onload">
-									<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+									<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 									<?php esc_html_e( 'Continue', 'snapshot' ); ?>
 								</span>
 							</button>
@@ -163,16 +180,16 @@ if ( $has_hosting_backups ) {
 
 				<div class="sui-box-header sui-flatten sui-content-center">
 
-					<div class="sui-box-banner" role="banner" aria-hidden="true"></div>
-					<button class="sui-button-icon sui-button-float--right close-modal">
-						<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<div class="sui-box-banner <?php echo ! empty( $is_branding_hidden ) ? esc_html( 'snapshot-hidden-branding' ) : esc_html( '' ); ?>" role="banner" aria-hidden="true"></div>
+					<button class="sui-button-icon sui-button-float--right close-modal  <?php echo ! empty( $is_branding_hidden ) ? esc_html( 'snapshot-hidden-branding' ) : esc_html( '' ); ?>">
+						<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					</button>
-					<button class="sui-button-icon sui-button-float--left hide-when-region-selected" data-modal-slide="snapshot-welcome-dialog-slide-2">
-						<i class="sui-icon-chevron-left sui-md" aria-hidden="true"></i>
+					<button class="sui-button-icon sui-button-float--left hide-when-region-selected <?php echo ! empty( $is_branding_hidden ) ? esc_html( 'snapshot-hidden-branding' ) : esc_html( '' ); ?>" data-modal-slide="snapshot-welcome-dialog-slide-2">
+						<span class="sui-icon-chevron-left sui-md" aria-hidden="true"></span>
 						<span class="sui-screen-reader-text"><?php esc_html_e( 'Back to Choose Region' ); ?></span>
 					</button>
 
-					<h3 class="sui-box-title sui-lg"><?php esc_html_e( 'Welcome to Snapshot Pro', 'snapshot' ); ?></h3>
+					<h3 class="sui-box-title sui-lg"><?php Settings::get_branding_hide_doc_link() ? esc_html_e( 'Welcome!', 'snapshot' ) : esc_html_e( 'Welcome to Snapshot Pro', 'snapshot' ); ?></h3>
 					<span class="sui-description"><?php esc_html_e( 'Choose your backup schedule.', 'snapshot' ); ?></span>
 
 				</div>
@@ -203,7 +220,7 @@ if ( $has_hosting_backups ) {
 
 										<div class="sui-tab-boxed <?php echo 'daily' === $frequency ? 'active' : ''; ?>">
 											<label for="snapshot-welcome-daily-time" class="sui-label"><?php esc_html_e( 'Time of the day', 'snapshot' ); ?></label>
-											<select id="snapshot-welcome-daily-time" name="daily_time">
+											<select class="sui-select" id="snapshot-welcome-daily-time" name="daily_time">
 											<?php foreach ( Helper\Datetime::get_hour_list() as $value => $text ) { ?>
 											<option  <?php echo $value === $schedule['values']['time'] ? 'selected' : ''; ?> value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $text ); ?></option>
 											<?php } ?>
@@ -214,7 +231,7 @@ if ( $has_hosting_backups ) {
 											<div class="sui-row">
 												<div class="sui-col-sm-6">
 													<label for="snapshot-welcome-weekly-dow" class="sui-label"><?php esc_html_e( 'Day of the week', 'snapshot' ); ?></label>
-													<select id="snapshot-welcome-weekly-dow" name="frequency_weekday">
+													<select class="sui-select" id="snapshot-welcome-weekly-dow" name="frequency_weekday">
 														<option <?php echo 1 === $schedule['values']['frequency_weekday'] ? 'selected' : ''; ?> value="1"><?php esc_html_e( 'Sunday', 'snapshot' ); ?></option>
 														<option <?php echo ( 2 === $schedule['values']['frequency_weekday'] || ! $schedule['values']['frequency_weekday'] ) ? 'selected' : ''; ?> value="2"><?php esc_html_e( 'Monday', 'snapshot' ); ?></option>
 														<option <?php echo 3 === $schedule['values']['frequency_weekday'] ? 'selected' : ''; ?> value="3"><?php esc_html_e( 'Tuesday', 'snapshot' ); ?></option>
@@ -226,7 +243,7 @@ if ( $has_hosting_backups ) {
 												</div>
 												<div class="sui-col-sm-6">
 													<label for="snapshot-welcome-weekly-time" class="sui-label"><?php esc_html_e( 'Time of the day', 'snapshot' ); ?></label>
-													<select id="snapshot-welcome-weekly-time" name="weekly_time">
+													<select class="sui-select" id="snapshot-welcome-weekly-time" name="weekly_time">
 													<?php foreach ( Helper\Datetime::get_hour_list() as $value => $text ) { ?>
 														<?php $w_time = isset( $schedule['values']['time'] ) ? $schedule['values']['time'] : '00:00'; ?>
 													<option <?php echo $value === $w_time ? 'selected' : ''; ?> value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $text ); ?></option>
@@ -240,7 +257,7 @@ if ( $has_hosting_backups ) {
 											<div class="sui-row">
 												<div class="sui-col-sm-6">
 													<label for="snapshot-welcome-monthly-day" class="sui-label"><?php esc_html_e( 'Day of the month', 'snapshot' ); ?></label>
-													<select id="snapshot-welcome-monthly-day" name="frequency_monthday">
+													<select class="sui-select" id="snapshot-welcome-monthly-day" name="frequency_monthday">
 													<?php foreach ( range( 1, 28 ) as $day ) { ?>
 														<option <?php echo $day === $schedule['values']['frequency_monthday'] ? 'selected' : ''; ?> value="<?php echo esc_attr( $day ); ?>"><?php echo esc_html( $day ); ?></option>
 													<?php } ?>
@@ -248,7 +265,7 @@ if ( $has_hosting_backups ) {
 												</div>
 												<div class="sui-col-sm-6">
 													<label for="snapshot-welcome-monthly-time" class="sui-label"><?php esc_html_e( 'Time of the day', 'snapshot' ); ?></label>
-													<select id="snapshot-welcome-monthly-time" name="monthly_time">
+													<select class="sui-select" id="snapshot-welcome-monthly-time" name="monthly_time">
 													<?php foreach ( Helper\Datetime::get_hour_list() as $value => $text ) { ?>
 													<option <?php echo $value === $schedule['values']['time'] ? 'selected' : ''; ?> value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $text ); ?></option>
 													<?php } ?>
@@ -271,7 +288,7 @@ if ( $has_hosting_backups ) {
 						<button type="submit" class="sui-button sui-button-blue" aria-live="polite">
 							<span class="sui-button-text-default"><?php esc_html_e( 'Save', 'snapshot' ); ?></span>
 							<span class="sui-button-text-onload">
-								<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+								<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 								<?php esc_html_e( 'Saving', 'snapshot' ); ?>
 							</span>
 						</button>

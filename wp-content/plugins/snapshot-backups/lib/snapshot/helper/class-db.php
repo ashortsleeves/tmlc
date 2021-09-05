@@ -30,10 +30,20 @@ class Db {
 			return array();
 		}
 
-		$all_tables = $wpdb->get_col( $wpdb->prepare( 'SELECT table_name FROM information_schema.tables WHERE table_schema = %s', $db_name ) ); // db call ok; no-cache ok.
+		$all_tables = $wpdb->get_results( $wpdb->prepare( 'SELECT table_name as table_name, table_type as table_type FROM information_schema.tables WHERE table_schema = %s ORDER BY table_type = "VIEW"', $db_name ) ); // db call ok; no-cache ok.
 		if ( empty( $all_tables ) ) {
 			return array();
 		}
+
+		array_walk(
+			$all_tables,
+			function ( &$row ) {
+				$row = array(
+					'name'    => $row->table_name,
+					'is_view' => 'VIEW' === $row->table_type,
+				);
+			}
+		);
 
 		return $all_tables;
 	}

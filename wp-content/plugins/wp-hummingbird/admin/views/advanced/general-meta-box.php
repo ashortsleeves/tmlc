@@ -9,7 +9,8 @@
  * @var bool   $cart_fragments        WooCommerce cart fragments.
  * @var bool   $emoji                 Remove Emojis file enabled or disabled.
  * @var bool   $emoji_global          Is Emoji clearing a global option.
- * @var string $prefetch              Prefetch dns urls.
+ * @var string $prefetch              Prefetch DNS URLs.
+ * @var string $preconnect            Preconnect URLs.
  * @var bool   $woo_active            Is WooCommerce activated.
  * @var string $woo_link              Link to WooCommerce Settings - Products page.
  */
@@ -199,6 +200,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span id="url_strings-id" class="sui-description">
 				<?php esc_html_e( 'Add one host entry per line replacing the http:// or https:// with // e.g. //fonts.googleapis.com. We’ve added a few common DNS requests to get you started.', 'wphb' ); ?>
 				<a href="#" id="wphb-adv-paste-value"><?php esc_html_e( 'Paste in recommended defaults.', 'wphb' ); ?></a>
+			</span>
+		</div>
+	</div>
+</div>
+
+<div class="sui-box-settings-row">
+	<div class="sui-box-settings-col-1">
+		<span class="sui-settings-label"><?php esc_html_e( 'Preconnect', 'wphb' ); ?></span>
+		<span class="sui-description">
+			<?php esc_html_e( 'If you load resources from other domains, using Preconnect can provide a faster page loading experience for your users. It tells the browser to set up early connections before an HTTP request is actually sent to your server., and includes DNS lookup, TCP handshake, TLS negotiation, etc.', 'wphb' ); ?>
+		</span>
+	</div>
+	<div class="sui-box-settings-col-2">
+		<div class="sui-form-field">
+			<textarea
+					placeholder="//cdn.google.com
+//fonts.gstatic.com
+//cdn.aliyuncs.com
+//apis.google.com"
+					id="preconnect_strings"
+					name="preconnect_strings"
+					class="sui-form-control"
+					aria-label="<?php esc_html_e( 'Preconnect', 'wphb' ); ?>"
+					aria-describedby="preconnect_strings-id"
+			><?php echo esc_html( $preconnect ); ?></textarea>
+			<span id="preconnect_strings-id" class="sui-description">
+				<?php
+				printf( /* translators: %1$s - opening <a>, %2$s - closing </a> */
+					esc_html__( 'Add hosts one per line, with no http or https. We’ve added a few common domains as an example. Note that Preconnect requests are made without the crossorigin attribute by default. If you’d like to add the crossorigin attribute, please see our %1$sdocumentation%2$s first.', 'wphb' ),
+					'<a href="' . esc_url( \Hummingbird\Core\Utils::get_documentation_url( 'wphb-advanced' ) ) . '" target="_blank">',
+					'</a>'
+				);
+				?>
 			</span>
 		</div>
 	</div>

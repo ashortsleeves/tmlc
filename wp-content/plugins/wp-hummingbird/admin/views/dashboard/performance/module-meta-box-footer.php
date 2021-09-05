@@ -18,20 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php if ( $dismissed ) : ?>
 	<a href="<?php echo esc_url( $url ); ?>" class="sui-button sui-button-ghost">
-		<i class="sui-icon-wrench-tool" aria-hidden="true"></i>
+		<span class="sui-icon-wrench-tool" aria-hidden="true"></span>
 		<?php esc_html_e( 'Configure', 'wphb' ); ?>
 	</a>
 <?php else : ?>
 	<a href="<?php echo esc_url( $url ); ?>" class="sui-button sui-button-ghost">
-		<i class="sui-icon-eye" aria-hidden="true"></i>
+		<span class="sui-icon-eye" aria-hidden="true"></span>
 		<?php esc_html_e( 'View Full Report', 'wphb' ); ?>
 	</a>
 <?php endif; ?>
-
-<div class="sui-actions-right">
-	<span class="status-text">
-		<a href="<?php echo esc_url( $url . '&view=settings' ); ?>">
-			<?php esc_html_e( 'Customize widget', 'wphb' ); ?>
-		</a>
-	</span>
-</div>

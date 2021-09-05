@@ -15,7 +15,7 @@ import React from 'react';
 export default function Tag( { value, type } ) {
 	if ( 0 === value && 'success' === type ) {
 		return (
-			<i
+			<span
 				className="sui-icon-check-tick sui-lg sui-success"
 				aria-hidden="true"
 			/>

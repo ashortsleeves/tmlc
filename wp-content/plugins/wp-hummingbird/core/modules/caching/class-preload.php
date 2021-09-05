@@ -8,6 +8,7 @@
 
 namespace Hummingbird\Core\Modules\Caching;
 
+use Hummingbird\Core\Filesystem;
 use Hummingbird\Core\Settings;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -57,17 +58,6 @@ class Preload extends Background_Process {
 	}
 
 	/**
-	 * Fires on complete.
-	 *
-	 * @since 2.1.0
-	 */
-	protected function complete() {
-		parent::complete();
-
-		delete_transient( 'wphb-preloading' );
-	}
-
-	/**
 	 * Populate the queue for preloading with the provided URL, or preload all pages.
 	 *
 	 * @since 2.1.0
@@ -75,9 +65,43 @@ class Preload extends Background_Process {
 	 * @param string $url  URL of the page to preload. Leave blank to preload all.
 	 */
 	private function preload( $url ) {
-		set_transient( 'wphb-preloading', true, 3600 );
+		// Try to avoid recursive loops.
+		if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
+			$user_agent = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
+			if ( preg_match( '/Hummingbird.+?\/Cache Preloader/', $user_agent ) ) {
+				return;
+			}
+		}
+
 		$this->push_to_queue( $url );
 		$this->save()->dispatch();
+	}
+
+	/**
+	 * Check if the desired path is already cached in the filesystem.
+	 *
+	 * @since 2.7.3
+	 *
+	 * @param string $path  Path to cacche.
+	 *
+	 * @return bool
+	 */
+	private function is_cached( $path ) {
+		global $wphb_fs;
+
+		// Init filesystem.
+		if ( ! $wphb_fs ) {
+			$wphb_fs = Filesystem::instance();
+		}
+
+		$http_host = '';
+		if ( isset( $_SERVER['HTTP_HOST'] ) ) {
+			$http_host = htmlentities( wp_unslash( $_SERVER['HTTP_HOST'] ) ); // Input var ok.
+		} elseif ( function_exists( 'get_option' ) ) {
+			$http_host = preg_replace( '/https?:\/\//', '', get_option( 'siteurl' ) );
+		}
+
+		return is_dir( $wphb_fs->cache_dir . $http_host . $path );
 	}
 
 	/**
@@ -99,6 +123,10 @@ class Preload extends Background_Process {
 			return;
 		}
 
+		if ( $this->is_cached( $path ) ) {
+			return;
+		}
+
 		$types = Settings::get_setting( 'preload_type', 'page_cache' );
 
 		if ( isset( $types['on_clear'] ) && $types['on_clear'] && ! $this->is_process_running() ) {
@@ -113,31 +141,11 @@ class Preload extends Background_Process {
 	 * @since 2.3.0
 	 */
 	public function preload_home_page() {
-		$types = Settings::get_setting( 'preload_type', 'page_cache' );
-
-		if ( isset( $types['home_page'] ) && $types['home_page'] && ! $this->is_process_running() ) {
-			$this->preload( get_option( 'home' ) );
+		if ( $this->is_process_running() ) {
+			return;
 		}
-	}
 
-	/**
-	 * Cancel cache preloading.
-	 *
-	 * @since 2.1.0
-	 */
-	public function cancel() {
-		delete_transient( 'wphb-preloading' );
-		$this->cancel_process();
-	}
-
-	/**
-	 * Clear out all database rows, associated with preloading.
-	 *
-	 * @since 2.7.0
-	 */
-	public function force_clear() {
-		delete_transient( 'wphb-preloading' );
-		$this->clear_all_queue();
+		$this->preload( get_option( 'home' ) );
 	}
 
 }

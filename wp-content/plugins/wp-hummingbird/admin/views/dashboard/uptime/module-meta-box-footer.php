@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 ?>
 <a href="<?php echo esc_url( $url ); ?>" class="sui-button sui-button-ghost">
-	<i class="sui-icon-eye" aria-hidden="true"></i>
+	<span class="sui-icon-eye" aria-hidden="true"></span>
 	<?php esc_html_e( 'View stats', 'wphb' ); ?>
 </a>
 <div class="sui-actions-right">

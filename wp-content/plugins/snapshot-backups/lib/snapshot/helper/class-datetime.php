@@ -39,7 +39,22 @@ class Datetime {
 	 * @return string
 	 */
 	public static function get_time_format() {
-		return get_option( 'time_format' );
+		$time_format = get_option( 'time_format' );
+
+		$supported_formats = array(
+			'g:i a',
+			'g:i A',
+			'g:i:s a',
+			'g:i:s A',
+			'g:i,',
+			'H:i',
+		);
+
+		if ( ! in_array( $time_format, $supported_formats, true ) ) {
+			$time_format = 'H:i'; // Fallback to default format.
+		}
+
+		return $time_format;
 	}
 
 	/**

@@ -19,13 +19,35 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Class Opcache
  */
 class Opcache {
+	/**
+	 * Module instance.
+	 *
+	 * @since 2.7.1
+	 * @var Opcache|null
+	 */
+	private static $instance = null;
+
+	/**
+	 * Return module instance.
+	 *
+	 * @since 2.7.1
+	 *
+	 * @return Opcache|null
+	 */
+	public static function get_instance() {
+		if ( ! self::$instance ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
 
 	/**
 	 * Opcache constructor.
 	 *
 	 * @since 2.1.0
 	 */
-	public function __construct() {
+	private function __construct() {
 		add_action( 'admin_init', array( $this, 'init' ) );
 	}
 
@@ -97,7 +119,7 @@ class Opcache {
 			return;
 		}
 
-		$status = opcache_reset();
+		opcache_reset();
 	}
 
 }

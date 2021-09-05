@@ -51,7 +51,7 @@
                 <div class="def-warning">
                     <i class="dashicons dashicons-warning" aria-hidden="true"></i>
 					<?php
-					echo $force_auth_message
+					echo ( ! empty( $force_auth_message ) ) ? $force_auth_message : $default_message;
 					?>
                 </div>
 			<?php
@@ -170,7 +170,7 @@
         });
 
         var links = {
-            'google-authenticato': {
+            'google-authenticator': {
                 android: 'https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2',
                 ios: 'https://apps.apple.com/app/google-authenticator/id388497605'
             },
@@ -186,7 +186,7 @@
         $('body').on('change', '#auth-app', function () {
             var value = $(this).val();
             var app = links[value];
-            if (app !== undefined) {
+            if (typeof app !== 'undefined') {
                 $('#android-app').attr('href', app.android);
                 $('#ios-app').attr('href', app.ios)
             }

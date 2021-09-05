@@ -5,6 +5,7 @@ namespace WP_Defender\Controller;
 use Calotes\Component\Request;
 use Calotes\Component\Response;
 use WP_Defender\Component\Blacklist_Lockout;
+use WP_Defender\Component\Config\Config_Hub_Helper;
 use WP_Defender\Controller2;
 use WP_Defender\Traits\IP;
 
@@ -46,11 +47,12 @@ class Login_Lockout extends Controller2 {
 	 */
 	public function save_settings( Request $request ) {
 		$data        = $request->get_data_by_model( $this->model );
-		$old_enabled = boolval( $this->model->enabled );
+		$old_enabled = (bool) $this->model->enabled;
 
 		$this->model->import( $data );
 		if ( $this->model->validate() ) {
 			$this->model->save();
+			Config_Hub_Helper::set_clear_active_flag();
 
 			return new Response( true, array_merge( [
 				'message' => $this->get_update_message( $data, $old_enabled ),
@@ -78,30 +80,19 @@ class Login_Lockout extends Controller2 {
 	 * @return array
 	 */
 	public function data_frontend() {
-		$host = parse_url( get_site_url(), PHP_URL_HOST );
-		$host = str_replace( 'www.', '', $host );
-		$host = explode( '.', $host );
-		if ( is_array( $host ) ) {
-			$host = array_shift( $host );
-		} else {
-			$host = null;
-		}
 
 		return array_merge( [
 			'model' => $this->model->export(),
 			'misc'  => [
-				'host' => $host
+				'host' => defender_get_hostname()
 			]
 		], $this->dump_routes_and_nonces() );
 	}
 
 	/**
-	 * Export the data of this module, we will use this for export to HUB, create a preset etc
-	 * @return array
+	 * Export the data of this module, we will use this for export to HUB, create a preset etc.
 	 */
-	public function to_array() {
-		// TODO: Implement to_array() method.
-	}
+	public function to_array() {}
 
 	private function adapt_data( $data ) {
 		$adapted_data = array();
@@ -121,9 +112,7 @@ class Login_Lockout extends Controller2 {
 			$adapted_data['duration_unit'] = $data['login_protection_lockout_duration_unit'];
 		}
 		if ( isset( $data['login_protection_lockout_ban'] ) ) {
-			$adapted_data['lockout_type'] = $data['login_protection_lockout_ban'] || 'permanent' === $data['login_protection_lockout_ban']
-				? 'permanent'
-				: 'timeframe';
+			$adapted_data['lockout_type'] = 'permanent' === $data['login_protection_lockout_ban'] ? 'permanent' : 'timeframe';
 		}
 		if ( isset( $data['login_protection_lockout_message'] ) ) {
 			$adapted_data['lockout_message'] = $data['login_protection_lockout_message'];
@@ -136,11 +125,10 @@ class Login_Lockout extends Controller2 {
 	}
 
 	/**
-	 * Import the data of other source into this, it can be when HUB trigger the import, or user apply a preset
+	 * Import the data of other source into this, it can be when HUB trigger the import, or user apply a preset.
+	 * @param array $data
 	 *
-	 * @param $data array
-	 *
-	 * @return boolean
+	 * @return mixed
 	 */
 	public function import_data( $data ) {
 		if ( ! empty( $data ) ) {
@@ -159,20 +147,14 @@ class Login_Lockout extends Controller2 {
 	}
 
 	/**
-	 * Remove all settings, configs generated in this container runtime
-	 * @return mixed
+	 * Remove all settings, configs generated in this container runtime.
 	 */
-	public function remove_settings() {
-		// TODO: Implement remove_settings() method.
-	}
+	public function remove_settings() {}
 
 	/**
-	 * Remove all data
-	 * @return mixed
+	 * Remove all data.
 	 */
-	public function remove_data() {
-		// TODO: Implement remove_data() method.
-	}
+	public function remove_data() {}
 
 	/**
 	 * @return array
@@ -190,7 +172,7 @@ class Login_Lockout extends Controller2 {
 	 * @return string
 	 */
 	private function get_update_message( $data, $old_data ) {
-		$new_data = boolval( $data['enabled'] );
+		$new_data = (bool) $data['enabled'];
 
 		// If old data and new data is matched, then it is not activated or deactivated.
 		if ( $old_data === $new_data ) {
@@ -203,5 +185,4 @@ class Login_Lockout extends Controller2 {
 
 		return __( 'Login Protection has been deactivated.', 'wpdef' );
 	}
-
 }

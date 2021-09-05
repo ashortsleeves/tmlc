@@ -36,12 +36,15 @@ if ( ! defined( 'WPINC' ) ) {
 					<?php esc_html_e( 'Choose which folder you wish to smush. Smush will automatically include any images in subfolders of your selected folder.', 'wp-smushit' ); ?>
 				</p>
 				<div class="content"></div>
+
+				<?php wp_nonce_field( 'smush_get_dir_list', 'list_nonce' ); ?>
+				<?php wp_nonce_field( 'smush_get_image_list', 'image_list_nonce' ); ?>
 			</div>
 
 			<div class="sui-box-footer sui-content-right">
-				<span class="add-dir-loader"></span>
 				<button class="sui-modal-close sui-button sui-button-blue wp-smush-select-dir" disabled id="wp-smush-select-dir">
-					<?php esc_html_e( 'SMUSH', 'wp-smushit' ); ?>
+					<span class="sui-loading-text"><?php esc_html_e( 'Choose directory', 'wp-smushit' ); ?></span>
+					<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 				</button>
 			</div>
 		</div>

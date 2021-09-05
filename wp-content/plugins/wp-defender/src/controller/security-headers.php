@@ -6,6 +6,7 @@ use Calotes\Component\Request;
 use Calotes\Component\Response;
 use Calotes\Helper\HTTP;
 use Calotes\Helper\Route;
+use WP_Defender\Component\Config\Config_Hub_Helper;
 use WP_Defender\Controller2;
 use WP_Defender\Model\Notification\Tweak_Reminder;
 
@@ -70,6 +71,7 @@ class Security_Headers extends Controller2 {
 		$this->model->import( $data );
 		if ( $this->model->validate() ) {
 			$this->model->save();
+			Config_Hub_Helper::set_clear_active_flag();
 
 			return new Response( true, array_merge( [
 				'message' => __( 'Your settings have been updated.', 'wpdef' ),
@@ -107,13 +109,9 @@ class Security_Headers extends Controller2 {
 		}
 	}
 
-	public function remove_settings() {
-		// TODO: Implement remove_settings() method.
-	}
+	public function remove_settings() {}
 
-	public function remove_data() {
-		$this->get_model()->delete();
-	}
+	public function remove_data() {}
 
 	/**
 	 * A summary data for dashboard

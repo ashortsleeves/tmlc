@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody>
 		<tr>
 			<td>
-				<i class="sui-icon-hummingbird" aria-hidden="true"></i>
+				<span class="sui-icon-hummingbird" aria-hidden="true"></span>
 				<strong><?php esc_html_e( 'Performance Test', 'wphb' ); ?></strong>
 			</td>
 			<td width="25%">
@@ -40,13 +40,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</td>
 			<td width="25%">
 				<a href="<?php echo Utils::get_admin_menu_url( 'performance' ) . '&view=reports#wphb-box-reporting-summary'; ?>">
-					<i class="sui-icon-widget-settings-config" aria-hidden="true"></i>
+					<span class="sui-icon-widget-settings-config" aria-hidden="true"></span>
 				</a>
 			</td>
 		</tr>
 		<tr>
 			<td>
-				<i class="sui-icon-user-reputation-points" aria-hidden="true"></i>
+				<span class="sui-icon-user-reputation-points" aria-hidden="true"></span>
 				<strong><?php esc_html_e( 'Database Cleanup', 'wphb' ); ?></strong>
 			</td>
 			<td>
@@ -58,13 +58,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</td>
 			<td>
 				<a href="<?php echo Utils::get_admin_menu_url( 'advanced' ) . '&view=db#wphb-box-advanced-db-settings'; ?>">
-					<i class="sui-icon-widget-settings-config" aria-hidden="true"></i>
+					<span class="sui-icon-widget-settings-config" aria-hidden="true"></span>
 				</a>
 			</td>
 		</tr>
 		<tr>
 			<td>
-				<i class="sui-icon-uptime" aria-hidden="true"></i>
+				<span class="sui-icon-uptime" aria-hidden="true"></span>
 				<strong><?php esc_html_e( 'Uptime', 'wphb' ); ?></strong>
 			</td>
 			<td>
@@ -76,7 +76,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</td>
 			<td>
 				<a href="<?php echo Utils::get_admin_menu_url( 'uptime' ) . '&view=reports'; ?>">
-					<i class="sui-icon-widget-settings-config" aria-hidden="true"></i>
+					<span class="sui-icon-widget-settings-config" aria-hidden="true"></span>
 				</a>
 			</td>
 		</tr>
@@ -88,7 +88,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	printf(
 		/* translators: %1$s: opening a tag, %2$s: closing a tag */
 		esc_html__( 'You can also set scheduled pdf reports for your clients via %1$sThe Hub%2$s.', 'wphb' ),
-		'<a href="https://premium.wpmudev.org/hub/my-websites/" target="_blank">',
+		'<a href="https://wpmudev.com/hub2/" target="_blank">',
 		'</a>'
 	);
 	?>

@@ -81,10 +81,10 @@ class Caching extends Module_Server {
 	 */
 	public function analyze_data( $check_api = false ) {
 		$files = array(
-			'javascript' => WPHB_DIR_URL . 'core/modules/dummy/dummy-js.js',
-			'css'        => WPHB_DIR_URL . 'core/modules/dummy/dummy-style.css',
-			'media'      => WPHB_DIR_URL . 'core/modules/dummy/dummy-media.pdf',
-			'images'     => WPHB_DIR_URL . 'core/modules/dummy/dummy-image.png',
+			'JavaScript' => WPHB_DIR_URL . 'core/modules/dummy/dummy-js.js',
+			'CSS'        => WPHB_DIR_URL . 'core/modules/dummy/dummy-style.css',
+			'Media'      => WPHB_DIR_URL . 'core/modules/dummy/dummy-media.pdf',
+			'Images'     => WPHB_DIR_URL . 'core/modules/dummy/dummy-image.png',
 		);
 
 		$results = array();
@@ -132,7 +132,7 @@ class Caching extends Module_Server {
 						$results[ $type ] = $seconds;
 					}
 				}
-			} elseif ( ! $cache_control ) {
+			} else {
 				$try_api = true;
 			}
 		}
@@ -147,9 +147,10 @@ class Caching extends Module_Server {
 			if ( ! is_wp_error( $api_results ) ) {
 				$api_results = get_object_vars( $api_results );
 
-				foreach ( $files as $type  => $file ) {
-					if ( ! isset( $api_results[ $type ]->response_error ) && ! isset( $api_results[ $type ]->http_request_failed ) && absint( $api_results[ $type ] ) > 0 ) {
-						$results[ $type ] = absint( $api_results[ $type ] );
+				foreach ( $files as $type => $file ) {
+					$ltype = strtolower( $type );
+					if ( ! isset( $api_results[ $ltype ]->response_error ) && ! isset( $api_results[ $ltype ]->http_request_failed ) && absint( $api_results[ $ltype ] ) > 0 ) {
+						$results[ $type ] = absint( $api_results[ $ltype ] );
 					}
 				}
 			}
@@ -191,7 +192,7 @@ location ~* \.(css)$ {
     expires %%CSS%%;
 }
 
-location ~* \.(flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|mp4|m4v|ogg|webm|aac|eot|ttf|otf|woff|svg)$ {
+location ~* \.(flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|mp4|m4v|ogg|webm|aac|eot|ttf|otf|woff|woff2|svg)$ {
     expires %%MEDIA%%;
 }
 
@@ -242,7 +243,7 @@ ExpiresDefault %%ASSETS%%
 ExpiresDefault %%CSS%%
 </FilesMatch>
 
-<FilesMatch "\.(flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|mp4|m4v|ogg|webm|aac|eot|ttf|otf|woff|svg)$">
+<FilesMatch "\.(flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|mp4|m4v|ogg|webm|aac|eot|ttf|otf|woff|woff2|svg)$">
 ExpiresDefault %%MEDIA%%
 </FilesMatch>
 
@@ -260,7 +261,7 @@ ExpiresDefault %%IMAGES%%
    Header set Cache-Control "max-age=%%CSS_HEAD%%"
   </FilesMatch>
 
-  <FilesMatch "\.(flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|mp4|m4v|ogg|webm|aac|eot|ttf|otf|woff|svg)$">
+  <FilesMatch "\.(flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav|mp4|m4v|ogg|webm|aac|eot|ttf|otf|woff|woff2|svg)$">
    Header set Cache-Control "max-age=%%MEDIA_HEAD%%"
   </FilesMatch>
 
@@ -358,7 +359,7 @@ ExpiresDefault %%IMAGES%%
 	}
 
 	/**
-	 * Get default caching types for HB or CloudFlare.
+	 * Get default caching types for HB or Cloudflare.
 	 *
 	 * @since 1.7.1
 	 * @return array
@@ -368,7 +369,7 @@ ExpiresDefault %%IMAGES%%
 
 		$caching_types['javascript'] = 'txt | xml | js';
 		$caching_types['css']        = 'css';
-		$caching_types['media']      = 'flv | ico | pdf | avi | mov | ppt | doc | mp3 | wmv | wav | mp4 | m4v | ogg | webm | aac | eot | ttf | otf | woff | svg';
+		$caching_types['media']      = 'flv | ico | pdf | avi | mov | ppt | doc | mp3 | wmv | wav | mp4 | m4v | ogg | webm | aac | eot | ttf | otf | woff | woff2 | svg';
 		$caching_types['images']     = 'jpg | jpeg | png | gif | swf | webp';
 
 		$cloudflare = Utils::get_module( 'cloudflare' );
@@ -376,7 +377,7 @@ ExpiresDefault %%IMAGES%%
 		if ( $cloudflare->is_connected() && $cloudflare->is_zone_selected() ) {
 			$caching_types['javascript'] = 'txt | xml | js';
 			$caching_types['css']        = 'css';
-			$caching_types['media']      = 'flv | ico | pdf | avi | mov | ppt | doc | mp3 | wmv | wav | mp4 | m4v | ogg | webm | aac | eot | ttf | otf | woff | svg';
+			$caching_types['media']      = 'flv | ico | pdf | avi | mov | ppt | doc | mp3 | wmv | wav | mp4 | m4v | ogg | webm | aac | eot | ttf | otf | woff | woff2 | svg';
 			$caching_types['images']     = 'jpg | jpeg | png | gif | swf | webp';
 			$caching_types['cloudflare'] = 'bmp | pict | csv | pls | tif | tiff | eps | ejs | midi | mid | woff2 | svgz | docx | xlsx | xls | pptx | ps | class | jar';
 		}

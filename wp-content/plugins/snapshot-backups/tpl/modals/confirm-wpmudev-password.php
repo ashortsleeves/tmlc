@@ -11,7 +11,7 @@ use WPMUDEV\Snapshot4\Helper\Api;
 $assets = new Helper\Assets();
 
 $wpmudev_user_email = Api::get_dashboard_profile_username();
-$hub_link           = 'https://premium.wpmudev.org/hub2/site/' . Api::get_site_id() . '/backups/settings';
+$hub_link           = 'https://wpmudev.com/hub2/site/' . Api::get_site_id() . '/backups/settings';
 
 ?>
 <div class="sui-modal sui-modal-md">
@@ -59,7 +59,7 @@ $hub_link           = 'https://premium.wpmudev.org/hub2/site/' . Api::get_site_i
 								aria-labelledby="snapshot-wpmudev-password-label"
 							/>
 							<button type="button" class="sui-button-icon">
-								<i aria-hidden="true" class="sui-icon-eye"></i>
+								<span aria-hidden="true" class="sui-icon-eye"></span>
 								<span class="sui-password-text sui-screen-reader-text"><?php esc_html_e( 'Show Password', 'snapshot' ); ?></span>
 								<span class="sui-password-text sui-screen-reader-text sui-hidden"><?php esc_html_e( 'Hide Password', 'snapshot' ); ?></span>
 							</button>
@@ -69,8 +69,8 @@ $hub_link           = 'https://premium.wpmudev.org/hub2/site/' . Api::get_site_i
 					</div>
 
 					<button type="submit" class="sui-button sui-button-icon-right submit-button">
-						<span class="sui-loading-text"><?php esc_html_e( 'Continue', 'snapshot' ); ?><i class="sui-icon-chevron-right" aria-hidden="true"></i></span>
-						<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+						<span class="sui-loading-text"><?php esc_html_e( 'Continue', 'snapshot' ); ?><span class="sui-icon-chevron-right" aria-hidden="true"></span></span>
+						<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 					</button>
 					<?php /* translators: %s - Link to the Hub */ ?>
 					<p class="sui-description" style="margin-bottom: 0;margin-top: 32px;"><?php echo wp_kses_post( sprintf( __( 'You can enable/disable this password protection step from <a href="%s" target="_blank">The Hub</a>.', 'snapshot' ), $hub_link ) ); ?></p>

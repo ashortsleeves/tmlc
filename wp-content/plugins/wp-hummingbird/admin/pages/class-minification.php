@@ -8,7 +8,6 @@
 namespace Hummingbird\Admin\Pages;
 
 use Hummingbird\Admin\Page;
-use Hummingbird\Core\Integration\Divi;
 use Hummingbird\Core\Modules\Minify;
 use Hummingbird\Core\Modules\Minify\Minify_Group;
 use Hummingbird\Core\Settings;
@@ -36,6 +35,8 @@ class Minification extends Page {
 	 * Function triggered when the page is loaded before render any content.
 	 */
 	public function on_load() {
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_react_scripts' ) );
+
 		$this->setup_navigation();
 
 		$minify_module = Utils::get_module( 'minify' );
@@ -107,6 +108,46 @@ class Minification extends Page {
 	}
 
 	/**
+	 * Enqueue scripts and styles for React.
+	 */
+	public function enqueue_react_scripts() {
+		if ( 'files' !== $this->get_current_tab() ) {
+			return;
+		}
+
+		wp_enqueue_style( 'wphb-react-minify-styles', WPHB_DIR_URL . 'admin/assets/css/wphb-react-minify.min.css', array(), WPHB_VERSION );
+		wp_enqueue_script( 'wphb-react-minify', WPHB_DIR_URL . 'admin/assets/js/wphb-react-minify.min.js', array( 'wp-i18n', 'lodash' ), WPHB_VERSION, true );
+
+		wp_localize_script(
+			'wphb-react-minify',
+			'wphbReact',
+			array(
+				'isMember' => Utils::is_member(),
+				'links'    => array(
+					'wphbDirUrl' => WPHB_DIR_URL,
+					'support'    => array(
+						'chat'  => Utils::get_link( 'chat' ),
+						'forum' => Utils::get_link( 'support' ),
+					),
+				),
+				'nonces'   => array(
+					'HBFetchNonce' => wp_create_nonce( 'wphb-fetch' ),
+				),
+				'module'   => array(
+					'isWhiteLabeled' => apply_filters( 'wpmudev_branding_hide_branding', false ),
+					'showModal'      => (bool) get_option( 'wphb-minification-show-advanced_modal' ),
+				),
+			)
+		);
+
+		wp_add_inline_script(
+			'wphb-react-minify',
+			'wp.i18n.setLocaleData( ' . wp_json_encode( Utils::get_locale_data() ) . ', "wphb" );',
+			'before'
+		);
+	}
+
+	/**
 	 * Set up navigation for module.
 	 *
 	 * @since 1.8.2
@@ -133,16 +174,21 @@ class Minification extends Page {
 		if ( isset( $_POST['submit'] ) ) { // Input var okay.
 			check_admin_referer( 'wphb-enqueued-files' );
 
-			$minify_module = Utils::get_module( 'minify' );
-			$options       = $minify_module->get_options();
+			$options = Utils::get_module( 'minify' )->get_options();
+			if ( ! empty( $_POST['styles'] ) ) {
+				$options = $this->sanitize_type( 'styles', $options );
+			}
+			if ( ! empty( $_POST['scripts'] ) ) {
+				$options = $this->sanitize_type( 'scripts', $options );
+			}
 
-			$options = $this->_sanitize_type( 'styles', $options );
-			$options = $this->_sanitize_type( 'scripts', $options );
-
-			$minify_module->update_options( $options );
+			Utils::get_module( 'minify' )->update_options( $options );
 
 			// Remove notice.
 			delete_site_option( 'wphb-notice-minification-optimized-show' );
+
+			// Clear all the page cache.
+			do_action( 'wphb_clear_page_cache' );
 
 			$this->admin_notices->show_floating( __( '<strong>Your changes have been published.</strong> Note: Files queued for compression will generate once someone visits your homepage.', 'wphb' ) );
 		}
@@ -201,7 +247,7 @@ class Minification extends Page {
 		}
 		?>
 		<a class="sui-button sui-button-ghost" data-modal-open="wphb-tour-minification-modal" data-modal-open-focus="dialog-close-div" data-modal-mask="true">
-			<i class="sui-icon-web-globe-world" aria-hidden="true"></i>
+			<span class="sui-icon-web-globe-world" aria-hidden="true"></span>
 			<?php esc_html_e( 'Take a Tour', 'wphb' ); ?>
 		</a>
 		<?php
@@ -226,7 +272,12 @@ class Minification extends Page {
 		}
 		?>
 		<div role="alert" class="sui-box sui-summary sui-summary-sm wphb-box-notice <?php echo isset( $_SERVER['WPMUDEV_HOSTED'] ) ? '' : 'wphb-notice-upsell'; ?>" aria-live="assertive">
-			<div class="sui-summary-image-space" aria-hidden="true" style="background-image: url( '<?php echo esc_url( apply_filters( 'wpmudev_branding_hero_image', '' ) ); ?>' )"></div>
+			<?php $branded_image = apply_filters( 'wpmudev_branding_hero_image', '' ); ?>
+			<?php if ( $branded_image ) : ?>
+				<div class="sui-summary-image-space" aria-hidden="true" style="background-image: url('<?php echo esc_url( $branded_image ); ?>')"></div>
+			<?php else : ?>
+				<div class="sui-summary-image-space" aria-hidden="true"></div>
+			<?php endif; ?>
 			<div class="sui-summary-segment">
 				<div class="sui-summary-details sui-no-padding-left">
 					<span class="sui-summary-sub sui-no-margin-bottom">
@@ -252,7 +303,7 @@ class Minification extends Page {
 			</div>
 			<div class="wphb-dismiss-icon">
 				<a id="wphb-floating-http2-info" class="dismiss" href="#" aria-label="<?php esc_attr_e( 'Dismiss', 'wphb' ); ?>">
-					<i class="sui-icon-close" aria-hidden="true"></i>
+					<span class="sui-icon-close" aria-hidden="true"></span>
 				</a>
 			</div>
 		</div>
@@ -267,10 +318,7 @@ class Minification extends Page {
 			$this->add_meta_box(
 				'minification/network-settings',
 				__( 'Settings', 'wphb' ),
-				array( $this, 'network_settings_meta_box' ),
-				null,
-				null,
-				'main'
+				array( $this, 'network_settings_meta_box' )
 			);
 
 			return;
@@ -310,37 +358,17 @@ class Minification extends Page {
 			null,
 			'summary',
 			array(
-				'box_content_class' => 'sui-box sui-summary',
+				'box_content_class' => 'sui-box sui-summary ' . Utils::get_whitelabel_class(),
 			)
 		);
 
 		/**
 		 * Files meta box.
 		 */
-		if ( 'basic' === $this->mode ) {
-			$this->add_meta_box(
-				'minification/assets-auto',
-				__( 'Assets', 'wphb' ),
-				array( $this, 'assets_automatic_metabox' ),
-				function() {
-					$this->view(
-						'minification/enqueued-files-meta-box-header',
-						array(
-							'title' => __( 'Assets', 'wphb' ),
-						)
-					);
-				}
-			);
-
-			$this->add_meta_box(
-				'minification/assets-auto-config',
-				__( 'Configurations', 'wphb' ),
-				array( $this, 'assets_automatic_config_metabox' )
-			);
-		} else {
+		if ( 'advanced' === $this->mode ) {
 			$this->add_meta_box(
 				'minification/enqueued-files',
-				__( 'Files', 'wphb' ),
+				__( 'Assets', 'wphb' ),
 				array( $this, 'enqueued_files_metabox' ),
 				null,
 				null,
@@ -433,57 +461,9 @@ class Minification extends Page {
 
 	/**
 	 * *************************
-	 * Asset Optimization auto/manual
+	 * Asset Optimization manual
 	 *
 	 * @since 2.6.0
-	 ***************************/
-
-	/**
-	 * Assets auto mode.
-	 *
-	 * @since 2.6.0
-	 */
-	public function assets_automatic_metabox() {
-		$options = Utils::get_module( 'minify' )->get_options();
-
-		$this->view(
-			'minification/assets-auto-meta-box',
-			array(
-				'type' => $this->mode,
-				'view' => $options['type'],
-			)
-		);
-	}
-
-	/**
-	 * Assets auto mode - configurations.
-	 *
-	 * @since 2.6.0
-	 */
-	public function assets_automatic_config_metabox() {
-		$options = Utils::get_module( 'minify' )->get_options();
-
-		$this->view(
-			'minification/assets-auto-config-meta-box',
-			array(
-				'enabled'    => array(
-					'styles'  => $options['do_assets']['styles'],
-					'scripts' => $options['do_assets']['scripts'],
-				),
-				'exclusions' => array(
-					'styles'  => array_merge( $options['dont_minify']['styles'], $options['dont_combine']['styles'] ),
-					'scripts' => array_merge( $options['dont_minify']['scripts'], $options['dont_combine']['scripts'] ),
-				),
-				'is_divi'    => Divi::is_divi_theme_active(),
-				'type'       => $this->mode,
-				'view'       => $options['type'],
-			)
-		);
-	}
-
-	/**
-	 * *************************
-	 * Asset Optimization basic/advanced
 	 ***************************/
 
 	/**
@@ -537,6 +517,7 @@ class Minification extends Page {
 			array(
 				'styles_rows'     => $styles_rows['content'],
 				'scripts_rows'    => $scripts_rows['content'],
+				'fonts_rows'      => $styles_rows['font'],
 				'others_rows'     => $others_rows,
 				'selector_filter' => $selector_filter,
 				'is_server_error' => $module->errors_controller->is_server_error(),
@@ -617,160 +598,94 @@ class Minification extends Page {
 	 * @param string $type     Asset type. Accepts: 'scripts' and 'styles'.
 	 * @param array  $options  Current settings.
 	 *
-	 * @return mixed
+	 * @return array
 	 */
-	private function _sanitize_type( $type, $options ) {
-		$minify          = Utils::get_module( 'minify' );
-		$current_options = $minify->get_options();
+	private function sanitize_type( $type, $options ) {
+		$set_asset_options = array(
+			'block'        => 'include',
+			'dont_minify'  => 'minify',
+			'dont_combine' => 'combine',
+		);
 
-		// We'll save what groups have changed so we reset the cache for those groups.
-		$changed_groups = array();
+		$unset_asset_options = array( 'defer', 'inline', 'preload', 'async' );
 
-		if ( ! empty( $_POST[ $type ] ) ) { // Input var okay.
-			foreach ( wp_unslash( $_POST[ $type ] ) as $handle => $item ) { // Input var okay.
-				$key = array_search( $handle, $options['block'][ $type ], true );
-				if ( ! isset( $item['include'] ) ) {
-					$options['block'][ $type ][] = $handle;
-				} elseif ( false !== $key ) {
-					unset( $options['block'][ $type ][ $key ] );
-				}
-				$options['block'][ $type ] = array_unique( $options['block'][ $type ] );
-				$diff                      = array_merge(
-					array_diff( $current_options['block'][ $type ], $options['block'][ $type ] ),
-					array_diff( $options['block'][ $type ], $current_options['block'][ $type ] )
-				);
-				if ( $diff ) {
-					foreach ( $diff as $diff_handle ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
+		$changed_assets = array();
+
+		$collection = Minify\Sources_Collector::get_collection();
+
+		$assets = filter_input( INPUT_POST, $type, FILTER_DEFAULT, FILTER_REQUIRE_ARRAY );
+		foreach ( $assets as $handle => $item ) {
+			foreach ( $set_asset_options as $stored_option => $selected_option ) {
+				// Make sure we do not force exclude already compressed assets.
+				$minified = false;
+				if ( 'minify' === $selected_option ) {
+					$full_src = $collection[ $type ][ $handle ]['src'];
+					$minified = preg_match( '/\.min\.(css|js)/', $full_src );
 				}
 
-				$key = array_search( $handle, $options['dont_minify'][ $type ], true );
-				if ( ! isset( $item['minify'] ) ) {
-					$options['dont_minify'][ $type ][] = $handle;
-				} elseif ( false !== $key ) {
-					unset( $options['dont_minify'][ $type ][ $key ] );
+				$key = array_search( $handle, $options[ $stored_option ][ $type ], true );
+				if ( ! isset( $item[ $selected_option ] ) && false === $key && ! $minified ) {
+					$options[ $stored_option ][ $type ][] = $handle;
+					array_push( $changed_assets, $handle );
+				} elseif ( isset( $item[ $selected_option ] ) && false !== $key ) {
+					unset( $options[ $stored_option ][ $type ][ $key ] );
+					array_push( $changed_assets, $handle );
 				}
-				$options['dont_minify'][ $type ] = array_unique( $options['dont_minify'][ $type ] );
-				$diff                            = array_merge(
-					array_diff( $current_options['dont_minify'][ $type ], $options['dont_minify'][ $type ] ),
-					array_diff( $options['dont_minify'][ $type ], $current_options['dont_minify'][ $type ] )
-				);
+			}
 
-				if ( $diff ) {
-					foreach ( $diff as $diff_handle ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
+			foreach ( $unset_asset_options as $option ) {
+				$key = array_search( $handle, $options[ $option ][ $type ], true );
+				if ( ! isset( $item[ $option ] ) && false !== $key ) {
+					unset( $options[ $option ][ $type ][ $key ] );
+					array_push( $changed_assets, $handle );
+				} elseif ( isset( $item[ $option ] ) && false === $key ) {
+					$options[ $option ][ $type ][] = $handle;
+					array_push( $changed_assets, $handle );
 				}
+			}
 
-				$key = array_search( $handle, $options['dont_combine'][ $type ], true );
-				if ( ! isset( $item['combine'] ) ) {
-					$options['dont_combine'][ $type ][] = $handle;
-				} elseif ( false !== $key ) {
-					unset( $options['dont_combine'][ $type ][ $key ] );
-				}
-				$options['dont_combine'][ $type ] = array_unique( $options['dont_combine'][ $type ] );
-				$diff                             = array_merge(
-					array_diff( $current_options['dont_combine'][ $type ], $options['dont_combine'][ $type ] ),
-					array_diff( $options['dont_combine'][ $type ], $current_options['dont_combine'][ $type ] )
-				);
+			/**
+			 * This is wrong. Instead of treating the options as "In footer" with values "true" or "false", we
+			 * treat this as "Location" with a value of "footer" (will never be header).
+			 *
+			 * TODO: change this up to match the $unset_asset_options logic above.
+			 */
+			$key_exists = array_key_exists( $handle, $options['position'][ $type ] );
+			if ( isset( $item['position'] ) && 'footer' === $item['position'] && ! $key_exists ) {
+				$options['position'][ $type ][ $handle ] = $item['position'];
+				array_push( $changed_assets, $handle );
+			} elseif ( ! isset( $item['position'] ) && $key_exists ) {
+				unset( $options['position'][ $type ][ $handle ] );
+				array_push( $changed_assets, $handle );
+			}
 
-				if ( $diff ) {
-					foreach ( $diff as $diff_handle ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
-				}
+			// This is a font.
+			if ( 'styles' === $type && isset( $item['font-optimize'] ) ) {
+				$key = array_search( $handle, $options['fonts'], true );
 
-				$key = array_search( $handle, $options['defer'][ $type ], true );
-				if ( ! isset( $item['defer'] ) && false !== $key ) {
-					unset( $options['defer'][ $type ][ $key ] );
-				} elseif ( isset( $item['defer'] ) ) {
-					$options['defer'][ $type ][] = $handle;
-				}
-				$options['defer'][ $type ] = array_unique( $options['defer'][ $type ] );
-				$diff                      = array_merge(
-					array_diff( $current_options['defer'][ $type ], $options['defer'][ $type ] ),
-					array_diff( $options['defer'][ $type ], $current_options['defer'][ $type ] )
-				);
-
-				if ( $diff ) {
-					foreach ( $diff as $diff_handle ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
+				// Add new font to optimization array.
+				if ( $item['font-optimize'] && false === $key ) {
+					array_push( $options['fonts'], $handle );
 				}
 
-				$key = array_search( $handle, $options['inline'][ $type ], true );
-				if ( ! isset( $item['inline'] ) && false !== $key ) {
-					unset( $options['inline'][ $type ][ $key ] );
-				} elseif ( isset( $item['inline'] ) ) {
-					$options['inline'][ $type ][] = $handle;
-				}
-				$options['inline'][ $type ] = array_unique( $options['inline'][ $type ] );
-				$diff                       = array_merge(
-					array_diff( $current_options['inline'][ $type ], $options['inline'][ $type ] ),
-					array_diff( $options['inline'][ $type ], $current_options['inline'][ $type ] )
-				);
-
-				if ( $diff ) {
-					foreach ( $diff as $diff_handle ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
-				}
-
-				if ( empty( $item['position'] ) ) {
-					$item['position'] = 'header';
-				}
-				$key_exists = array_key_exists( $handle, $options['position'][ $type ] );
-				if ( 'footer' === $item['position'] ) {
-					$options['position'][ $type ][ $handle ] = $item['position'];
-				} elseif ( $key_exists ) {
-					unset( $options['position'][ $type ][ $handle ] );
-				}
-				if ( $diff = array_diff_key( $current_options['position'][ $type ], $options['position'][ $type ] ) ) {
-					foreach ( $diff as $diff_handle ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
-				}
-				$diff = array_merge(
-					array_diff_key( $current_options['position'][ $type ], $options['position'][ $type ] ),
-					array_diff_key( $options['position'][ $type ], $current_options['position'][ $type ] )
-				);
-				if ( $diff ) {
-					foreach ( $diff as $diff_handle => $position ) {
-						$_groups = Minify_Group::get_groups_from_handle( $diff_handle, $type );
-						if ( $_groups ) {
-							$changed_groups = array_merge( $changed_groups, $_groups );
-						}
-					}
+				// Remove the font from optimization array.
+				if ( ! $item['font-optimize'] && false !== $key ) {
+					unset( $options['fonts'][ $key ] );
 				}
 			}
 		}
 
-		foreach ( $changed_groups as $group ) {
-			/**
-			 * Delete those groups.
-			 *
-			 * @var Minify_Group $group
-			 */
-			$group->delete_file();
+		$changed_assets = array_unique( $changed_assets );
+		foreach ( $changed_assets as $asset ) {
+			$changed_groups = Minify_Group::get_groups_from_handle( $asset, $type );
+			foreach ( $changed_groups as $group ) {
+				/**
+				 * Delete those groups.
+				 *
+				 * @var Minify_Group $group
+				 */
+				$group->delete_file();
+			}
 		}
 
 		return $options;
@@ -801,6 +716,7 @@ class Minification extends Page {
 		$content = array(
 			'content' => '',
 			'other'   => '',
+			'font'    => '',
 		);
 
 		foreach ( $collection as $item ) {
@@ -848,8 +764,13 @@ class Minification extends Page {
 
 			$info = pathinfo( $full_src );
 
+			$optimized = false; // This is only relevant for fonts.
+
 			$ext = 'OTHER';
-			if ( isset( $info['extension'] ) && preg_match( '/(css)\??[a-zA-Z=0-9]*/', $info['extension'] ) ) {
+			if ( isset( $info['dirname'] ) && false !== strpos( $info['dirname'], 'fonts.googleapis.com' ) ) {
+				$ext       = 'FONT';
+				$optimized = in_array( $item['handle'], $options['fonts'], true );
+			} elseif ( isset( $info['extension'] ) && preg_match( '/(css)\??[a-zA-Z=0-9]*/', $info['extension'] ) ) {
 				$ext = 'CSS';
 			} elseif ( isset( $info['extension'] ) && preg_match( '/(js)\??[a-zA-Z=0-9]*/', $info['extension'] ) ) {
 				$ext = 'JS';
@@ -899,9 +820,13 @@ class Minification extends Page {
 				|| 'footer' === $position
 				|| in_array( $item['handle'], $options['defer'][ $type ], true )
 				|| in_array( $item['handle'], $options['inline'][ $type ], true )
+				|| in_array( $item['handle'], $options['preload'][ $type ], true )
+				|| in_array( $item['handle'], $options['async'][ $type ], true )
 			) {
 				$file_changed = true;
 			}
+
+			$is_local = Minify_Group::is_src_local( $full_src );
 
 			$args = compact(
 				'item',
@@ -922,10 +847,15 @@ class Minification extends Page {
 				'processed',
 				'compressed',
 				'file_changed',
-				'component'
+				'component',
+				'is_local',
+				'optimized'
 			);
-			if ( 'OTHER' !== $ext ) {
+
+			if ( 'OTHER' !== $ext && 'FONT' !== $ext ) {
 				$content['content'] .= $this->view( 'minification/advanced-files-rows', $args, false );
+			} elseif ( 'FONT' === $ext ) {
+				$content['font'] .= $this->view( 'minification/advanced-fonts-rows', $args, false );
 			} else {
 				$content['other'] .= $this->view( 'minification/advanced-files-rows', $args, false );
 			}

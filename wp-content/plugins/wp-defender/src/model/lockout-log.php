@@ -80,14 +80,14 @@ class Lockout_Log extends DB {
 	) {
 		$orm = self::get_orm();
 		$orm->get_repository( self::class )
-		    ->where(
-			    'date',
-			    'between',
-			    array(
-				    $filters['from'],
-				    $filters['to'],
-			    )
-		    );
+			->where(
+				'date',
+				'between',
+				array(
+					$filters['from'],
+					$filters['to'],
+				)
+			);
 
 		if ( isset( $filters['ip'] ) && ! empty( $filters['ip'] ) ) {
 			$orm->where( 'ip', 'like', '%' . $filters['ip'] . '%' );
@@ -98,7 +98,7 @@ class Lockout_Log extends DB {
 		if ( ! empty( $order_by ) && ! empty( $order ) ) {
 			$orm->order_by( $order_by, $order );
 		}
-		if ( $page_size !== false ) {
+		if ( false !== $page_size ) {
 			$offset = ( $paged - 1 ) * $page_size;
 			$orm->limit( "$offset,$page_size" );
 		}
@@ -119,14 +119,14 @@ class Lockout_Log extends DB {
 	public static function count( $date_from, $date_to, $type = '', $ip = '' ) {
 		$orm = self::get_orm();
 		$orm->get_repository( self::class )
-		    ->where(
-			    'date',
-			    'between',
-			    array(
-				    $date_from,
-				    $date_to,
-			    )
-		    );
+			->where(
+				'date',
+				'between',
+				array(
+					$date_from,
+					$date_to,
+				)
+			);
 
 		if ( ! empty( $type ) ) {
 			if ( is_array( $type ) ) {
@@ -173,10 +173,14 @@ class Lockout_Log extends DB {
 		$start = strtotime( '-24 hours' );
 		$end   = time();
 
-		return self::count( $start, $end, [
-			self::AUTH_LOCK,
-			self::LOCKOUT_404
-		] );
+		return self::count(
+			$start,
+			$end,
+			array(
+				self::AUTH_LOCK,
+				self::LOCKOUT_404,
+			)
+		);
 	}
 
 	/**
@@ -187,10 +191,14 @@ class Lockout_Log extends DB {
 		$start = strtotime( '-7 days' );
 		$end   = time();
 
-		return self::count( $start, $end, [
-			self::AUTH_LOCK,
-			self::LOCKOUT_404
-		] );
+		return self::count(
+			$start,
+			$end,
+			array(
+				self::AUTH_LOCK,
+				self::LOCKOUT_404,
+			)
+		);
 	}
 
 	/**
@@ -201,27 +209,41 @@ class Lockout_Log extends DB {
 		$start = strtotime( '-30 days' );
 		$end   = time();
 
-		return self::count( $start, $end, [
-			self::AUTH_LOCK,
-			self::LOCKOUT_404
-		] );
+		return self::count(
+			$start,
+			$end,
+			array(
+				self::AUTH_LOCK,
+				self::LOCKOUT_404,
+			)
+		);
 	}
 
 	/**
 	 * Get the last time a lockout happen
+	 * @param false $for_hub
+	 *
 	 * @return false|string
 	 */
-	public static function get_last_lockout_date() {
-		$data = self::query_logs( [
-			'from' => strtotime( '-30 days' ),
-			'to'   => time()
-		], 1, 'id', 'desc', 1 );
+	public static function get_last_lockout_date( $for_hub = false ) {
+		$data = self::query_logs(
+			array(
+				'from' => strtotime( '-30 days' ),
+				'to'   => time(),
+			),
+			1,
+			'id',
+			'desc',
+			1
+		);
 		$last = array_shift( $data );
 		if ( ! is_object( $last ) ) {
 			return 'n/a';
 		}
 
-		return $last->format_date_time( $last->date );
+		return $for_hub
+			? $last->persistent_hub_datetime_format( $last->date )
+			: $last->format_date_time( $last->date );
 	}
 
 	/**
@@ -233,20 +255,24 @@ class Lockout_Log extends DB {
 		$orm = self::get_orm();
 
 		return $orm->get_repository( self::class )
-		           ->truncate();
+				->truncate();
 	}
 
 	/**
 	 * Remove data by time period
 	 *
 	 * @param int $timestamp
+	 * @param int $limit
+	 *
+	 * @return void
 	 */
-	public static function remove_logs( $timestamp ) {
+	public static function remove_logs( $timestamp, $limit ) {
 		$orm = self::get_orm();
-		$orm->get_repository( self::class );
-
-		return $orm->where( 'date', '<=', $timestamp )
-		           ->delete_all();
+		$orm->get_repository( self::class )
+			->where( 'date', '<=', $timestamp )
+			->order_by( 'id' )
+			->limit( $limit )
+			->delete_by_limit();
 	}
 
 	/**
@@ -258,10 +284,10 @@ class Lockout_Log extends DB {
 		$orm = self::get_orm();
 
 		return $orm->get_repository( self::class )
-		           ->where( 'type', 'in', array( self::LOCKOUT_404, self::AUTH_LOCK ) )
-		           ->where( 'date', '>=', strtotime( '-30 days', current_time( 'timestamp' ) ) ) // phpcs:ignore
-		           ->order_by( 'id', 'desc' )
-		           ->get();
+				->where( 'type', 'in', array( self::LOCKOUT_404, self::AUTH_LOCK ) )
+				->where( 'date', '>=', strtotime( '-30 days', current_time( 'timestamp' ) ) ) // phpcs:ignore
+				->order_by( 'id', 'desc' )
+				->get();
 	}
 
 	/**
@@ -283,18 +309,21 @@ class Lockout_Log extends DB {
 		$page_size = 50
 	) {
 		$logs = self::query_logs( $filters, $paged, $order_by, $order, $page_size );
-		$data = [];
+		$data = array();
 		foreach ( $logs as $item ) {
 			$ip_model                  = Lockout_Ip::get( $item->ip );
 			$log                       = $item->export();
 			$log['date']               = $item->format_date_time( $item->date );
 			$log['format_date']        = $item->get_date( $item->date );
-			$log['tag']                = in_array( $item->type,
-				[ self::LOCKOUT_404, self::ERROR_404 ] ) ? '404' : 'login';
-			$log['tag_class']          = in_array( $item->type,
-				[ self::AUTH_LOCK, self::ERROR_404 ] ) ? 'bg-badge-red' : 'bg-badge-green';
-			$log['container_class']    = in_array( $item->type,
-				[ self::AUTH_LOCK, self::ERROR_404 ] ) ? 'sui-error' : 'sui-warning';
+			$log['tag']                = in_array( $item->type, array( self::LOCKOUT_404, self::ERROR_404 ) )
+				? '404'
+				: 'login';
+			$log['tag_class']          = in_array( $item->type, array( self::AUTH_LOCK, self::ERROR_404 ) )
+				? 'bg-badge-red'
+				: 'bg-badge-green';
+			$log['container_class']    = in_array( $item->type, array( self::AUTH_LOCK, self::ERROR_404 ) )
+				? 'sui-error'
+				: 'sui-warning';
 			$log['access_status']      = $ip_model->get_access_status();
 			$log['access_status_text'] = $ip_model->get_access_status_text();
 			$data[]                    = $log;
@@ -314,8 +343,8 @@ class Lockout_Log extends DB {
 		$orm = self::get_orm();
 
 		return $orm->get_repository( self::class )
-		           ->where( 'id', $id )
-		           ->first();
+				->where( 'id', $id )
+				->first();
 	}
 
 	/**
@@ -323,8 +352,10 @@ class Lockout_Log extends DB {
 	 */
 	public function delete() {
 		$orm = self::get_orm();
-		$orm->get_repository( self::class )->delete( [
-			'id' => $this->id
-		] );
+		$orm->get_repository( self::class )->delete(
+			array(
+				'id' => $this->id,
+			)
+		);
 	}
 }

@@ -2,18 +2,18 @@
     "name": "incsub/snapshot-backups",
     "description": "Snapshot - Incremental backups for WP",
     "type": "wordpress-plugin",
-    "homepage": "https://premium.wpmudev.org/project/snapshot/",
+    "homepage": "https://wpmudev.com/project/snapshot/",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
             "name": "WPMU DEV",
-            "homepage": "https://premium.wpmudev.org"
+            "homepage": "https://wpmudev.com"
         }
     ],
     "support": {
-        "docs": "https://premium.wpmudev.org/docs",
+        "docs": "https://wpmudev.com/docs",
         "issues": "https://app.asana.com/0/1102895513716897/overview",
-        "forum": "https://premium.wpmudev.org/forums/forum/support",
+        "forum": "https://wpmudev.com/forums/forum/support",
         "source": "https://bitbucket.org/incsub/snapshot-backups"
     },
     "config": {

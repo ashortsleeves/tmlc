@@ -65,15 +65,20 @@ class Notices {
 			include_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
+		add_action( 'upgrader_process_complete', array( $this, 'plugin_changed' ) );
+		add_action( 'activated_plugin', array( $this, 'plugin_changed' ) );
+		add_action( 'deactivated_plugin', array( $this, 'plugin_changed' ) );
+		add_action( 'after_switch_theme', array( $this, 'plugin_changed' ) );
+
+		// This will show notice on both multisite and single site.
+		add_action( 'admin_notices', array( $this, 'clear_cache' ) );
+		add_action( 'network_admin_notices', array( $this, 'clear_cache' ) );
+
 		// Only show notices to users who can do something about it (update, for example).
 		$cap = is_multisite() ? 'manage_network_plugins' : 'update_plugins';
 		if ( ! current_user_can( $cap ) ) {
 			return;
 		}
-
-		// This will show notice on both multisite and single site.
-		add_action( 'admin_notices', array( $this, 'clear_cache' ) );
-		add_action( 'network_admin_notices', array( $this, 'clear_cache' ) );
 
 		if ( is_multisite() ) {
 			add_action( 'network_admin_notices', array( $this, 'upgrade_to_pro' ) );
@@ -86,11 +91,6 @@ class Notices {
 			add_action( 'admin_notices', array( $this, 'free_version_rate' ) );
 			add_action( 'admin_notices', array( $this, 'plugin_compat_check' ) );
 		}
-
-		add_action( 'upgrader_process_complete', array( $this, 'plugin_changed' ) );
-		add_action( 'activated_plugin', array( $this, 'plugin_changed' ) );
-		add_action( 'deactivated_plugin', array( $this, 'plugin_changed' ) );
-		add_action( 'after_switch_theme', array( $this, 'plugin_changed' ) );
 	}
 
 	/**
@@ -278,11 +278,11 @@ class Notices {
 		<div class="sui-notice sui-notice-<?php echo esc_attr( $class ); ?>">
 			<div class="sui-notice-content">
 				<div class="sui-notice-message">
-					<i class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></i>
+					<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
 					<p><?php echo wp_kses_post( $message ); ?></p>
 					<?php foreach ( $data as $p ) : ?>
 						<?php if ( ! empty( $p ) ) : ?>
-							<?php echo '<p>' . wp_kses_post( $p ) . '</p>'; ?>
+							<?php echo '<p>' . $p . '</p>'; ?>
 						<?php endif; ?>
 					<?php endforeach; ?>
 				</div>
@@ -367,7 +367,7 @@ class Notices {
 		<div class="sui-notice <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $id ); ?>" role="alert" style="display: block">
 			<div class="sui-notice-content">
 				<div class="sui-notice-message">
-					<i class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></i>
+					<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
 					<p><?php echo wp_kses_post( $message ); ?></p>
 					<p>
 						<a role="button" href="#" style="color: #888;text-transform: uppercase" onclick="WPHB_Admin.notices.dismiss( this )">
@@ -463,7 +463,7 @@ class Notices {
 
 		// Show only if at least 7 days have past after installation of the free version.
 		$free_installation = get_site_option( 'wphb-free-install-date' );
-		if ( ( current_time( 'timestamp' ) - (int) $free_installation ) < 604800 ) {
+		if ( ( time() - (int) $free_installation ) < 604800 ) {
 			return;
 		}
 

@@ -25,6 +25,7 @@ class Manual extends Task {
 	 */
 	protected $required_params = array(
 		'backup_name'      => 'sanitize_text_field',
+		'description'      => 'sanitize_textarea_field',
 		'apply_exclusions' => 'boolval',
 	);
 
@@ -41,6 +42,7 @@ class Manual extends Task {
 		}
 		$model = $args['model'];
 
+		$model->set( 'description', $args['description'] );
 		$model->set( 'apply_exclusions', $args['apply_exclusions'] );
 
 		// This is where we are going to handle the API request to trigger the manual backup.

@@ -113,7 +113,7 @@ class Env {
 	public static function get_wpmu_api_server_url() {
 		$api_server_url = defined( 'WPMUDEV_CUSTOM_API_SERVER' ) && WPMUDEV_CUSTOM_API_SERVER
 			? trailingslashit( WPMUDEV_CUSTOM_API_SERVER )
-			: 'https://premium.wpmudev.org/';
+			: 'https://wpmudev.com/';
 		return $api_server_url;
 	}
 }

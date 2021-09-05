@@ -9,6 +9,7 @@
 
 namespace Hummingbird\Core\Api;
 
+use Hummingbird\Core\Configs;
 use Hummingbird\Core\Modules\Performance;
 use Hummingbird\Core\Settings;
 use Hummingbird\Core\Utils;
@@ -40,6 +41,8 @@ class Hub {
 		'get_timezone',
 		'recipients',
 		'purge_all_cache',
+		'import_settings',
+		'export_settings',
 	);
 
 	/**
@@ -94,7 +97,7 @@ class Hub {
 			foreach ( $status as $status_name => $status_value ) {
 				$result['gzip']['status'][ strtolower( $status_name ) ] = $status_value;
 			}
-			$result['gzip']['server'] = $module::get_server_type();
+			$result['gzip']['server'] = $module::get_server_type( false );
 		}
 
 		/**
@@ -107,6 +110,11 @@ class Hub {
 		if ( ! is_array( $status ) ) {
 			$result['browser-caching'] = new WP_Error( 'browser-caching-status-not-found', 'There is not Browser Caching data yet' );
 		} else {
+			// We have a Cloudflare connection.
+			if ( Utils::get_module( 'cloudflare' )->is_connected() && Utils::get_module( 'cloudflare' )->is_zone_selected() ) {
+				$status = array_fill_keys( array_keys( $status ), Utils::get_module( 'cloudflare' )->get_caching_expiration() );
+			}
+
 			$result['browser-caching'] = array();
 			foreach ( $status as $status_name => $status_value ) {
 				$result['browser-caching']['status'][ strtolower( $status_name ) ] = $status_value;
@@ -132,6 +140,18 @@ class Hub {
 		} elseif ( ! $module->is_active() ) {
 			$result['minify'] = new WP_Error( 'minify-disabled', 'Asset Optimization module not activated' );
 		} else {
+			// Remove those assets that we don't want to display.
+			foreach ( $collection['styles'] as $key => $item ) {
+				if ( ! apply_filters( 'wphb_minification_display_enqueued_file', true, $item, 'styles' ) || ! isset( $item['original_size'], $item['compressed_size'] ) ) {
+					unset( $collection['styles'][ $key ] );
+				}
+			}
+			foreach ( $collection['scripts'] as $key => $item ) {
+				if ( ! apply_filters( 'wphb_minification_display_enqueued_file', true, $item, 'scripts' ) || ! isset( $item['original_size'], $item['compressed_size'] ) ) {
+					unset( $collection['scripts'][ $key ] );
+				}
+			}
+
 			$original_size_styles  = Utils::calculate_sum( wp_list_pluck( $collection['styles'], 'original_size' ) );
 			$original_size_scripts = Utils::calculate_sum( wp_list_pluck( $collection['scripts'], 'original_size' ) );
 			$original_size         = $original_size_scripts + $original_size_styles;
@@ -184,7 +204,7 @@ class Hub {
 		$options = $module->get_options();
 
 		$result['db-cleanup']['status']    = $options['db_cleanups'];
-		$result['db-cleanup']['frequency'] = $options['db_frequency'];
+		$result['db-cleanup']['frequency'] = isset( $options['db_frequency'] ) ? $options['db_frequency'] : 7;
 
 		/**
 		 * Advanced tools.
@@ -200,9 +220,7 @@ class Hub {
 		 */
 		$performance_module    = Utils::get_module( 'performance' );
 		$options               = $performance_module->get_options();
-		$performance_is_active = $options['reports']['enabled'];
-
-		$result['performance'] = $options['hub'];
+		$performance_is_active = isset( $options['reports']['enabled'] ) ? $options['reports']['enabled'] : false;
 
 		$uptime_is_active     = Utils::get_module( 'uptime' )->is_active();
 		$uptime_reporting     = Settings::get_setting( 'reports', 'uptime' );
@@ -279,6 +297,7 @@ class Hub {
 			);
 		}
 
+		define( 'WPHB_IS_NETWORK_ADMIN', true );
 		call_user_func( array( $module, 'enable' ) );
 		wp_send_json_success();
 	}
@@ -311,6 +330,7 @@ class Hub {
 			);
 		}
 
+		define( 'WPHB_IS_NETWORK_ADMIN', true );
 		call_user_func( array( $module, 'disable' ) );
 		wp_send_json_success();
 	}
@@ -608,6 +628,43 @@ class Hub {
 	public function action_purge_all_cache( $params, $action ) {
 		WP_Hummingbird::flush_cache( false, false );
 		wp_send_json_success();
+	}
+
+	/**
+	 * Applies the given config sent by the Hub via the Dashboard plugin.
+	 *
+	 * @since 3.0.1
+	 *
+	 * @param object $params  The config sent by the Hub.
+	 */
+	public function action_import_settings( $params ) {
+		if ( empty( $params->configs ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Missing config data', 'wphb' ),
+				)
+			);
+		}
+
+		// The Hub returns an object, we use an array.
+		$config_array = json_decode( wp_json_encode( $params->configs ), true );
+
+		$configs = new Configs();
+		$configs->apply_config( $config_array );
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * Exports the current settings as a config for the Hub.
+	 *
+	 * @since 3.0.1
+	 */
+	public function action_export_settings() {
+		$configs = new Configs();
+		$config  = $configs->get_config_from_current();
+
+		wp_send_json_success( $config['config'] );
 	}
 
 }

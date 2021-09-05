@@ -74,16 +74,23 @@ class Restore extends Model {
 	 * Cleans any remaining stuff from the fs and the db.
 	 *
 	 * This happens both at the start of a new restore and at the end of it.
+	 *
+	 * @param bool $manual_restore Whether manual mode is on.
 	 */
-	public static function clean_residuals() {
-		// We have to remove all locks.
-		Lock::remove_lock_dir();
+	public static function clean_residuals( $manual_restore = false ) {
+		if ( ! $manual_restore ) {
+			// We have to remove all locks.
+			Lock::remove_lock_dir();
+		}
 
 		// We have to remove backup download and file iteration markers.
 		delete_site_option( Controller\Ajax\Restore::SNAPSHOT_DOWNLOAD_BACKUP_PROGRESS );
 		delete_site_option( Model\Restore\Files::KEY_PATHS );
+		delete_site_option( Model\Restore\Files::KEY_LAST_PATHS );
 
-		// We have to unify the plugin and service schedules again, in case we have a mismatch now that we restored the local db.
-		Snapshot4\Main::handle_schedules();
+		if ( ! $manual_restore ) {
+			// We have to unify the plugin and service schedules again, in case we have a mismatch now that we restored the local db.
+			Snapshot4\Main::handle_schedules();
+		}
 	}
 }

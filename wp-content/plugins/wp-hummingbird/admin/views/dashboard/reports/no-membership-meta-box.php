@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<tbody>
 		<tr>
 			<td>
-				<i class="sui-icon-hummingbird" aria-hidden="true"></i>
+				<span class="sui-icon-hummingbird" aria-hidden="true"></span>
 				<strong><?php esc_html_e( 'Performance Test', 'wphb' ); ?></strong>
 			</td>
 			<td>
@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<td>
-				<i class="sui-icon-user-reputation-points" aria-hidden="true"></i>
+				<span class="sui-icon-user-reputation-points" aria-hidden="true"></span>
 				<strong><?php esc_html_e( 'Database Cleanup', 'wphb' ); ?></strong>
 			</td>
 			<td>
@@ -40,7 +40,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</tr>
 		<tr>
 			<td>
-				<i class="sui-icon-uptime" aria-hidden="true"></i>
+				<span class="sui-icon-uptime" aria-hidden="true"></span>
 				<strong><?php esc_html_e( 'Uptime', 'wphb' ); ?></strong>
 			</td>
 			<td>

@@ -33,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php
 			$this->admin_notices->show_inline(
 				sprintf( /* translators: %1$s - <a>, %2$s - </a> */
-					esc_html__( "We've completed the file check but haven't been able to load the files. Please try clearing your object cache, refresh the page and wait a few seconds to load the files, or visit your homepage to trigger the file list to show. If you continue having problems, please %1\$sopen a ticket%2\$s with our support team.", 'wphb' ),
+					esc_html__( "We've completed the file check but haven't been able to load the files. Please try clearing your object cache, refresh the page and wait a few seconds to load the files, or visit your homepage to trigger the file list to show. If you continue to have problems, please %1\$sopen a ticket%2\$s with our support team.", 'wphb' ),
 					'<a href="' . esc_url( Utils::get_link( 'support' ) ) . '" target="_blank">',
 					'</a>'
 				),

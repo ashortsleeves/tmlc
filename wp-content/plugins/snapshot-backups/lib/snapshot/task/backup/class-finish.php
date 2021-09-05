@@ -30,6 +30,7 @@ class Finish extends Task {
 		delete_site_option( Controller\Ajax\Backup::SNAPSHOT_MANUAL_BACKUP_TRIGGER_TIME );
 
 		delete_transient( 'snapshot_listed_backups' );
+		delete_transient( 'snapshot_current_stats' );
 
 		Log::set_backup_id( $backup_id );
 

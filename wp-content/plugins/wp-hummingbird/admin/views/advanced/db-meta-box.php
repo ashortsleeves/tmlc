@@ -33,7 +33,7 @@ $total = 0;
 			<div>
 				<?php echo esc_html( $field['title'] ); ?>
 				<span class="sui-tooltip sui-tooltip-constrained" data-tooltip="<?php echo esc_attr( $field['tooltip'] ); ?>">
-					<i class="sui-icon-info" aria-hidden="true"></i>
+					<span class="sui-icon-info" aria-hidden="true"></span>
 				</span>
 			</div>
 			<div class="wphb-db-items"><?php echo absint( $field['value'] ); ?></div>
@@ -41,8 +41,8 @@ $total = 0;
 					data-tooltip="<?php esc_attr_e( 'Delete entries', 'wphb' ); ?>"
 					data-type="<?php echo esc_attr( $db_type ); ?>"
 					data-entries="<?php echo absint( $field['value'] ); ?>">
-				<span class="sui-loading-text" aria-hidden="true"><i class="sui-icon-trash sui-md"></i></span>
-				<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+				<span class="sui-loading-text" aria-hidden="true"><span class="sui-icon-trash sui-md"></span></span>
+				<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 				<span class="sui-screen-reader-text">
 					<?php
 						printf(
@@ -64,7 +64,7 @@ $total = 0;
 			</span>
 		</div>
 		<div class="sui-actions-right">
-			<i class="sui-icon-loader sui-loading sui-fw sui-hidden" aria-hidden="true"></i>
+			<span class="sui-icon-loader sui-loading sui-fw sui-hidden" aria-hidden="true"></span>
 			<button id="wphb-db-delete-all" class="sui-button wphb-db-delete-all" data-type="all" data-entries="<?php echo absint( $total ); ?>">
 				<?php esc_html_e( 'Delete All', 'wphb' ); ?> (<?php echo absint( $total ); ?>)
 			</button>

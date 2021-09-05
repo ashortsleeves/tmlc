@@ -28,7 +28,7 @@
         border: 1px solid $accessible-dark;
 
         & > span:not(.toggle),
-        & > i {
+        & > [class*="sui-icon-"] {
           color: #888888;
         }
 
@@ -40,7 +40,7 @@
 
       input[type="checkbox"]:checked + label {
         & > span:not(.toggle),
-        & > i {
+        & > [class*="sui-icon-"] {
           color: $accessible-dark;
         }
       }
@@ -51,9 +51,14 @@
       input[type="checkbox"]:checked + label {
         background-color: $accessible-light !important;
         border-color: $accessible-dark;
+
+        & > span[class^="sui-icon"]:before {
+          color: $accessible-dark !important;
+        }
+
         &:hover {
           background-color: $accessible-dark !important;
-          & > i[class^="sui-icon"]:before {
+          & > span[class^="sui-icon"]:before {
             color: $accessible-light !important;
           }
         }

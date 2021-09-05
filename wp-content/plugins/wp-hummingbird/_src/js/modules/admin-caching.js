@@ -1,11 +1,10 @@
 /* global WPHB_Admin */
-/* global wphb */
-/* global wphbCachingStrings */
 
 /**
  * Internal dependencies
  */
 import Fetcher from '../utils/fetcher';
+import { getString } from '../utils/helpers';
 import CacheScanner from '../scanners/CacheScanner';
 
 ( function ( $ ) {
@@ -21,12 +20,12 @@ import CacheScanner from '../scanners/CacheScanner';
 		init() {
 			const self = this,
 				hash = window.location.hash,
-				pageCachingForm = $( 'form[id="page-caching-form"]' ),
-				rssForm = $( 'form[id="rss-caching-settings"]' ),
+				pageCachingForm = $( 'form[id="page_cache-form"]' ),
+				rssForm = $( 'form[id="rss-form"]' ),
 				gravatarDiv = $( 'div[id="wphb-box-caching-gravatar"]' ),
 				cachingHeader = $( '.box-caching-status .sui-box-header' ),
 				expiryForm = $( 'form[id="expiry-settings"]' ),
-				settingsForm = $( 'form[id="other-caching-settings"]' );
+				settingsForm = $( 'form[id="settings-form"]' );
 
 			// We assume there's at least one site, but this.scanner.init() will properly set the total sites.
 			this.scanner = new CacheScanner( 1, 0 );
@@ -34,11 +33,6 @@ import CacheScanner from '../scanners/CacheScanner';
 			// Define selected server.
 			self.serverSelector = $( '#wphb-server-type' );
 			self.selectedServer = self.serverSelector.val();
-
-			/** @member {Array} wphbCachingStrings */
-			if ( wphbCachingStrings ) {
-				self.strings = wphbCachingStrings;
-			}
 
 			if ( hash && $( hash ).length ) {
 				setTimeout( function () {
@@ -119,6 +113,11 @@ import CacheScanner from '../scanners/CacheScanner';
 			 * BROWSER CACHING
 			 */
 
+			// Make sure we have single set to avoid modifying all cache values at once.
+			if ( false === $( '#hb_all_expiry' ).prop( 'checked' ) ) {
+				this.selectedExpiryType = 'single';
+			}
+
 			// Init server instructions tabs.
 			$( '.wphb-server-instructions' ).each( function () {
 				self.serverInstructions[ $( this ).data( 'server' ) ] = $(
@@ -136,13 +135,20 @@ import CacheScanner from '../scanners/CacheScanner';
 			);
 
 			// Server type changed.
-			self.serverSelector.change( function () {
+			self.serverSelector.on( 'change', function () {
 				const value = $( this ).val();
 				self.hideCurrentInstructions();
 				self.showServerInstructions( value );
 				self.setServer( value );
 				self.selectedServer = value;
 				$( '.hb-server-type' ).val( value );
+
+				// Remove the expiry time settings row for IIS servers.
+				const expiryRow = document.getElementById(
+					'wphb-expiry-time-row'
+				);
+				expiryRow.style.display =
+					'iis' === value || 'litespeed' === value ? 'none' : 'flex';
 			} );
 
 			// Expiry time change between all types and individual type.
@@ -175,12 +181,12 @@ import CacheScanner from '../scanners/CacheScanner';
 							response.success
 						) {
 							WPHB_Admin.notices.show(
-								self.strings.successRecheckStatus
+								getString( 'successRecheckStatus' )
 							);
 							self.reloadExpiryTags( response.expiry_values );
 						} else {
 							WPHB_Admin.notices.show(
-								self.strings.errorRecheckStatus,
+								getString( 'errorRecheckStatus' ),
 								'error'
 							);
 						}
@@ -211,16 +217,18 @@ import CacheScanner from '../scanners/CacheScanner';
 							spinner.removeClass( 'visible' );
 							notice.slideUp( 'slow' );
 
+							window.wphbBrowserCachingReactRefresh();
+
 							if (
 								'undefined' !== typeof response &&
 								response.success
 							) {
 								WPHB_Admin.notices.show(
-									wphb.strings.htaccessUpdated
+									getString( 'htaccessUpdated' )
 								);
 							} else {
 								WPHB_Admin.notices.show(
-									self.strings.htaccessUpdatedFailed,
+									getString( 'htaccessUpdatedFailed' ),
 									'error'
 								);
 							}
@@ -266,14 +274,6 @@ import CacheScanner from '../scanners/CacheScanner';
 			/**
 			 * CLOUDFLARE
 			 */
-
-			// Connect Cloudflare link clicked.
-			$( '.connect-cloudflare-link' ).on( 'click', function ( e ) {
-				e.preventDefault();
-				window.location.hash = 'connect-cloudflare';
-				self.setCloudflare();
-			} );
-
 			// "# of your cache types don’t meet the recommended expiry period" notice clicked.
 			$( '#configure-link' ).on( 'click', function ( e ) {
 				e.preventDefault();
@@ -325,20 +325,34 @@ import CacheScanner from '../scanners/CacheScanner';
 				redisForm.addEventListener( 'submit', ( e ) => {
 					e.preventDefault();
 
-					const host 		= document.getElementById( 'redis-host' ).value;
-					const port 		= document.getElementById( 'redis-port' ).value;
-					const pass 		= document.getElementById( 'redis-password' ).value;
-					const connected = document.getElementById( 'redis-connected' ).value;
+					const btn = document.getElementById( 'redis-connect-save' );
+					btn.classList.add( 'sui-button-onload-text' );
+
+					const host = document.getElementById( 'redis-host' ).value;
+					let port = document.getElementById( 'redis-port' ).value;
+					const pass = document.getElementById( 'redis-password' )
+						.value;
+					const db = document.getElementById( 'redis-db' ).value;
+					const connected = document.getElementById(
+						'redis-connected'
+					).value;
+
+					if ( ! port ) {
+						port = 6379;
+					}
 
 					// Submit via Fetcher. then close modal.
 					Fetcher.caching
-						.redisSaveSettings( host, port, pass )
+						.redisSaveSettings( host, port, pass, db )
 						.then( ( response ) => {
 							if (
 								'undefined' !== typeof response &&
 								response.success
 							) {
-								window.location.search += ( connected === '1' )? '&updated=redis-auth-2' : '&updated=redis-auth';
+								window.location.search +=
+									connected === '1'
+										? '&updated=redis-auth-2'
+										: '&updated=redis-auth';
 							} else {
 								const notice = document.getElementById(
 									'redis-connect-notice-on-modal'
@@ -349,6 +363,10 @@ import CacheScanner from '../scanners/CacheScanner';
 								);
 								notice.parentNode.parentNode.classList.add(
 									'sui-spacing-top--10'
+								);
+
+								btn.classList.remove(
+									'sui-button-onload-text'
 								);
 							}
 						} );
@@ -376,7 +394,7 @@ import CacheScanner from '../scanners/CacheScanner';
 									'&updated=redis-object-cache';
 							} else {
 								WPHB_Admin.notices.show(
-									wphb.strings.errorSettingsUpdate,
+									getString( 'errorSettingsUpdate' ),
 									'error'
 								);
 							}
@@ -397,7 +415,7 @@ import CacheScanner from '../scanners/CacheScanner';
 								'sui-button-onload-text'
 							);
 							WPHB_Admin.notices.show(
-								wphbCachingStrings.successRedisPurge
+								getString( 'successRedisPurge' )
 							);
 						} );
 				} );
@@ -474,7 +492,7 @@ import CacheScanner from '../scanners/CacheScanner';
 						}
 					} else {
 						WPHB_Admin.notices.show(
-							wphb.strings.errorSettingsUpdate,
+							getString( 'errorSettingsUpdate' ),
 							'error'
 						);
 					}
@@ -500,16 +518,16 @@ import CacheScanner from '../scanners/CacheScanner';
 							'0'
 						);
 						WPHB_Admin.notices.show(
-							wphbCachingStrings.successPageCachePurge
+							getString( 'successPageCachePurge' )
 						);
 					} else if ( 'gravatar' === module ) {
 						WPHB_Admin.notices.show(
-							wphbCachingStrings.successGravatarPurge
+							getString( 'successGravatarPurge' )
 						);
 					}
 				} else {
 					WPHB_Admin.notices.show(
-						wphbCachingStrings.errorCachePurge,
+						getString( 'errorCachePurge' ),
 						'error'
 					);
 				}

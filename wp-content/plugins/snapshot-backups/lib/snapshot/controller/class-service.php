@@ -29,9 +29,6 @@ abstract class Service extends Controller {
 	const EXPORT_BACKUP_EMAIL           = 'export_backup_email';
 	const EXPORT_LOGGING                = 'export_logging';
 	const HUB_INFO                      = 'hub_info';
-	const HUB_END_GET_SCHEDULE          = 'hub_end_get_schedule';
-	const HUB_END_SET_SCHEDULE          = 'hub_end_set_schedule';
-	const HUB_END_DEL_SCHEDULE          = 'hub_end_del_schedule';
 	const HUB_END_START_BACKUP          = 'hub_end_start_backup';
 	const HUB_END_DELETE_BACKUPS        = 'hub_end_delete_backups';
 	const HUB_END_DELETE_CACHE          = 'hub_end_delete_cache';

@@ -14,15 +14,32 @@ class Core_Integrity extends Behavior {
 	const CACHE_CHECKSUMS = 'wd_cache_checksums';
 
 	/**
-	 * Check if the core file is un touch
+	 * Check that the folder is empty.
+	 * @param string $path
+	 *
+	 * @return bool
+	 */
+	protected function is_dir_empty( $path ) {
+		$rfiles = scandir( $path );
+		foreach ( $rfiles as $rfile ) {
+			if ( ! in_array( $rfile, array( '.', '..' ), true ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if the core file is on touch
 	 */
 	public function core_integrity_check() {
-		$core_files = get_site_option( Gather_Fact::CACHE_CORE, [] );
+		$core_files = get_site_option( Gather_Fact::CACHE_CORE, array() );
 		$core_files = new \ArrayIterator( $core_files );
 		$checksums  = $this->get_checksum();
-		$timer = new Timer();
-		$model = $this->owner->scan;
-		$pos   = intval( $model->task_checkpoint );
+		$timer      = new Timer();
+		$model      = $this->owner->scan;
+		$pos        = (int) $model->task_checkpoint;
 		$core_files->seek( $pos );
 		$this->log( sprintf( 'current pos %s', $pos ), 'scan' );
 		while ( $core_files->valid() ) {
@@ -45,8 +62,7 @@ class Core_Integrity extends Behavior {
 				continue;
 			}
 
-			//because in windows, the file will be \ instead of /, so we need to convert
-			//everything to /
+			//because in windows, the file will be \ instead of /, so we need to convert everything to /
 			$file = $core_files->current();
 			//get relative so we can compare
 			$abs_path = ABSPATH;
@@ -58,29 +74,44 @@ class Core_Integrity extends Behavior {
 			//remove the first \ on windows
 			$rev_file = str_replace( DIRECTORY_SEPARATOR, '/', $rev_file );
 			if ( isset( $checksums[ $rev_file ] ) ) {
-				$md5 = md5_file( $file );
-				if ( ! hash_equals( $md5, $checksums[ $rev_file ] ) ) {
+				if ( ! $this->compare_hashes( $file, $checksums[ $rev_file ] ) ) {
 					$this->log( sprintf( 'modified %s', $file ), 'scan' );
-					$model->add_item( Scan_Item::TYPE_INTEGRITY, [
-						'file' => $file,
-						'type' => 'modified'
-					] );
+					$model->add_item(
+						Scan_Item::TYPE_INTEGRITY,
+						array(
+							'file' => $file,
+							'type' => 'modified',
+						)
+					);
 				}
 			} else {
-				//$this->log( sprintf( 'unversion %s', $rev_file ), 'scan' );
-				$model->add_item( Scan_Item::TYPE_INTEGRITY, [
-					'file' => $file,
-					'type' => is_dir( $file ) ? 'dir' : 'unversion'
-				] );
+				if ( is_dir( $file ) ) {
+					if ( $this->is_dir_empty( $core_files->current() ) ) {
+						$this->log( sprintf( 'skip %s because of non-WP directory is empty', $core_files->current() ), 'scan' );
+						$core_files->next();
+						continue;
+					}
+					$item_type = 'dir';
+				} else {
+					$item_type = 'unversion';
+				}
+
+				$model->add_item(
+					Scan_Item::TYPE_INTEGRITY,
+					array(
+						'file' => $file,
+						'type' => $item_type,
+					)
+				);
 			}
 			$model->calculate_percent( $core_files->key() * 100 / $core_files->count(), 2 );
-			if ( $core_files->key() % 100 === 0 ) {
+			if ( 0 === $core_files->key() % 100 ) {
 				//we should update the model percent each 100 files so we have some progress ont he screen$pos * 100 / $core_files->count()
 				$model->save();
 			}
 			$core_files->next();
 		}
-		if ( true === $core_files->valid() ) {
+		if ( $core_files->valid() ) {
 			//save the current progress and quit
 			$model->task_checkpoint = $core_files->key();
 		} else {
@@ -114,7 +145,7 @@ class Core_Integrity extends Behavior {
 		if ( ! function_exists( 'get_core_checksums' ) ) {
 			include_once ABSPATH . 'wp-admin/includes/update.php';
 		}
-		$checksums = get_core_checksums( $wp_version, isset( $wp_local_package ) ? $wp_local_package : 'en_US' );
+		$checksums = get_core_checksums( $wp_version, empty( $wp_local_package ) ? 'en_US' : $wp_local_package );
 		if ( false === $checksums ) {
 			$this->log( 'Error from fetching checksums from wp.org', 'scan' );
 			$scan         = $this->owner->scan;

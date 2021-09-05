@@ -77,7 +77,7 @@ tribe.tickets.block = {
 			if ( 0 === available ) { // Ticket is out of stock.
 				const unavailableHtml = tickets[ ticketId ].unavailable_html;
 				// Set the availability data attribute to false.
-				$ticketEl.attr( 'available', false );
+				$ticketEl.prop( 'available', false );
 
 				// Remove classes for in-stock and purchasable.
 				$ticketEl.removeClass( 'instock' );
@@ -126,7 +126,14 @@ tribe.tickets.block = {
 		let footerCount = 0;
 
 		$quantities.each( function() {
-			let newQuantity = parseInt( $( this ).val(), 10 );
+			const $input = $( this );
+
+			// Only check on elements that are visible, to work with cart removals.
+			if ( ! $input.is( ':visible' ) ) {
+				return;
+			}
+
+			let newQuantity = parseInt( $input.val(), 10 );
 			newQuantity = isNaN( newQuantity ) ? 0 : newQuantity;
 			footerCount += newQuantity;
 		} );
@@ -168,12 +175,20 @@ tribe.tickets.block = {
 		let footerAmount = 0;
 
 		$quantities.each( function() {
-			const $price = $( this ).closest( obj.selectors.item ).find( obj.selectors.itemPrice ).first();
-			let quantity = parseInt( $( this ).val(), 10 );
+			const $input = $( this );
+
+			// Only check on elements that are visible, to work with cart removals.
+			if ( ! $input.is( ':visible' ) ) {
+				return;
+			}
+
+			const $price = $input.closest( obj.selectors.item ).find( obj.selectors.itemPrice ).first();
+			const realPrice = $input.closest( obj.selectors.item ).data( 'ticket-price' );
+			let quantity = parseInt( $input.val(), 10 );
 			quantity = isNaN( quantity ) ? 0 : quantity;
-			let text = $price.text();
-			text = tribe.tickets.utils.cleanNumber( text, provider );
-			const cost = text * quantity;
+			const selectedPrice = isNaN( realPrice ) ? $price.text() : realPrice.toString();
+			const ticketPrice = tribe.tickets.utils.cleanNumber( selectedPrice, provider );
+			const cost = ticketPrice * quantity;
 			footerAmount += cost;
 		} );
 
@@ -371,7 +386,7 @@ tribe.tickets.block = {
 
 		$sharedTickets.each(
 			function() {
-				sharedCap.push( parseInt( $( this ).attr( 'data-shared-cap' ), 10 ) );
+				sharedCap.push( parseInt( $( this ).attr( 'data-available-count' ), 10 ) );
 			}
 		);
 
@@ -424,7 +439,12 @@ tribe.tickets.block = {
 	obj.getPrice = function( $cartItem ) {
 		const $form = $cartItem.closest( 'form' );
 		const provider = obj.getTicketsBlockProvider( $form );
-		const price = tribe.tickets.utils.cleanNumber( $cartItem.find( obj.selectors.itemPrice ).first().text(), provider );
+
+		const $price = $cartItem.find( obj.selectors.itemPrice ).first();
+		const realPrice = $cartItem.closest( obj.selectors.item ).data( 'ticket-price' );
+		const text = isNaN( realPrice ) ? $price.text() : realPrice.toString();
+
+		const price = tribe.tickets.utils.cleanNumber( text, provider );
 
 		return isNaN( price ) ? 0 : price;
 	};
@@ -446,6 +466,10 @@ tribe.tickets.block = {
 		$ticketRows.each(
 			function() {
 				const $row = $( this );
+
+				if ( ! $row.is( ':visible' ) ) {
+					return;
+				}
 				const ticketId = $row.data( 'ticketId' );
 				const qty = $row.find( obj.selectors.itemQuantityInput ).val();
 				const $optoutInput = $row.find( '[name="attendee[optout]"]' );
@@ -694,6 +718,40 @@ tribe.tickets.block = {
 	};
 
 	/**
+	 * Submit the tickets block form.
+	 *
+	 * @since 5.0.3
+	 *
+	 * @param {jQuery} $form jQuery object of the form.
+	 *
+	 * @return {void}
+	 */
+	obj.ticketsSubmit = function( $form ) {
+		const $container = $form.closest( obj.selectors.container );
+		const postId = $form.data( 'post-id' );
+		const ticketProvider = $form.data( 'provider' );
+
+		// Show the loader.
+		tribe.tickets.loader.show( $form );
+
+		// Save meta and cart.
+		const params = {
+			tribe_tickets_provider: obj.commerceSelector[ ticketProvider ],
+			tribe_tickets_tickets: obj.getTicketsForCart( $form ),
+			tribe_tickets_meta: {},
+			tribe_tickets_post_id: postId,
+		};
+
+		$form.find( '#tribe_tickets_block_ar_data' ).val( JSON.stringify( params ) );
+
+		$document.trigger( 'beforeTicketsSubmit.tribeTicketsBlock', [ $form, params ] );
+
+		$form.submit();
+
+		$document.trigger( 'afterTicketsSubmit.tribeTicketsBlock', [ $form, params ] );
+	};
+
+	/**
 	 * Binds events the classic "Submit" (non-modal)
 	 *
 	 * @since 5.0.3
@@ -716,27 +774,8 @@ tribe.tickets.block = {
 				}
 
 				const $form = $container.find( obj.selectors.form );
-				const postId = $form.data( 'post-id' );
-				const ticketProvider = $form.data( 'provider' );
 
-				// Show the loader.
-				tribe.tickets.loader.show( $form );
-
-				// Save meta and cart.
-				const params = {
-					tribe_tickets_provider: obj.commerceSelector[ ticketProvider ],
-					tribe_tickets_tickets: obj.getTicketsForCart( $container ),
-					tribe_tickets_meta: {},
-					tribe_tickets_post_id: postId,
-				};
-
-				$( '#tribe_tickets_block_ar_data' ).val( JSON.stringify( params ) );
-
-				$document.trigger( 'beforeTicketsSubmit.tribeTicketsBlock', [ $form, params ] );
-
-				$form.submit();
-
-				$document.trigger( 'afterTicketsSubmit.tribeTicketsBlock', [ $form, params ] );
+				obj.ticketsSubmit( $form );
 			}
 		);
 	};
@@ -797,6 +836,6 @@ tribe.tickets.block = {
 	} );
 
 	// Configure on document ready.
-	$document.ready( obj.ready );
+	$( obj.ready );
 } )( jQuery, tribe.tickets.block );
 /* eslint-enable max-len */

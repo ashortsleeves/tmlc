@@ -7,18 +7,22 @@
 
 use WPMUDEV\Snapshot4\Task\Check\Hub;
 use WPMUDEV\Snapshot4\Helper\Settings;
+use WPMUDEV\Snapshot4\Helper\Api;
+
+$need_reactivate_membership = false;
 
 $button_class = 'sui-button-blue';
 $this->render(
 	'modals/edit-schedule',
 	array(
-		'modal_title'   => __( 'Backup schedule', 'snapshot' ),
-		'message'       => __( 'Edit your backup schedule to run automatically. We highly recommend a weekly or daily frequency depending on how active your website is.', 'snapshot' ),
-		'button'        => __( 'Save schedule', 'snapshot' ),
-		'button_saving' => __( 'Saving', 'snapshot' ),
-		'status'        => 'active',
-		'files'         => 'all',
-		'tables'        => 'all',
+		'modal_title'        => __( 'Backup schedule', 'snapshot' ),
+		'message'            => __( 'Edit your backup schedule to run automatically. We highly recommend a weekly or daily frequency depending on how active your website is.', 'snapshot' ),
+		'button'             => __( 'Save schedule', 'snapshot' ),
+		'button_saving'      => __( 'Saving', 'snapshot' ),
+		'status'             => 'active',
+		'files'              => 'all',
+		'tables'             => 'all',
+		'is_branding_hidden' => $is_branding_hidden,
 	)
 );
 
@@ -33,6 +37,7 @@ if ( snapshot_has_error( Hub::ERR_DASH_PRESENT, $errors ) ) {
 			'button_class'       => $button_class,
 			'active_first_slide' => true,
 			'installed'          => false,
+			'is_branding_hidden' => $is_branding_hidden,
 		)
 	);
 } elseif ( snapshot_has_error( Hub::ERR_DASH_ACTIVE, $errors ) ) {
@@ -47,8 +52,10 @@ if ( snapshot_has_error( Hub::ERR_DASH_PRESENT, $errors ) ) {
 			'button_class'       => $button_class,
 			'active_first_slide' => true,
 			'installed'          => true,
+			'is_branding_hidden' => $is_branding_hidden,
 		)
 	);
+	$need_reactivate_membership = true;
 } elseif ( snapshot_has_error( Hub::ERR_DASH_APIKEY, $errors ) ) {
 	$this->render(
 		'modals/welcome-wpmu-dashboard',
@@ -57,28 +64,44 @@ if ( snapshot_has_error( Hub::ERR_DASH_PRESENT, $errors ) ) {
 			'button_class'       => $button_class,
 			'installed'          => true,
 			'button_loading'     => __( 'Logging in', 'snapshot' ),
+			'is_branding_hidden' => $is_branding_hidden,
 		)
 	);
 }
 
-if ( true === $welcome_modal ) {
+$need_reactivate_membership = $need_reactivate_membership || Api::need_reactivate_membership();
+if ( $need_reactivate_membership ) {
+	$this->render( 'modals/membership-expired' );
+}
+
+if ( true === $welcome_modal && ! $need_reactivate_membership ) {
 	$this->render(
 		'modals/welcome',
 		array(
-			'modal_title'  => $welcome_modal_alt ? __( 'Welcome back', 'snapshot' ) : __( 'Welcome to Snapshot Pro', 'snapshot' ),
-			/* translators: %s - Admin name */
-			'message'      => $welcome_modal_alt ? sprintf( __( '%s, welcome back to the hottest backup plugin for WordPress. We have saved all your settings and old backups. You\'ll be able to restore the backups anytime and use already configured settings.', 'snapshot' ), wp_get_current_user()->display_name ) : sprintf( __( '%s, welcome to the hottest backup plugin for WordPress. Snapshot Pro is successfully connected with the WPMU DEV Dashboard plugin and you\'re ready to create your first backup.', 'snapshot' ), wp_get_current_user()->display_name ),
-			'message2'     => __( 'Please choose backup region to continue.', 'snapshot' ),
-			'button'       => $welcome_modal_alt ? __( 'Okay, thanks!', 'snapshot' ) : __( 'Get started', 'snapshot' ),
-			'button_class' => $button_class,
+			'modal_title'        => $welcome_modal_alt
+				? __( 'Welcome back', 'snapshot' )
+				: ( Settings::get_branding_hide_doc_link() ? __( 'Welcome!', 'snapshot' ) : __( 'Welcome to Snapshot Pro', 'snapshot' ) ),
+			'message'            => $welcome_modal_alt
+				/* translators: %s - Admin name */
+				? sprintf( __( '%s, welcome back to the hottest backup plugin for WordPress. We have saved all your settings and old backups. You\'ll be able to restore the backups anytime and use already configured settings.', 'snapshot' ), wp_get_current_user()->display_name )
+				: ( Settings::get_branding_hide_doc_link()
+					/* translators: %s - Admin name */
+					? sprintf( __( '%s, welcome to the hottest backup plugin for WordPress. The backup has been successfully connected to the WPMU DEV remote destination and you\'re ready to create your first backup.', 'snapshot' ), wp_get_current_user()->display_name )
+					/* translators: %s - Admin name */
+					: sprintf( __( '%s, welcome to the hottest backup plugin for WordPress. Snapshot Pro is successfully connected with the WPMU DEV Dashboard plugin and you\'re ready to create your first backup.', 'snapshot' ), wp_get_current_user()->display_name )
+				),
+			'message2'           => __( 'Please choose backup region to continue.', 'snapshot' ),
+			'button'             => $welcome_modal_alt ? __( 'Okay, thanks!', 'snapshot' ) : __( 'Get started', 'snapshot' ),
+			'button_class'       => $button_class,
 
-			'status'       => 'active',
-			'files'        => 'all',
-			'tables'       => 'all',
+			'status'             => 'active',
+			'files'              => 'all',
+			'tables'             => 'all',
+			'is_branding_hidden' => $is_branding_hidden,
 		)
 	);
 }
 
-if ( ! Settings::get_whats_new_seen() ) {
-	$this->render( 'modals/whats-new' );
-}
+//if ( ! Settings::get_whats_new_seen() && ! $need_reactivate_membership ) {
+//	$this->render( 'modals/whats-new' );
+//}

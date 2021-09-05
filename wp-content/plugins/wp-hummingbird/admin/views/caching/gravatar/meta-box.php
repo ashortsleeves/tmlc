@@ -31,7 +31,7 @@ if ( is_wp_error( $error ) ) {
 	</div>
 	<div class="sui-box-settings-col-2">
 		<a href="<?php echo esc_url( $deactivate_url ); ?>" class="sui-button sui-button-ghost sui-button-icon-left" role="button" onclick="WPHB_Admin.Tracking.disableFeature( 'Gravatar Caching' )">
-			<i class="sui-icon-power-on-off" aria-hidden="true"></i>
+			<span class="sui-icon-power-on-off" aria-hidden="true"></span>
 			<?php esc_html_e( 'Deactivate', 'wphb' ); ?>
 		</a>
 	</div>

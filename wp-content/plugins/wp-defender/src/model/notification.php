@@ -3,6 +3,7 @@
 namespace WP_Defender\Model;
 
 use Calotes\Model\Setting;
+use WP_Defender\Traits\Formats;
 use WP_Defender\Traits\User;
 
 /**
@@ -12,7 +13,7 @@ use WP_Defender\Traits\User;
  * @package WP_Defender\Model
  */
 abstract class Notification extends Setting {
-	use User;
+	use User, Formats;
 
 	const STATUS_INACTIVE = 'inactive', STATUS_DISABLED = 'disabled', STATUS_ACTIVE = 'enabled';
 	const USER_SUBSCRIBED = 'subscribed', USER_SUBSCRIBE_WAITING = 'waiting', USER_SUBSCRIBE_CANCELED = 'cancelled', USER_SUBSCRIBE_NA = 'na';
@@ -156,14 +157,14 @@ abstract class Notification extends Setting {
 	}
 
 	/**
-	 * Check if the current moment is right for sending
+	 * Check if the current moment is right for sending.
 	 *
-	 * @return bool
+	 * @return bool|void
 	 */
 	public function maybe_send() {
-		if ( $this->dry_run === true ) {
+		if ( true === $this->dry_run ) {
 			//no send, but need to track as sent so we can requeue it
-			if ( $this->type === 'report' ) {
+			if ( 'report' === $this->type ) {
 				$this->last_sent     = $this->est_timestamp;
 				$this->est_timestamp = $this->get_next_run()->getTimestamp();
 				$this->save();
@@ -172,24 +173,19 @@ abstract class Notification extends Setting {
 			return;
 		}
 
-		if ( $this->status !== self::STATUS_ACTIVE ) {
+		if ( self::STATUS_ACTIVE !== $this->status ) {
 			return false;
 		}
 
-		if ( $this->type === 'notification' ) {
+		if ( 'notification' === $this->type ) {
 			return true;
 		}
 
-		if ( $this->last_sent === 0 ) {
+		if ( 0 === $this->last_sent ) {
 			return false;
 		}
 
-		$now = new \DateTime( 'now', wp_timezone() );
-
-		if ( $this->slug === 'tweak-reminder' ) {
-
-		}
-
+		$now  = new \DateTime( 'now', wp_timezone() );
 		$time = apply_filters( 'defender_current_time_for_report', $now );
 
 		return $time->getTimestamp() >= $this->est_timestamp;
@@ -199,11 +195,11 @@ abstract class Notification extends Setting {
 	 * @return \DateTime|false
 	 * @throws \Exception
 	 */
-	public function get_next_run( $for_display = false ) {
-		if ( $this->type === 'notification' ) {
+	public function get_next_run() {
+		if ( 'notification' === $this->type ) {
 			return false;
 		}
-		if ( $this->status !== self::STATUS_ACTIVE ) {
+		if ( self::STATUS_ACTIVE !== $this->status ) {
 			return false;
 		}
 
@@ -219,8 +215,8 @@ abstract class Notification extends Setting {
 		$now      = new \DateTime( 'now', wp_timezone() );
 		$interval = \DateInterval::createFromDateString( (string) $est->getOffset() . 'seconds' );
 		list( $hour, $min ) = explode( ':', $this->time );
-		$hour = intval( $hour );
-		$min  = intval( $min );
+		$hour = (int) $hour;
+		$min  = (int) $min;
 		switch ( $this->frequency ) {
 			case 'daily':
 				//set the time
@@ -246,11 +242,10 @@ abstract class Notification extends Setting {
 				 * We will need to check if the date is passed today, if not, use this, if yes, then queue for next month
 				 */
 				$est->setDate( $est->format( 'Y' ), $est->format( 'm' ), 1 );
-				if ( $this->day_n == '31' ) {
+				if ( 31 === (int) $this->day_n ) {
 					$this->day_n = $est->format( 't' );
 				}
 				$est->add( new \DateInterval( 'P' . ( $this->day_n - 1 ) . 'D' ) );
-				$est->add( $interval );
 				$est->setTime( $hour, $min, 0 );
 				while ( $est->getTimestamp() < $now->getTimestamp() ) {
 					//already over, move to next month
@@ -264,9 +259,9 @@ abstract class Notification extends Setting {
 	}
 
 	/**
-	 * We have multiple issues where the email keep sending for no reason, this for debugging later
+	 * We have multiple issues where the email keep sending for no reason, this for debugging later.
 	 *
-	 * @param $email
+	 * @param string $email
 	 */
 	public function save_log( $email ) {
 		$track            = new Email_Track();
@@ -292,6 +287,7 @@ abstract class Notification extends Setting {
 			case 'weekly':
 				return sprintf( __( '%s on %s at %s', 'wpdef' ), ucfirst( $this->frequency ), ucfirst( $this->day ), $date->format( 'h:i A' ) );
 			case 'monthly':
+			default:
 				return sprintf( __( '%s/%d, %s', 'wpdef' ), ucfirst( $this->frequency ), $this->day_n, $date->format( 'h:i A' ) );
 		};
 	}
@@ -303,26 +299,26 @@ abstract class Notification extends Setting {
 	 * @throws \Exception
 	 */
 	public function get_next_run_as_string( $for_hub = false ) {
-		if ( $this->type === 'notification' ) {
-			if ( $for_hub ) {
-				return false;
-			}
+		if ( 'notification' === $this->type ) {
 
-			return __( 'Never', 'wpdef' );
+			return $for_hub ? false : __( 'Never', 'wpdef' );
 		}
 
-		if ( $this->status === self::STATUS_ACTIVE ) {
-			$format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
-			$date   = new \DateTime( 'now', wp_timezone() );
-			$date->setTimestamp( $this->est_timestamp );
-
-			return $date->format( $format );
-		}
 		if ( $for_hub ) {
-			return false;
-		}
+			return self::STATUS_ACTIVE === $this->status
+				? $this->persistent_hub_datetime_format( $this->est_timestamp )
+				: false;
+		} else {
+			if ( self::STATUS_ACTIVE === $this->status ) {
+				$format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+				$date   = new \DateTime( 'now', wp_timezone() );
+				$date->setTimestamp( $this->est_timestamp );
 
-		return __( 'Never', 'wpdef' );
+				return $date->format( $format );
+			} else {
+				return __( 'Never', 'wpdef' );
+			}
+		}
 	}
 
 	/**
@@ -356,7 +352,16 @@ abstract class Notification extends Setting {
 	 * @return array
 	 */
 	public function export() {
-		$data                    = parent::export();
+
+		$data = parent::export();
+
+		global $l10n;
+
+		if ( isset( $l10n['wpdef'] ) ) {
+			$data['title']       = __( $data['title'], 'wpdef' );
+			$data['description'] = __( $data['description'], 'wpdef' );
+		}
+
 		$data['next_run']        = $this->get_next_run_as_string();
 		$data['all_subscribers'] = array_merge( $this->in_house_recipients, $this->out_house_recipients );
 

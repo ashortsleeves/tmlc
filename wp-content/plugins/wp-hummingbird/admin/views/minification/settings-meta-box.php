@@ -42,7 +42,7 @@ $is_site_cdn_enabled = $cdn_status && $is_member;
 				<input type="text" class="sui-form-control" name="file_path" id="file_path" placeholder="/wp-content/uploads/hummingbird-assets/" value="<?php echo esc_attr( $file_path ); ?>" <?php disabled( $cdn_status ); ?>>
 			</label>
 			<span class="sui-description">
-				<?php esc_html_e( 'Leave this blank to use the default folder, or define your own as a relative path. Note: changing the directory will clear out al the generated assets.', 'wphb' ); ?>
+				<?php esc_html_e( 'Leave this blank to use the default folder, or define your own as a relative path. Note: changing the directory will clear out all the generated assets.', 'wphb' ); ?>
 			</span>
 		</div>
 	</div>
@@ -177,46 +177,48 @@ $is_site_cdn_enabled = $cdn_status && $is_member;
 	</div><!-- end sui-upsell-row -->
 <?php endif; ?>
 
-<div class="sui-box-settings-row">
-	<div class="sui-box-settings-col-1">
-		<span class="sui-settings-label"><?php esc_html_e( 'Debug', 'wphb' ); ?></span>
-		<span class="sui-description">
-			<?php esc_html_e( 'Turn on the debug log to get insight into any issues you’re having.', 'wphb' ); ?>
-		</span>
-	</div>
-	<div class="sui-box-settings-col-2">
-		<div class="sui-form-field">
-			<?php if ( ! is_multisite() ) : ?>
-				<label for="debug_log" class="sui-toggle">
-					<input type="checkbox" name="debug_log" id="debug_log" aria-labelledby="debug_log-label" <?php checked( $logging ); ?>>
-					<span class="sui-toggle-slider" aria-hidden="true"></span>
-					<span id="debug_log-label" class="sui-toggle-label">
-						<?php esc_html_e( 'Enable debug log', 'wphb' ); ?>
-					</span>
-				</label>
-			<?php endif; ?>
-
-			<div class="sui-description sui-border-frame with-padding wphb-logging-box <?php echo $logging ? '' : 'sui-hidden'; ?>">
-				<?php esc_html_e( 'Debug logging is active. Logs are stored for 30 days, you can download the log file below.', 'wphb' ); ?>
-
-				<div class="wphb-logging-buttons">
-					<a href="<?php echo esc_url( $download_url ); ?>" class="sui-button sui-button-ghost" <?php disabled( ! $logs_link, true ); ?>>
-						<i class="sui-icon-download" aria-hidden="true"></i>
-						<?php esc_html_e( 'Download Logs', 'wphb' ); ?>
-					</a>
-					<a href="#" class="sui-button sui-button-ghost sui-button-red wphb-logs-clear" data-module="minify" <?php disabled( ! $logs_link, true ); ?>>
-						<i class="sui-icon-trash" aria-hidden="true"></i>
-						<?php esc_html_e( 'Clear', 'wphb' ); ?>
-					</a>
-				</div>
-
-				<?php if ( $path_url ) : ?>
-					<a href="<?php echo esc_url( $download_url ); ?>"><?php echo esc_url( $path_url ); ?></a>
+<?php if ( ! is_multisite() || ( is_multisite() && $logging ) ) : ?>
+	<div class="sui-box-settings-row">
+		<div class="sui-box-settings-col-1">
+			<span class="sui-settings-label"><?php esc_html_e( 'Debug', 'wphb' ); ?></span>
+			<span class="sui-description">
+				<?php esc_html_e( 'Turn on the debug log to get insight into any issues you’re having.', 'wphb' ); ?>
+			</span>
+		</div>
+		<div class="sui-box-settings-col-2">
+			<div class="sui-form-field">
+				<?php if ( ! is_multisite() ) : ?>
+					<label for="debug_log" class="sui-toggle">
+						<input type="checkbox" name="debug_log" id="debug_log" aria-labelledby="debug_log-label" <?php checked( $logging ); ?>>
+						<span class="sui-toggle-slider" aria-hidden="true"></span>
+						<span id="debug_log-label" class="sui-toggle-label">
+							<?php esc_html_e( 'Enable debug log', 'wphb' ); ?>
+						</span>
+					</label>
 				<?php endif; ?>
+
+				<div class="sui-description sui-border-frame with-padding wphb-logging-box <?php echo $logging ? '' : 'sui-hidden'; ?>">
+					<?php esc_html_e( 'Debug logging is active. Logs are stored for 30 days, you can download the log file below.', 'wphb' ); ?>
+
+					<div class="wphb-logging-buttons">
+						<a href="<?php echo esc_url( $download_url ); ?>" class="sui-button sui-button-ghost" <?php disabled( ! $logs_link, true ); ?>>
+							<span class="sui-icon-download" aria-hidden="true"></span>
+							<?php esc_html_e( 'Download Logs', 'wphb' ); ?>
+						</a>
+						<a href="#" class="sui-button sui-button-ghost sui-button-red wphb-logs-clear" data-module="minify" <?php disabled( ! $logs_link, true ); ?>>
+							<span class="sui-icon-trash" aria-hidden="true"></span>
+							<?php esc_html_e( 'Clear', 'wphb' ); ?>
+						</a>
+					</div>
+
+					<?php if ( $path_url ) : ?>
+						<a href="<?php echo esc_url( $download_url ); ?>"><?php echo esc_url( $path_url ); ?></a>
+					<?php endif; ?>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
+<?php endif; ?>
 
 <div class="sui-box-settings-row">
 	<div class="sui-box-settings-col-1">

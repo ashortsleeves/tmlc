@@ -4,6 +4,11 @@
  * Internal dependencies
  */
 import Fetcher from '../utils/fetcher';
+import { getString } from '../utils/helpers';
+
+/**
+ * External dependencies
+ */
 const MixPanel = require( 'mixpanel-browser' );
 
 ( function ( $ ) {
@@ -13,6 +18,29 @@ const MixPanel = require( 'mixpanel-browser' );
 		modules: [],
 		// Common functionality to all screens
 		init() {
+			/**
+			 * Handles the tab navigation on mobile.
+			 *
+			 * @since 2.7.2
+			 */
+			$( '.sui-mobile-nav' ).on( 'change', ( e ) => {
+				window.location.href = e.target.value;
+			} );
+
+			/**
+			 * Refresh page, when selecting a report type.
+			 *
+			 * @since 2.0.0
+			 */
+			$( 'select#wphb-performance-report-type' ).on(
+					'change',
+					function ( e ) {
+						const url = new URL( window.location );
+						url.searchParams.set( 'type', e.target.value );
+						window.location = url;
+					}
+			);
+
 			/**
 			 * Clear log button clicked.
 			 *
@@ -84,8 +112,8 @@ const MixPanel = require( 'mixpanel-browser' );
 						if ( 'notifications' === setting ) {
 							userRow.append(
 								'<span class="sui-recipient-status sui-tooltip" data-tooltip="' +
-									wphb.strings.awaitingConfirmation +
-									'"><i class="sui-icon-clock" aria-hidden="true"></i></span>'
+									getString( 'awaitingConfirmation' ) +
+									'"><span class="sui-icon-clock" aria-hidden="true"></span></span>'
 							);
 						}
 
@@ -107,11 +135,12 @@ const MixPanel = require( 'mixpanel-browser' );
 										class:
 											'sui-button-icon wphb-resend-recipient sui-tooltip',
 										type: 'button',
-										'data-tooltip':
-											wphb.strings.resendEmail,
+										'data-tooltip': getString(
+											'resendEmail'
+										),
 									} )
 									.html(
-										'<i class="sui-icon-send" aria-hidden="true"></i>'
+										'<span class="sui-icon-send" aria-hidden="true"></span>'
 									)
 							);
 						}
@@ -124,7 +153,7 @@ const MixPanel = require( 'mixpanel-browser' );
 									type: 'button',
 								} )
 								.html(
-									'<i class="sui-icon-trash" aria-hidden="true"></i>'
+									'<span class="sui-icon-trash" aria-hidden="true"></span>'
 								)
 						);
 
@@ -158,7 +187,7 @@ const MixPanel = require( 'mixpanel-browser' );
 
 						// Show notice to save settings.
 						WPHB_Admin.notices.show(
-							name + wphb.strings.successRecipientAdded,
+							name + getString( 'successRecipientAdded' ),
 							'info'
 						);
 						self.removeAttr( 'disabled' );
@@ -221,7 +250,7 @@ const MixPanel = require( 'mixpanel-browser' );
 										'.sui-box-body > .sui-notice-success:first-of-type > p'
 									).text( response.recipientNotice );
 									$(
-										'.sui-vertical-tab.current i[class^="sui-icon"]'
+										'.sui-vertical-tab.current span[class^="sui-icon"]'
 									).removeClass( 'sui-hidden' );
 								} else {
 									$(
@@ -233,13 +262,13 @@ const MixPanel = require( 'mixpanel-browser' );
 										'.sui-box-body > .sui-notice-default:first-of-type > p'
 									).text( response.recipientNotice );
 									$(
-										'.sui-vertical-tab.current i[class^="sui-icon"]'
+										'.sui-vertical-tab.current span[class^="sui-icon"]'
 									).addClass( 'sui-hidden' );
 								}
 
 								WPHB_Admin.notices.show(
 									response.enabled
-										? wphb.strings.confirmRecipient
+										? getString( 'confirmRecipient' )
 										: response.notice
 								);
 							} else {
@@ -251,7 +280,7 @@ const MixPanel = require( 'mixpanel-browser' );
 							);
 						} else {
 							WPHB_Admin.notices.show(
-								wphb.strings.errorSettingsUpdate,
+								getString( 'errorSettingsUpdate' ),
 								'error'
 							);
 						}
@@ -291,7 +320,7 @@ const MixPanel = require( 'mixpanel-browser' );
 			 * Schedule show/hide day of week.
 			 */
 			$( 'select[name="report-frequency"]' )
-				.change( function () {
+				.on( 'change', function () {
 					const freq = $( this ).val();
 
 					if ( '1' === freq ) {
@@ -326,7 +355,7 @@ const MixPanel = require( 'mixpanel-browser' );
 						}
 					}
 				} )
-				.change();
+				.trigger( 'change' );
 
 			/**
 			 * Track performance report scan init.
@@ -337,10 +366,12 @@ const MixPanel = require( 'mixpanel-browser' );
 				'click',
 				() => {
 					WPHB_Admin.Tracking.track( 'plugin_scan_started', {
-						score_mobile_previous:
-							wphbPerformanceStrings.previousScoreMobile,
-						score_desktop_previous:
-							wphbPerformanceStrings.previousScoreDesktop,
+						score_mobile_previous: getString(
+							'previousScoreMobile'
+						),
+						score_desktop_previous: getString(
+							'previousScoreDesktop'
+						),
 					} );
 				}
 			);
@@ -360,7 +391,7 @@ const MixPanel = require( 'mixpanel-browser' );
 				return this.modules[ module ];
 			}
 			return this.initModule( module );
-		}
+		},
 	};
 
 	/**
@@ -394,13 +425,17 @@ const MixPanel = require( 'mixpanel-browser' );
 		 * @param {string}  type     Error or success.
 		 * @param {boolean} dismiss  Auto dismiss message.
 		 */
-		show( message = wphb.strings.successUpdate, type = 'success', dismiss = true ) {
+		show( message = '', type = 'success', dismiss = true ) {
+			if ( '' === message ) {
+				message = getString( 'successUpdate' );
+			}
+
 			const options = {
 				type,
 				dismiss: {
 					show: false,
-					label: wphb.strings.dismissLabel,
-					tooltip: wphb.strings.dismissLabel,
+					label: getString( 'dismissLabel' ),
+					tooltip: getString( 'dismissLabel' ),
 				},
 				icon: 'info',
 			};

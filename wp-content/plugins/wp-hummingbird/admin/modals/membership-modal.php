@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="sui-box">
 			<div class="sui-box-header">
 				<button class="sui-button-icon sui-button-float--right" data-modal-close="" id="dialog-close-div">
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text"><?php esc_attr_e( 'Close this dialog window', 'wphb' ); ?></span>
 				</button>
 

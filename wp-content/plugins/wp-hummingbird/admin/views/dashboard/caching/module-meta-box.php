@@ -9,9 +9,9 @@
  * @var array  $recommended    Array of recommended values.
  * @var array  $results        Array of results. Raw.
  * @var int    $issues         Number of issues.
- * @var bool   $show_cf_notice Show the CloudFlare notice.
- * @var string $cf_notice      CloudFlare copy to show.
- * @var string $cf_connect_url Connect CloudFlare URL.
+ * @var bool   $show_cf_notice Show the Cloudflare notice.
+ * @var string $cf_notice      Cloudflare copy to show.
+ * @var string $cf_connect_url Connect Cloudflare URL.
  * @var array  $caching_type_tooltips    Caching types array if browser caching is enabled.
  */
 
@@ -45,7 +45,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php
 		foreach ( $human_results as $type => $result ) :
-			if ( $result && $recommended[ $type ]['value'] <= $results[ $type ] ) {
+			$index = strtolower( $type );
+			if ( $result && $recommended[ $index ]['value'] <= $results[ $type ] ) {
 				$result_status       = $result;
 				$result_status_color = 'success';
 				$tooltip_text        = __( 'Caching is enabled', 'wphb' );
@@ -61,33 +62,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 			<li>
 				<span class="sui-list-label">
-					<span class="wphb-filename-extension wphb-filename-extension-<?php echo esc_attr( $type ); ?> sui-tooltip sui-tooltip-top-left sui-tooltip-constrained" data-tooltip="<?php echo esc_attr( $caching_type_tooltips[ $type ] ); ?>">
+					<span class="wphb-filename-extension wphb-filename-extension-<?php echo esc_attr( $index ); ?> sui-tooltip sui-tooltip-top-left sui-tooltip-constrained" data-tooltip="<?php echo esc_attr( $caching_type_tooltips[ $index ] ); ?>">
 						<?php
-						switch ( $type ) {
+						switch ( $index ) {
 							case 'javascript':
 							default:
-								$label = 'JavaScript';
 								echo 'js';
 								break;
 							case 'images':
-								$label = 'Images';
 								echo 'img';
 								break;
 							case 'css':
-								$label = 'CSS';
-								echo esc_html( $type );
-								break;
 							case 'media':
-								$label = 'Media';
-								echo esc_html( $type );
+								echo esc_html( $index );
 								break;
 						}
 						?>
 					</span>
-					<span class="wphb-filename-extension-label"><?php echo esc_html( $label ); ?></span>
+					<span class="wphb-filename-extension-label"><?php echo esc_html( $type ); ?></span>
 				</span>
 				<span class="sui-list-detail">
-					<span class="sui-tag sui-tag-<?php echo esc_attr( $result_status_color ); ?> sui-tooltip sui-tooltip-top-left sui-tooltip-constrained" data-tooltip="<?php echo esc_attr( $tooltip_text ); ?>">
+					<span class="sui-tag sui-tag-<?php echo esc_attr( $result_status_color ); ?> sui-tooltip sui-tooltip-constrained sui-tooltip-top-right-mobile" data-tooltip="<?php echo esc_attr( $tooltip_text ); ?>">
 						<?php echo esc_html( $result_status ); ?>
 					</span>
 				</span>
@@ -108,7 +103,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		$this->admin_notices->show_inline(
 			$cf_notice,
 			apply_filters( 'wpmudev_branding_hide_branding', false ) ? 'grey' : 'sui-upsell-notice',
-			sprintf( /* translators: %s: Connect CloudFlare link */
+			sprintf( /* translators: %s: Connect Cloudflare link */
 				__( ' <a href="%s">Connect your account</a> to control your settings via Hummingbird.', 'wphb' ),
 				esc_url( $cf_connect_url )
 			),

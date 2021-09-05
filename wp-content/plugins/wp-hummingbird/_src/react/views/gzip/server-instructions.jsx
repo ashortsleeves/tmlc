@@ -7,7 +7,7 @@ import React from 'react';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+const { __ } = wp.i18n;
 
 /**
  * Internal dependencies
@@ -73,7 +73,7 @@ export default class ServerInstructions extends React.Component {
 				<Button
 					url={ this.context.links.support.chat }
 					target="blank"
-					text={ __( 'Start a live chat.' ) }
+					text={ __( 'Start a live chat.', 'wphb' ) }
 				/>
 			);
 		} else {
@@ -81,14 +81,14 @@ export default class ServerInstructions extends React.Component {
 				<Button
 					url={ this.context.links.support.forum }
 					target="blank"
-					text={ __( 'Open a support ticket.' ) }
+					text={ __( 'Open a support ticket.', 'wphb' ) }
 				/>
 			);
 		}
 
 		return (
 			<p className="sui-description">
-				{ __( 'Still having trouble?' ) } { button }
+				{ __( 'Still having trouble?', 'wphb' ) } { button }
 			</p>
 		);
 	}
@@ -106,37 +106,38 @@ export default class ServerInstructions extends React.Component {
 
 		const enableButton = this.props.htaccessWritten ? (
 			<Button
-				onClick={ this.props.disableGzip }
+				onClick={ this.props.disable }
 				classes={ [
 					'sui-button',
 					'sui-button-ghost',
 					'sui-margin-top',
 				] }
-				text={ __( 'Deactivate' ) }
+				text={ __( 'Deactivate', 'wphb' ) }
 			/>
 		) : (
 			<Button
-				onClick={ this.props.enableGzip }
+				onClick={ this.props.enable }
 				classes={ [
 					'sui-button',
 					'sui-button-blue',
 					'sui-margin-top',
 				] }
-				text={ __( 'Apply Rules' ) }
+				text={ __( 'Apply Rules', 'wphb' ) }
 			/>
 		);
 
 		const noticeText = (
 			<p>
 				{ __(
-					'We tried applying the .htaccess rules automatically but we weren’t able to. Make sure your file permissions on your .htaccess file are set to 644, or'
+					'We tried applying the .htaccess rules automatically but we weren’t able to. Make sure your file permissions on your .htaccess file are set to 644, or',
+					'wphb'
 				) }
 				<Button
 					url="#apache-config-manual"
 					classes={ [ 'switch-manual' ] }
-					text={ __( 'switch to manual mode' ) }
+					text={ __( 'switch to manual mode', 'wphb' ) }
 				/>
-				{ __( 'and apply the rules yourself.' ) }
+				{ __( 'and apply the rules yourself.', 'wphb' ) }
 			</p>
 		);
 
@@ -171,14 +172,17 @@ export default class ServerInstructions extends React.Component {
 			>
 				<div className="sui-tabs">
 					<div data-tabs>
-						<div className="active">{ __( 'Automatic' ) }</div>
-						<div>{ __( 'Manual' ) }</div>
+						<div className="active">
+							{ __( 'Automatic', 'wphb' ) }
+						</div>
+						<div>{ __( 'Manual', 'wphb' ) }</div>
 					</div>
 					<div data-panes>
 						<div className="active">
 							<span className="sui-description">
 								{ __(
-									'Hummingbird can automatically apply GZip compression for Apache servers by writing your .htaccess file. Alternately, switch to Manual to apply these rules yourself.'
+									'Hummingbird can automatically apply GZip compression for Apache/LiteSpeed servers by writing your .htaccess file. Alternately, switch to Manual to apply these rules yourself.',
+									'wphb'
 								) }
 							</span>
 							{ this.props.htaccessWritable &&
@@ -189,30 +193,34 @@ export default class ServerInstructions extends React.Component {
 							<div className="apache-instructions">
 								<p className="sui-description">
 									{ __(
-										'If you are unable to get the automated method working you can copy the generated code below into your .htaccess file to activate GZip compression.'
+										'If you are unable to get the automated method working you can copy the generated code below into your .htaccess file to activate GZip compression.',
+										'wphb'
 									) }
 								</p>
 
 								<ol className="wphb-listing wphb-listing-ordered">
 									<li>
 										{ __(
-											'Copy & paste the generated code below into your .htaccess file'
+											'Copy & paste the generated code below into your .htaccess file',
+											'wphb'
 										) }
 									</li>
 									<li>
-										{ __( 'Next' ) },{ ' ' }
+										{ __( 'Next', 'wphb' ) },{ ' ' }
 										<Button
 											url="#"
 											text={ __(
-												're-check your GZip status'
+												're-check your GZip status',
+												'wphb'
 											) }
 										/>{ ' ' }
-										{ __( 'to see if it worked' ) }.{ ' ' }
+										{ __( 'to see if it worked', 'wphb' ) }.{ ' ' }
 										<Button
 											url="#"
 											id="troubleshooting-link"
 											text={ __(
-												'Still having issues?'
+												'Still having issues?',
+												'wphb'
 											) }
 										/>
 									</li>
@@ -237,23 +245,31 @@ export default class ServerInstructions extends React.Component {
 									className="sui-description sui-margin-top"
 									id="troubleshooting-apache"
 								>
-									<strong>{ __( 'Troubleshooting' ) }</strong>
+									<strong>{ __( 'Troubleshooting', 'wphb' ) }</strong>
 								</p>
 								<p className="sui-description">
 									{ __(
-										'If .htaccess does not work, and you have access to vhosts.conf or httpd.conf try this:'
+										'If .htaccess does not work, and you have access to vhosts.conf or httpd.conf try this:',
+										'wphb'
 									) }
 								</p>
 								<ol className="wphb-listing wphb-listing-ordered">
 									<li>
 										{ __(
-											'Look for your site in the file and find the line that starts with &lt;Directory> - add the code above into that section and save the file.'
+											'Look for your site in the file and find the line that starts with <Directory> - add the code above into that section and save the file.',
+											'wphb'
 										) }
 									</li>
-									<li>{ __( 'Reload Apache.' ) }</li>
 									<li>
 										{ __(
-											"If you don't know where those files are, or you aren't able to reload Apache, you would need to consult with your hosting provider or a system administrator who has access to change the configuration of your server"
+											'Reload Apache/LiteSpeed.',
+											'wphb'
+										) }
+									</li>
+									<li>
+										{ __(
+											"If you don't know where those files are, or you aren't able to reload Apache/LiteSpeed, you would need to consult with your hosting provider or a system administrator who has access to change the configuration of your server",
+											'wphb'
 										) }
 									</li>
 								</ol>
@@ -279,26 +295,29 @@ export default class ServerInstructions extends React.Component {
 				data-server="nginx"
 			>
 				<p className="sui-description">
-					{ __( 'For NGINX servers:' ) }
+					{ __( 'For NGINX servers:', 'wphb' ) }
 				</p>
 
 				<ol className="wphb-listing wphb-listing-ordered">
 					<li>
 						{ __(
-							"Edit your nginx.conf. Usually it's located at /etc/nginx/nginx.conf or /usr/local/nginx/nginx.conf"
+							"Edit your nginx.conf. Usually it's located at /etc/nginx/nginx.conf or /usr/local/nginx/nginx.conf",
+							'wphb'
 						) }
 					</li>
 					<li>
 						{ __(
-							'Copy the generated code found below and paste it inside your http or server block.'
+							'Copy the generated code found below and paste it inside your http or server block.',
+							'wphb'
 						) }
 					</li>
-					<li>{ __( 'Reload/restart NGINX.' ) }</li>
+					<li>{ __( 'Reload/restart NGINX.', 'wphb' ) }</li>
 				</ol>
 
 				<p className="sui-description">
 					{ __(
-						'If you do not have access to your NGINX config files you will need to contact your hosting provider to make these changes.'
+						'If you do not have access to your NGINX config files you will need to contact your hosting provider to make these changes.',
+						'wphb'
 					) }
 				</p>
 
@@ -324,12 +343,36 @@ export default class ServerInstructions extends React.Component {
 				data-server="iis"
 			>
 				<p className="sui-description">
-					{ __( 'For IIS 7 servers and above,' ) }{ ' ' }
+					{ __( 'For IIS 7 servers and above,', 'wphb' ) }{ ' ' }
 					<Button
 						url="https://technet.microsoft.com/en-us/library/cc771003(v=ws.10).aspx"
 						target="blank"
-						text={ __( 'visit Microsoft TechNet' ) }
+						text={ __( 'visit Microsoft TechNet', 'wphb' ) }
 					/>
+				</p>
+			</div>
+		);
+	}
+
+	/**
+	 * Render Cloudflare tab.
+	 *
+	 * @since 2.7.2
+	 *
+	 * @return {*}  Tab content.
+	 */
+	renderCloudflareTabs() {
+		return (
+			<div
+				id="wphb-server-instructions-cloudflare"
+				className="wphb-server-instructions"
+				data-server="cloudflare"
+			>
+				<p className="sui-description">
+					{ __(
+						'Hummingbird can control your Cloudflare GZip compression settings from here. Simply add your Cloudflare API details and configure away',
+						'wphb'
+					) }
 				</p>
 			</div>
 		);
@@ -338,7 +381,7 @@ export default class ServerInstructions extends React.Component {
 	/**
 	 * Render component.
 	 *
-	 * @return {React.Component}  ServerInstructions component.
+	 * @return {JSX.Element}  ServerInstructions component.
 	 */
 	render() {
 		if ( this.props.htaccessWritten && this.props.fullyEnabled ) {
@@ -347,13 +390,14 @@ export default class ServerInstructions extends React.Component {
 					<Notice
 						classes={ [ 'sui-notice-info' ] }
 						message={ __(
-							'Automatic .htaccess rules have been applied.'
+							'Automatic .htaccess rules have been applied.',
+							'wphb'
 						) }
 					/>
 					<Button
-						onClick={ this.props.disableGzip }
+						onClick={ this.props.disable }
 						classes={ [ 'sui-button', 'sui-button-ghost' ] }
-						text={ __( 'Deactivate' ) }
+						text={ __( 'Deactivate', 'wphb' ) }
 					/>
 				</React.Fragment>
 			);
@@ -363,11 +407,11 @@ export default class ServerInstructions extends React.Component {
 			<React.Fragment>
 				{ 'apache' === this.props.currentServer &&
 					this.renderApacheTabs() }
-
 				{ 'nginx' === this.props.currentServer &&
 					this.renderNginxTabs() }
-
 				{ 'iis' === this.props.currentServer && this.renderIisTabs() }
+				{ 'cloudflare' === this.props.currentServer &&
+					this.renderCloudflareTabs() }
 			</React.Fragment>
 		);
 	}

@@ -6,6 +6,7 @@
  */
 
 use WPMUDEV\Snapshot4\Task;
+use WPMUDEV\Snapshot4\Helper\Settings;
 
 ?>
 <div class="sui-modal-slide sui-loaded" id="snapshot-add-destination-dialog-slide-2-s3" data-modal-size="md">
@@ -21,15 +22,15 @@ use WPMUDEV\Snapshot4\Task;
 			</figure>
 
 			<button class="sui-button-icon sui-button-float--right" data-modal-close>
-				<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+				<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 			</button>
 
 			<h3 class="sui-box-title sui-lg"><?php echo esc_html( __( 'Connect S3', 'snapshot' ) ); ?></h3>
 			<?php /* translators: %s - WPMU DEV link */ ?>
-			<span class="sui-description"><?php echo wp_kses_post( sprintf( __( 'Connect with Amazon S3 and store your backups in their directory, or choose one of the available <a href="%s" target="_blank">S3 Compatible providers</a> and store the backups there.', 'snapshot' ), 'https://premium.wpmudev.org/docs/wpmu-dev-plugins/snapshot-4-0/#s3-compatible-storage' ) ); ?></span>
+			<span class="sui-description"><?php echo Settings::get_branding_hide_doc_link() ? esc_html( __( 'Connect with Amazon S3 and store your backups in their directory, or choose one of the available S3 Compatible providers and store the backups there.', 'snapshot' ) ) : wp_kses_post( sprintf( __( 'Connect with Amazon S3 and store your backups in their directory, or choose one of the available <a href="%s" target="_blank">S3 Compatible providers</a> and store the backups there.', 'snapshot' ), 'https://wpmudev.com/docs/wpmu-dev-plugins/snapshot-4-0/#s3-compatible-storage' ) ); ?></span>
 
 			<button class="sui-button-icon sui-button-float--left" data-modal-slide="snapshot-add-destination-dialog-slide-1">
-				<i class="sui-icon-chevron-left sui-md" aria-hidden="true"></i>
+				<span class="sui-icon-chevron-left sui-md" aria-hidden="true"></span>
 				<span class="sui-screen-reader-text"><?php esc_html_e( 'Back' ); ?></span>
 			</button>
 
@@ -58,8 +59,12 @@ use WPMUDEV\Snapshot4\Task;
 
 										<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
 
-										<?php /* translators: %s - Link for support */ ?>
-										<p><?php echo wp_kses_post( sprintf( __( 'It appears the authorization codes you used were invalid. Please enter your credentials again or follow the instructions below to find them. If you run into further issues, you can <a href="%s" target="_blank">contact our Support</a> team for help.', 'snapshot' ), Task\Backup\Fail::URL_CONTACT_SUPPORT ) ); ?></p>
+										<?php if ( Settings::get_branding_hide_doc_link() ) { ?>
+											<p><?php esc_html_e( 'It appears the authorization credentials you used were invalid. Please enter your credentials again or follow the instructions below to find them. If you run into further issues, you can contact support for help.', 'snapshot' ); ?></p>
+										<?php } else { ?>
+											<?php /* translators: %s - Link for support */ ?>
+											<p><?php echo wp_kses_post( sprintf( __( 'It appears the authorization credentials you used were invalid. Please enter your credentials again or follow the instructions below to find them. If you run into further issues, you can <a href="%s" target="_blank">contact our Support</a> team for help.', 'snapshot' ), Task\Backup\Fail::URL_CONTACT_SUPPORT ) ); ?></p>
+										<?php } ?>
 
 									</div>
 
@@ -139,7 +144,6 @@ use WPMUDEV\Snapshot4\Task;
 										<option value="ap-southeast-2"><?php echo esc_html( __( 'Asia Pacific (Sydney)', 'snapshot' ) ); ?></option>
 										<option value="ap-northeast-1"><?php echo esc_html( __( 'Asia Pacific (Tokyo)', 'snapshot' ) ); ?></option>
 										<option value="ca-central-1"><?php echo esc_html( __( 'Canada (Central)', 'snapshot' ) ); ?></option>
-										<option value="cn-north-1"><?php echo esc_html( __( 'China (Beijing)', 'snapshot' ) ); ?></option>
 										<option value="cn-northwest-1"><?php echo esc_html( __( 'China (Ningxia)', 'snapshot' ) ); ?></option>
 										<option value="eu-central-1"><?php echo esc_html( __( 'Europe (Frankfurt)', 'snapshot' ) ); ?></option>
 										<option value="eu-west-1"><?php echo esc_html( __( 'Europe (Ireland)', 'snapshot' ) ); ?></option>
@@ -178,8 +182,12 @@ use WPMUDEV\Snapshot4\Task;
 
 										<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
 
-										<?php /* translators: %s - Link for support */ ?>
-										<p><?php echo wp_kses_post( sprintf( __( 'It appears the authorization codes you used were invalid. Please enter your credentials again or follow the instructions below to find them. If you run into further issues, you can <a href="%s" target="_blank">contact our Support</a> team for help.', 'snapshot' ), Task\Backup\Fail::URL_CONTACT_SUPPORT ) ); ?></p>
+										<?php if ( Settings::get_branding_hide_doc_link() ) { ?>
+											<p><?php esc_html_e( 'It appears the authorization credentials you used were invalid. Follow the instructions below for guidance and add the credentials again. If you run into further issues, you can contact support for help. ', 'snapshot' ); ?></p>
+										<?php } else { ?>
+											<?php /* translators: %s - Link for support */ ?>
+											<p><?php echo wp_kses_post( sprintf( __( 'It appears the authorization credentials you used were invalid. Follow the instructions below for guidance and add the credentials again. If you run into further issues, you can <a href="%s" target="_blank">contact our Support</a> team for help.', 'snapshot' ), Task\Backup\Fail::URL_CONTACT_SUPPORT ) ); ?></p>
+										<?php } ?>
 
 									</div>
 
@@ -210,7 +218,7 @@ use WPMUDEV\Snapshot4\Task;
 								<div class="sui-form-field s3-compatible-providers">
 									<label for="s3-compatible-connection-provider" id="label-s3-compatible-connection-provider" class="sui-label">
 										<?php echo esc_html( __( 'Choose provider', 'snapshot' ) ); ?><span style="margin-left: 3px; "><?php echo esc_html( '*' ); ?></span>
-										<a href="https://premium.wpmudev.org/docs/wpmu-dev-plugins/snapshot-4-0/#s3-compatible-storage" target="_blank" class="sui-label-link"><?php echo esc_html( __( 'Guide to find the credentials', 'snapshot' ) ); ?></a>
+										<a href="<?php echo Settings::get_branding_hide_doc_link() ? '#' : 'https://wpmudev.com/docs/wpmu-dev-plugins/snapshot-4-0/#s3-compatible-storage'; ?>" target="_blank" class="sui-label-link"><?php echo esc_html( __( 'Guide to find the credentials', 'snapshot' ) ); ?></a>
 									</label>
 
 									<select id="s3-compatible-connection-provider" name="tpd_type" class="sui-select" aria-labelledby="label-s3-connection-provider" >
@@ -241,7 +249,7 @@ use WPMUDEV\Snapshot4\Task;
 												name="tpd_accesskey"
 												aria-labelledby="label-s3-compatible-connection-access-key-id"
 											/>
-											<i class="sui-icon-profile-male" aria-hidden="true"></i>
+											<span class="sui-icon-profile-male" aria-hidden="true"></span>
 										</div>
 										<span id="error-s3-compatible-connection-access-key-id" class="sui-error-message" style="display: none; text-align: right;" role="alert"></span>
 									</div>
@@ -259,7 +267,7 @@ use WPMUDEV\Snapshot4\Task;
 												name="tpd_secretkey"
 												aria-labelledby="label-s3-compatible-connection-secret-access-key"
 											/>
-											<i class="sui-icon-key" aria-hidden="true"></i>
+											<span class="sui-icon-key" aria-hidden="true"></span>
 										</div>
 										<span id="error-s3-compatible-connection-secret-access-key" class="sui-error-message" style="display: none; text-align: right;" role="alert"></span>
 									</div>
@@ -314,18 +322,18 @@ use WPMUDEV\Snapshot4\Task;
 		<div class="sui-box-footer sui-flatten sui-lg sui-content-separated">
 
 			<button class="sui-button sui-button-ghost" data-modal-slide="snapshot-add-destination-dialog-slide-1" >
-				<i class="sui-icon-arrow-left" aria-hidden="true"></i>
+				<span class="sui-icon-arrow-left" aria-hidden="true"></span>
 				<?php esc_html_e( 'Back' ); ?>
 			</button>
 
 			<button class="sui-button sui-button-icon-right snapshot-next-destination-screen" id="snapshot-submit-s3-connection-test" >
 				<span class="sui-button-text-default">
 					<?php esc_html_e( 'Next' ); ?>
-					<i class="sui-icon-arrow-right" aria-hidden="true"></i>
+					<span class="sui-icon-arrow-right" aria-hidden="true"></span>
 				</span>
 
 				<span class="sui-button-text-onload">
-					<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+					<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 					<?php esc_html_e( 'Connecting...' ); ?>
 				</span>
 			</button>

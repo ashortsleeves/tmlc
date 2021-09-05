@@ -61,6 +61,7 @@ class Blacklist extends Model {
 		$this->large_files = array(
 			trailingslashit( ABSPATH ) . 'error_log',
 			trailingslashit( WP_CONTENT_DIR ) . 'debug.log',
+			trailingslashit( WP_CONTENT_DIR ) . 'uploads/wp-defender/defender.log',
 		);
 		$this->large_dirs  = array(
 			trailingslashit( ABSPATH ) . 'wp-snapshots/',
@@ -70,9 +71,10 @@ class Blacklist extends Model {
 			trailingslashit( WP_CONTENT_DIR ) . 'wphb-cache/',
 			trailingslashit( WP_CONTENT_DIR ) . 'wphb-logs/',
 			trailingslashit( WP_CONTENT_DIR ) . 'updraft/',
-			trailingslashit( WP_CONTENT_DIR ) . 'uploads/ai1wm-backups/',
+			trailingslashit( WP_CONTENT_DIR ) . 'ai1wm-backups/',
 			trailingslashit( WP_CONTENT_DIR ) . 'uploads/shipper/',
 			trailingslashit( WP_CONTENT_DIR ) . 'uploads/snapshot/',
+			trailingslashit( WP_CONTENT_DIR ) . 'uploads/snapshots/',
 		);
 
 		$this->files = $this->get_default_file_exclusions( $exclude_large );

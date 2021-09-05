@@ -135,4 +135,31 @@ class Api {
 
 		return false;
 	}
+
+	/**
+	 * Returns WPMU DEV membership data
+	 *
+	 * @return array|null
+	 */
+	public static function get_dashboard_membership_data() {
+		$api = self::get_dashboard_api();
+		if ( $api && is_callable( array( $api, 'get_membership_data' ) ) ) {
+			$result = $api->get_membership_data();
+			return $result;
+		}
+		return null;
+	}
+
+	/**
+	 * Returns true if the user needs to activate the membership
+	 *
+	 * @return boolean
+	 */
+	public static function need_reactivate_membership() {
+		$membership_data = self::get_dashboard_membership_data();
+		if ( is_array( $membership_data ) && isset( $membership_data['membership'] ) && 'free' !== $membership_data['membership'] ) {
+			return false;
+		}
+		return true;
+	}
 }

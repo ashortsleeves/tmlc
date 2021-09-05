@@ -137,4 +137,3 @@ define( 'FTP_HOST', '<?php echo esc_html( $ftp_host ); ?>' );
 		</div>
 	</div>
 </div>
-

@@ -20,6 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="sui-actions-left">
 		<div class="sui-tag sui-tag-warning"><?php echo (int) $issues; ?></div>
 	</div>
-<?php elseif ( 691200 !== $cf_current && $cf_active ) : ?>
+<?php elseif ( YEAR_IN_SECONDS !== $cf_current && $cf_active ) : ?>
 	<div class="sui-tag sui-tag-warning">5</div>
 <?php endif; ?>

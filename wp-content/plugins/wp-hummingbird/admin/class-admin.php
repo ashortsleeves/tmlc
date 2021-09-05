@@ -90,6 +90,9 @@ class Admin {
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 			new AJAX();
 			new Ajax\Gzip();
+			new Ajax\Minify();
+			new Ajax\Caching\Browser();
+			new Ajax\Caching\Integrations();
 		}
 
 		add_action( 'admin_init', array( $this, 'maybe_clear_all_cache' ) );
@@ -121,7 +124,7 @@ class Admin {
 	 *
 	 * @param array $actions  Current actions.
 	 *
-	 * @return mixed
+	 * @return array
 	 */
 	public function add_plugin_action_links( $actions ) {
 		// Upgrade link.
@@ -171,15 +174,15 @@ class Admin {
 			if ( isset( $links[2] ) && false !== strpos( $links[2], 'project/wp-hummingbird' ) ) {
 				$links[2] = sprintf(
 					'<a href="%s" target="_blank">%s</a>',
-					'https://premium.wpmudev.org/project/wp-hummingbird/',
+					'https://wpmudev.com/project/wp-hummingbird/',
 					__( 'View details', 'wphb' )
 				);
 			}
 
-			$links[] = '<a href="https://premium.wpmudev.org/get-support/" target="_blank" title="' . esc_attr__( 'Premium Support', 'wphb' ) . '">' . esc_html__( 'Premium Support', 'wphb' ) . '</a>';
+			$links[] = '<a href="https://wpmudev.com/get-support/" target="_blank" title="' . esc_attr__( 'Premium Support', 'wphb' ) . '">' . esc_html__( 'Premium Support', 'wphb' ) . '</a>';
 		}
 
-		$links[] = '<a href="https://premium.wpmudev.org/roadmap/" target="_blank" title="' . esc_attr__( 'Roadmap', 'wphb' ) . '">' . esc_html__( 'Roadmap', 'wphb' ) . '</a>';
+		$links[] = '<a href="https://wpmudev.com/roadmap/" target="_blank" title="' . esc_attr__( 'Roadmap', 'wphb' ) . '">' . esc_html__( 'Roadmap', 'wphb' ) . '</a>';
 
 		$links[] = '<a class="wphb-stars" href="https://wordpress.org/support/plugin/hummingbird-performance/reviews/#new-post" target="_blank" rel="noopener noreferrer" title="' . esc_attr__( 'Rate our plugin', 'wphb' ) . '">
 					<span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
@@ -214,10 +217,7 @@ class Admin {
 			exit;
 		}
 
-		$caching = Settings::get_setting( 'enabled', 'page_cache' );
-		if ( ! is_multisite() || ( is_super_admin() && $caching ) || 'blog-admins' === $caching ) {
-			$this->pages['wphb-caching'] = new Pages\Caching( 'wphb-caching', __( 'Caching', 'wphb' ), __( 'Caching', 'wphb' ), 'wphb' );
-		}
+		$this->pages['wphb-caching'] = new Pages\Caching( 'wphb-caching', __( 'Caching', 'wphb' ), __( 'Caching', 'wphb' ), 'wphb' );
 
 		if ( ! is_multisite() ) {
 			$this->pages['wphb-gzip'] = new Pages\React\Gzip( 'wphb-gzip', __( 'Gzip Compression', 'wphb' ), __( 'Gzip Compression', 'wphb' ), 'wphb' );
@@ -241,6 +241,10 @@ class Admin {
 			$this->pages['wphb-settings'] = new Pages\Settings( 'wphb-settings', __( 'Settings', 'wphb' ), __( 'Settings', 'wphb' ), 'wphb' );
 		}
 
+		if ( ! apply_filters( 'wpmudev_branding_hide_doc_link', false ) ) {
+			$this->pages['wphb-tutorials'] = new Pages\React\Tutorials( 'wphb-tutorials', __( 'Tutorials', 'wphb' ), __( 'Tutorials', 'wphb' ), 'wphb' );
+		}
+
 		if ( ! Utils::is_member() && ! is_multisite() ) {
 			$this->pages['wphb-upgrade'] = new Pages\Upgrade( 'wphb-upgrade', __( 'Hummingbird Pro', 'wphb' ), __( 'Hummingbird Pro', 'wphb' ), 'wphb' );
 		}
@@ -261,6 +265,10 @@ class Admin {
 		$this->pages['wphb-advanced']     = new Pages\Advanced( 'wphb-advanced', __( 'Advanced Tools', 'wphb' ), __( 'Advanced Tools', 'wphb' ), 'wphb' );
 		$this->pages['wphb-uptime']       = new Pages\Uptime( 'wphb-uptime', __( 'Uptime', 'wphb' ), __( 'Uptime', 'wphb' ), 'wphb' );
 		$this->pages['wphb-settings']     = new Pages\Settings( 'wphb-settings', __( 'Settings', 'wphb' ), __( 'Settings', 'wphb' ), 'wphb' );
+
+		if ( ! apply_filters( 'wpmudev_branding_hide_doc_link', false ) ) {
+			$this->pages['wphb-tutorials'] = new Pages\React\Tutorials( 'wphb-tutorials', __( 'Tutorials', 'wphb' ), __( 'Tutorials', 'wphb' ), 'wphb' );
+		}
 
 		if ( ! Utils::is_member() ) {
 			$this->pages['wphb-upgrade'] = new Pages\Upgrade( 'wphb-upgrade', __( 'Hummingbird Pro', 'wphb' ), __( 'Hummingbird Pro', 'wphb' ), 'wphb' );
@@ -372,10 +380,18 @@ class Admin {
 		WP_Hummingbird::flush_cache();
 		Utils::get_module( 'page_cache' )->toggle_service( false );
 
+		Utils::get_module( 'cloudflare' )->toggle_apo( false );
+
 		if ( 'all' === $wphb_clear ) {
 			Settings::reset_to_defaults();
+
+			// Remove configs.
+			delete_site_option( 'wphb-preset_configs' );
+
 			update_option( 'wphb_run_onboarding', true );
 			update_option( 'wphb-minification-show-config_modal', true );
+			update_option( 'wphb-minification-show-advanced_modal', true );
+			delete_option( 'wphb-hide-tutorials' );
 
 			// Clean all cron.
 			wp_clear_scheduled_hook( 'wphb_performance_report' );
@@ -394,6 +410,7 @@ class Admin {
 							Settings::reset_to_defaults();
 							update_option( 'wphb_run_onboarding', true );
 							update_option( 'wphb-minification-show-config_modal', true );
+							update_option( 'wphb-minification-show-advanced_modal', true );
 
 							// Clean all cron.
 							wp_clear_scheduled_hook( 'wphb_minify_clear_files' );

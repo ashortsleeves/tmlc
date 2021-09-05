@@ -16,7 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div class="sui-box-settings-row sui-disabled">
 	<div class="sui-box-settings-col-1">
-		<span class="sui-settings-label"><?php esc_html_e( 'Schedule Cleanups', 'wphb' ); ?></span>
+		<span class="sui-settings-label">
+			<?php esc_html_e( 'Schedule Cleanups', 'wphb' ); ?>
+			<?php if ( ! Utils::is_member() ) : ?>
+				<span class="sui-tag sui-tag-pro"><?php esc_html_e( 'Pro', 'wphb' ); ?></span>
+			<?php endif; ?>
+		</span>
 		<span class="sui-description">
 			<?php esc_html_e( 'Schedule Hummingbird to automatically clean your database daily, weekly or monthly.', 'wphb' ); ?>
 		</span>
@@ -39,10 +44,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<div class="sui-upsell-notice">
 		<p>
-			<?php esc_html_e( 'Regular cleanups of your database ensures you’re regularly removing extra bloat which can slow down your host server. Upgrade to Hummingbird Pro as part of a WPMU DEV membership to unlock this feature today!', 'wphb' ); ?>
+			<?php
+			printf( /* translators: %1$s - <a>, %2$s - </a> */
+				esc_html__( 'Regular cleanups of your database ensures you’re regularly removing extra bloat which can slow down your host server. Upgrade to Hummingbird Pro as part of a WPMU DEV membership to unlock this feature today! %1$sLearn more%2$s.', 'wphb' ),
+				'<a href="' . esc_url( Utils::get_link( 'plugin', 'hummingbird_dbcleanup_schedule_upsell_link' ) ) . '" target="_blank">',
+				'</a>'
+			)
+			?>
 			<br>
-			<a href="<?php Utils::get_link( 'plugin', 'hummingbird_dbcleanup_schedule_upsell_link' ); ?>" target="_blank">
-				<?php esc_html_e( 'Learn More', 'wphb' ); ?>
+			<a class="sui-button sui-button-purple" href="<?php echo esc_url( Utils::get_link( 'plugin', 'hummingbird_dbcleanup_schedule_upsell_link' ) ); ?>" target="_blank" style="margin-top: 10px;">
+				<?php esc_html_e( 'Upgrade to pro', 'wphb' ); ?>
 			</a>
 		</p>
 	</div>

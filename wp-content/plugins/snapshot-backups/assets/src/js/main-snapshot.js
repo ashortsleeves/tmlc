@@ -1,6 +1,7 @@
 /**
  * All Snapshot Pages.
  */
+
 ;(function($) {
 
     if (($('#snapshot-welcome-dialog').length > 0) && ! ($('#snapshot-welcome-dashboard-dialog').length > 0)) {
@@ -18,6 +19,33 @@
     }
 
 	/**
+	 * Sends an AJAX Request to change the storage limit.
+	 *
+	 * @param {*} el   Main "Save Changes" button.
+	 * @param {*} args AJAX data arguments.
+	 *
+	 * @returns {bool|XMLHttpRequest}
+	 */
+	function change_storage_limit( el = null, args = null ) {
+		if ( null === args ) {
+			return false;
+		}
+
+		if ( null === el ) {
+			return false;
+		}
+
+		return $.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			data: args,
+			beforeSend: function () {
+				el.find('.sui-button').prop('disabled', true);
+            }
+		});
+	}
+
+	/**
 	 * Handles saving settings
 	 *
 	 * @param {Object} e Event object
@@ -31,13 +59,33 @@
 		});
 		data._wpnonce = $( '#_wpnonce-save_snapshot_settings' ).val();
 
+		if ( 'snapshot-backup-limit' in data ) {
+			if (
+				!$.isNumeric(data['snapshot-backup-limit']) ||
+				data['snapshot-backup-limit'] < 1 ||
+				data['snapshot-backup-limit'] > 30
+			) {
+				$('#error-snapshot-backup-limit').show();
+				$('#error-snapshot-backup-limit').html(snapshot_messages.storage_limit_invalid);
+				$('.snapshot-storage-limit-input .sui-form-field').addClass('sui-form-field-error');
+				$('#snapshot-backup-limit').trigger('focus');
+
+				return false;
+			} else {
+				$('#error-snapshot-backup-limit').html('');
+				$('#error-snapshot-backup-limit').hide();
+				$('.snapshot-storage-limit-input .sui-form-field').removeClass('sui-form-field-error');
+			}
+		}
+
         var that = $(this);
 
-		var global_exclusions_el = that.find('#global-exclusions');
+		var global_exclusions_el = that.find('.sui-multistrings-list');
+
 		if (global_exclusions_el.length) {
 			var items = [];
-			global_exclusions_el.find('.sui-active-filter').each(function () {
-				items.push($(this).data('value'));
+			global_exclusions_el.children('li:not(.sui-multistrings-input)').each(function () {
+				items.push($(this).attr('title'));
 			});
 			data.global_exclusions = JSON.stringify(items);
 		}
@@ -49,14 +97,33 @@
             beforeSend: function () {
 				that.find('.sui-button').prop('disabled', true);
             },
-			complete: function () {
-				that.find('.sui-button').prop('disabled', false);
-			},
-            success: function (data) {
-                if (data.success) {
-                    if (data.data.global_exclusions !== undefined) {
-                        jQuery(window).trigger('snapshot:show_top_notice', ['success', snapshot_messages.settings_save_success, 3000, false]);
-                    }
+            success: function (result) {
+                if (result.success) {
+					// We have to send another AJAX request if response has 'continue_ajax' flag.
+					if ( 'continue_ajax' in result.data && result.data.continue_ajax ) {
+						if ( 'change_storage_limit' === result.data.next_action ) {
+							// Send another AJAX request to update the storage limit via API.
+							const newAjax = change_storage_limit( that, result.data.next_args );
+
+							newAjax.done( (result) => {
+								if ( result.success ) {
+									that.find('#existing_backup_limit').val(result.data.changed_storage);
+									jQuery(window).trigger( 'snapshot:show_top_notice', ['success', snapshot_messages.settings_save_success, 3000, false ]);
+								} else {
+									jQuery(window).trigger( 'snapshot:show_top_notice', ['error', snapshot_messages.settings_save_error] );
+								}
+							});
+							newAjax.always( () => {
+								that.find('.sui-button').prop('disabled', false);
+							});
+							newAjax.fail( () => {
+								jQuery(window).trigger( 'snapshot:show_top_notice', ['error', snapshot_messages.settings_save_error] );
+							});
+						}
+					} else {
+						that.find('.sui-button').prop('disabled', false);
+						jQuery(window).trigger( 'snapshot:show_top_notice', ['success', snapshot_messages.settings_save_success, 3000, false ]);
+					}
                 } else {
                     jQuery(window).trigger('snapshot:show_top_notice', ['error', snapshot_messages.settings_save_error]);
                 }
@@ -176,33 +243,6 @@
 		});
 	}
 
-	function setup_global_exclusions() {
-		$('.sui-pagination-active-filters').on('click', '.sui-active-filter-remove', function () {
-			$(this).closest('.sui-active-filter').remove();
-		});
-
-		$('#snapshot-file-exclusions').on('keypress', function (e) {
-			// Enter
-			if (e.which === 13) {
-				var values = $(this).val().split(':');
-				$(this).val('');
-				values.forEach(function (value) {
-					value = value.trim();
-					if (value === '') {
-						return;
-					}
-					var item = $('<span class="sui-active-filter"><i class="sui-icon-page sui-sm" aria-hidden="true"></i></span>');
-					var close = $('<span class="sui-active-filter-remove"></span>');
-					item.data('value', value);
-					item.append(value);
-					item.append(close);
-					$('#global-exclusions').append(item);
-				});
-				return false;
-			}
-		});
-	}
-
 	function close_welcome_schedule_modal() {
 		close_modal();
 
@@ -229,7 +269,6 @@
 			$(window).trigger('snapshot:backup_modal');
 			$(this).trigger('snapshot:close_notice');
 		});
-		setup_global_exclusions();
     }
 
 	function on_snapshot_manual_backup_modal(e) {
@@ -241,7 +280,7 @@
 
 		$('#form-snapshot-create-manual-backup input[type=text]').val('');
 		SUI.openModal('modal-snapshot-create-manual-backup', this);
-		$('#modal-snapshot-create-manual-backup #manual-backup-name').focus();
+		$('#modal-snapshot-create-manual-backup #manual-backup-name').trigger('focus');
 		return false;
 	}
 
@@ -270,7 +309,7 @@
 			if (values.frequency_monthday) {
 				form.find('select[name=frequency_monthday]').val(values.frequency_monthday);
 			}
-			form.find('select').trigger('sui:change');
+			form.find('select').trigger('change');
 		}
 
 		var open = true;
@@ -392,18 +431,22 @@
                 if (response.success) {
 					if ('activation' === response.data.action) {
 						// Checked in PHP after activation, whether we're logged in or not. If we are, no need to redirect.
-						
+
 						if (false !== response.data.redirect_to) {
 							window.location.href = response.data.redirect_to;
 						} else {
 							$('#snapshot-welcome-dashboard-dialog').find('.sui-button').removeClass('sui-button-onload-text', false);
-	
+
 							close_modal();
 							if (true === response.data.welcome_modal) {
 								var listen = setInterval(function () {
 									SUI.openModal('snapshot-welcome-dialog', this, undefined, false, false);
 									clearInterval(listen);
 								}, 500);
+							}
+
+							if (response.data.reactivate_membership) {
+								show_membership_expired_modal(true);
 							}
 						}
 					} else if ('installation' === response.data.action) {
@@ -455,7 +498,7 @@
 				if (response.data.show_schedule_modal === true) {
 					// We have a region selected already, so we skip the region modal.
 					SUI.slideModal( 'snapshot-welcome-dialog-slide-3' );
-	
+
 					// We also hide the X button on the schedule modal.
 					$('#snapshot-welcome-dialog-slide-3 .hide-when-region-selected').hide();
 				} else {
@@ -505,7 +548,7 @@
 			success: function (response) {
 				if (response.success) {
 					SUI.slideModal( 'snapshot-welcome-dialog-slide-3' );
-	
+
 					if ( response.data.selected_region === 'US' ) {
 						$('#backup-region-us').prop('checked', true);
 						$('#backup-region-eu').prop('checked', false);
@@ -532,16 +575,19 @@
 		}
 	}
 
-	
+
 	function move_to_region_modal() {
 		SUI.slideModal( 'snapshot-welcome-dialog-slide-2' );
 	}
 
-	
+
 	function toggle_cooldown(e, time_elapsed) {
 		if ( time_elapsed < 1 ) {
 			$('.sui-tooltip.snapshot-cooldown').show();
 			$('.sui-button.snapshot-not-cooldown').hide();
+			setTimeout(function () {
+				toggle_cooldown(e, 1);
+			}, (1 - time_elapsed) * 1000 * 60 );
 		} else {
 			$('.sui-tooltip.snapshot-cooldown').hide();
 			$('.sui-button.snapshot-not-cooldown').show();
@@ -568,8 +614,8 @@
                 if (response.success) {
 					SUI.closeNotice( 'snapshot-uninstall-v3' );
 					jQuery(window).trigger('snapshot:show_top_notice', ['success', snapshot_messages.snapshot_v3_uninstall_success]);
-					
-                    $('.wp-has-submenu.toplevel_page_snapshot_pro_dashboard').hide(); 
+
+                    $('.wp-has-submenu.toplevel_page_snapshot_pro_dashboard').hide();
 				}
             },
 			error: function () {
@@ -596,7 +642,7 @@
 
         $.ajax({
             type: 'POST',
-            url: ajaxurl + '?action=snapshot-check_if_region',
+            url: ajaxurl + '?action=snapshot-check_creds',
             data: data,
             beforeSend: function () {
 				buttons.addClass('sui-button-onload-text');
@@ -613,7 +659,7 @@
 				}
 
                 if (response.success) {
-					if (response.data.region == null) {						
+					if (response.data.region == null) {
 						$(window).trigger('snapshot:move_to_region_modal');
 					} else {
 						$(window).trigger('snapshot:reactivate_schedule');
@@ -632,11 +678,27 @@
 	}
 
 	function on_click_whats_new_link() {
-		var add_destination_button = $('#snapshot-add-destination');
-		if (add_destination_button.length) {
+		var url = new URL($(this).attr('href'));
+		if (url.hash === '#notifications' && $('.snapshot-page-backups').length) {
 			$(window).trigger('snapshot:close_modal');
-			add_destination_button.click();
+			$('.snapshot-page-main').find('.snapshot-notifications').show();
+			$('.snapshot-page-main').find('.snapshot-list-backups').hide();
+			$('.snapshot-page-main').find('.snapshot-vertical-notifications').addClass('current');
+			$('.snapshot-page-main').find('.snapshot-vertical-backups').removeClass('current');
+			$('.snapshot-page-main select.sui-mobile-nav').val('notifications').change();
 			return false;
+		}
+	}
+
+	function show_membership_expired_modal(no_check_dashboard) {
+		if (no_check_dashboard === undefined) {
+			no_check_dashboard = false;
+		}
+		if (!no_check_dashboard && $('#snapshot-welcome-dashboard-dialog').length) {
+			return;
+		}
+		if ($('#snapshot-membership-expired-modal').length) {
+			SUI.openModal('snapshot-membership-expired-modal', this);
 		}
 	}
 
@@ -653,11 +715,31 @@
 		}
 	}
 
+	function click_whats_new_modal_button_ok() {
+		var a = $(this);
+		var href = a.attr('href');
+		if (href && href !== window.location.href) {
+			window.location = href;
+		}
+	}
+
 	function hide_double_tooltip() {
-		$('.snapshot-export-failure').hover(function () {
+		$('.snapshot-export-failure').on('mouseenter', function () {
 			$(this).parent().addClass('snapshot-tooltip-hover');
-		},function () {
+		}).on('mouseleave', function () {
 			$(this).parent().removeClass('snapshot-tooltip-hover');
+		});
+	}
+
+	function close_tutorials_slider() {
+		$('#snapshot-tutorials-slider').closest('.sui-row').remove();
+
+		$.ajax({
+			type: 'POST',
+			url: ajaxurl + '?action=snapshot-tutorials_slider_seen',
+			data: {
+				_wpnonce : $( '#_wpnonce-tutorials_slider_seen' ).val()
+			}
 		});
 	}
 
@@ -675,20 +757,37 @@
 		$(window).on('snapshot:uninstall_snapshot_v3', uninstall_snapshot_v3);
 		$(window).on('snapshot:check_if_region_modal', check_if_region_modal);
 		$(window).on('snapshot:hide_double_tooltip', hide_double_tooltip);
+		$(window).on('snapshot:close_tutorials_slider', close_tutorials_slider);
 
 		if ('#create-backup' === window.location.hash) {
 			jQuery(window).trigger('snapshot:backup_modal');
-			if (window.history && window.history.replaceState) {    
-				window.history.replaceState('', document.title, window.location.pathname + window.location.search);    
-			}    
+			if (window.history && window.history.replaceState) {
+				window.history.replaceState('', document.title, window.location.pathname + window.location.search);
+			}
 		}
 
 		$('#snapshot-uninstall-v3-confirm').on('click', uninstall_v3_confirm);
 
 		$('#snapshot-whats-new-modal .sui-box-header .sui-description>a').on('click', on_click_whats_new_link);
 		$(window).on('snapshot:show_whats_new_modal', show_whats_new_modal);
+		$('#snapshot-whats-new-modal-button-ok').on('click', click_whats_new_modal_button_ok);
 		if (!$('#snapshot-welcome-dialog').length) {
 			show_whats_new_modal();
 		}
+
+		show_membership_expired_modal();
 	});
 })(jQuery);
+
+/**
+ * Closes the modal when 'esc' key is pressed.
+ */
+document.addEventListener('keyup', (e) => {
+	if (e.key && 'undefined' !== e.key && 'escape' === e.key.toLowerCase()) {
+		const activeModal = document.querySelector('.sui-active');
+		if (activeModal && activeModal.classList.contains('sui-modal')) {
+			const $close = activeModal.querySelector('button[data-modal-close]');
+			if ($close) $close.click();
+		}
+	}
+});

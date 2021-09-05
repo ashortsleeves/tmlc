@@ -26,25 +26,29 @@ class Config_Adapter extends Component {
 		$this->status_recipient = \WP_Defender\Model\Notification::USER_SUBSCRIBED;
 
 		return array(
-			'security_tweaks'  => $this->update_security_tweaks( $old_data['security_tweaks'] ),
-			'scan'             => empty( $old_data['scan'] ) ? array() : $this->update_scan( $old_data['scan'] ),
-			'iplockout'        => empty( $old_data['iplockout'] )
+			'security_tweaks'   => $this->update_security_tweaks( $old_data['security_tweaks'] ),
+			'scan'              => empty( $old_data['scan'] ) ? array() : $this->update_scan( $old_data['scan'] ),
+			'iplockout'         => empty( $old_data['iplockout'] )
 				? array()
 				: $this->update_ip_lockout( $old_data['iplockout'] ),
 			//Empty data if Audit module is disabled
-			'audit'            => empty( $old_data['audit'] ) ? array() : $this->update_audit( $old_data['audit'] ),
-			'two_factor'       => empty( $old_data['two_factor'] )
+			'audit'             => empty( $old_data['audit'] ) ? array() : $this->update_audit( $old_data['audit'] ),
+			'two_factor'        => empty( $old_data['two_factor'] )
 				? array()
 				: $this->update_two_factor( $old_data['two_factor'] ),
 			//Checks for empty values Mask Login and Security Headers inside methods
-			'mask_login'       => $this->update_mask_login( $old_data['mask_login'] ),
-			'security_headers' => $this->update_security_headers( $old_data['security_headers'] ),
-			'settings'         => empty( $old_data['settings'] ) ? array() : $old_data['settings'],
-			'blocklist_monitor'=> empty( $old_data['blocklist_monitor'] )  ? array() : $old_data['blocklist_monitor'],
+			'mask_login'        => $this->update_mask_login( $old_data['mask_login'] ),
+			'security_headers'  => $this->update_security_headers( $old_data['security_headers'] ),
+			'settings'          => empty( $old_data['settings'] ) ? array() : $old_data['settings'],
+			'blocklist_monitor' => empty( $old_data['blocklist_monitor'] )  ? array() : $old_data['blocklist_monitor'],
+			'pwned_passwords'   => empty( $old_data['pwned_passwords'] )  ? array() : $old_data['pwned_passwords'],
 		);
 	}
 
 	/**
+	 * Convert key type from frequency to text.
+	 * Attention: it's NOT translation lines.
+	 *
 	 * @param int $freq
 	 *
 	 * @return string
@@ -166,8 +170,12 @@ class Config_Adapter extends Component {
 	public function update_scan( $old_data ) {
 		$scan = array(
 			'integrity_check'               => empty( $old_data['scan_core'] ) ? true : $old_data['scan_core'],
+			'check_core'                    => empty( $old_data['check_core'] ) ? true : $old_data['check_core'],
+			//leave for migration from prev version to 2.5.0 and vice versa
+			'check_themes'                  => empty( $old_data['check_themes'] ) ? false : $old_data['check_themes'],
+			'check_plugins'                 => empty( $old_data['check_plugins'] ) ? false : $old_data['check_plugins'],
 			'check_known_vuln'              => empty( $old_data['scan_vuln'] ) ? true : $old_data['scan_vuln'],
-			'scan_malware'                  => empty( $old_data['scan_content'] ) ? true : $old_data['scan_content'],
+			'scan_malware'                  => empty( $old_data['scan_content'] ) ? false : $old_data['scan_content'],
 			'filesize'                      => empty( $old_data['max_filesize'] ) ? 3 : $old_data['max_filesize'],
 			//should get bool value
 			'report'                        => isset( $old_data['report'] ) && $old_data['report'] ? 'enabled' : 'disabled',
@@ -183,12 +191,13 @@ class Config_Adapter extends Component {
 			'always_send_notification'      => empty( $old_data['always_send_notification'] )
 				? false
 				: $old_data['always_send_notification'],
+			'error_send'                    => empty( $old_data['error_send'] ) ? false : $old_data['error_send'],
 			'email_subject_issue_found'     => isset( $old_data['email_subject_issue'] ) ? $old_data['email_subject_issue'] : '',
 			'email_subject_issue_not_found' => isset( $old_data['email_subject'] ) ? $old_data['email_subject'] : '',
-			'email_subject_error'           => '',
+			'email_subject_error'           => isset( $old_data['email_subject_error'] ) ? $old_data['email_subject_error'] : '',
 			'email_content_issue_found'     => isset( $old_data['email_has_issue'] ) ? $old_data['email_has_issue'] : '',
 			'email_content_issue_not_found' => isset( $old_data['email_all_ok'] ) ? $old_data['email_all_ok'] : '',
-			'email_content_error'           => '',
+			'email_content_error'           => isset( $old_data['email_content_error'] ) ? $old_data['email_content_error'] : '',
 		);
 
 		$scan['report_subscribers']       = empty( $old_data['recipients'] )
@@ -287,6 +296,8 @@ class Config_Adapter extends Component {
 			'storage_days'                           => empty( $old_data['storage_days'] )
 				? '180' : $old_data['storage_days'],
 			'geoIP_db'                               => isset( $old_data['geoIP_db'] ) ? $old_data['geoIP_db'] : '',
+			'ip_blocklist_cleanup_interval'          => empty( $old_data['ip_blocklist_cleanup_interval'] )
+				? 'never' : $old_data['ip_blocklist_cleanup_interval'],
 		);
 		if ( isset( $old_data['lastReportSent'] ) && ! empty( $old_data['lastReportSent'] ) ) {
 			$iplockout['last_sent'] = $old_data['lastReportSent'];
@@ -379,6 +390,10 @@ class Config_Adapter extends Component {
 		}
 	}
 
+	/**
+	 * @since 2.5.0 Remove 'ALLOW-FROM' directive and move to 'sameorigin' by default.
+	 * Leave 'sh_xframe_urls' for config migration.
+	*/
 	public function update_security_headers( $old_data ) {
 		if ( empty( $old_data ) ) {
 			//Sometimes migrated data is empty
@@ -387,7 +402,8 @@ class Config_Adapter extends Component {
 			return array(
 				'sh_xframe'                    => $model_sec_headers->sh_xframe,
 				'sh_xframe_mode'               => $model_sec_headers->sh_xframe_mode,
-				'sh_xframe_urls'               => $model_sec_headers->sh_xframe_urls,
+				//leave for migration to 2.5.1
+				'sh_xframe_urls'               => '',
 				'sh_xss_protection'            => $model_sec_headers->sh_xss_protection,
 				'sh_xss_protection_mode'       => $model_sec_headers->sh_xss_protection_mode,
 				'sh_content_type_options'      => $model_sec_headers->sh_content_type_options,
@@ -407,7 +423,8 @@ class Config_Adapter extends Component {
 			return array(
 				'sh_xframe'                    => (bool) $old_data['sh_xframe'],
 				'sh_xframe_mode'               => $old_data['sh_xframe_mode'],
-				'sh_xframe_urls'               => $old_data['sh_xframe_urls'],
+				//leave for migration to 2.5.1
+				'sh_xframe_urls'               => isset( $old_data['sh_xframe_urls'] ) ? $old_data['sh_xframe_urls'] : '',
 				'sh_xss_protection'            => (bool) $old_data['sh_xss_protection'],
 				'sh_xss_protection_mode'       => $old_data['sh_xss_protection_mode'],
 				'sh_content_type_options'      => (bool) $old_data['sh_content_type_options'],

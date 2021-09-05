@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="sui-box">
 			<div class="sui-box-header sui-flatten sui-content-center sui-spacing-top--60">
 				<button class="sui-button-icon sui-button-float--right" id="dialog-close-div" data-modal-close="">
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text"><?php esc_attr_e( 'Close this dialog window', 'wphb' ); ?></span>
 				</button>
 
@@ -27,30 +27,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<p class="sui-description" id="dialogDescription">
 					<?php
 					if ( 'speedy' === \Hummingbird\Core\Settings::get_setting( 'type', 'minify' ) ) {
-						printf(
-							/* translators: %1$s - <strong>, %2$s - </strong> */
-							esc_html__( 'The automatic %1$sSpeedy%2$s preset rules will be applied which will auto-compress and auto-combine your assets.You can always switch back to manual mode and reapply the configuration there.', 'wphb' ),
+						printf( /* translators: %1$s - <strong>, %2$s - </strong> */
+							esc_html__( 'The automatic %1$sSpeedy%2$s preset rules will be applied which will auto-compress and auto-combine your assets. This mode will inherit configurations from the current manual mode.', 'wphb' ),
 							'<strong>',
 							'</strong>'
 						);
 					} else {
-						printf(
-							/* translators: %1$s - <strong>, %2$s - </strong> */
-							esc_html__( 'The automatic %1$sBasic%2$s preset rules will be applied which will auto-compress your assets. You can always switch back to manual mode and reapply the configuration there.', 'wphb' ),
+						printf( /* translators: %1$s - <strong>, %2$s - </strong> */
+							esc_html__( 'The automatic %1$sBasic%2$s preset rules will be applied which will auto-compress your assets. This mode will inherit configurations from the current manual mode.', 'wphb' ),
 							'<strong>',
 							'</strong>'
 						);
 					}
 					?>
 				</p>
+
+				<p class="sui-description">
+					<?php
+					printf( /* translators: %1$s - <strong>, %2$s - </strong> */
+						esc_html__( 'Configurations that are unique to the manual mode (defer/inline etc.) will be discarded with this change and %1$swon’t be saved%2$s if you decide to switch back to manual.', 'wphb' ),
+						'<strong>',
+						'</strong>'
+					);
+					?>
+				</p>
 			</div>
 
 			<div class="sui-box-body sui-content-center">
 				<div class="sui-form-field">
-					<label for="hide-this-modal" class="sui-checkbox sui-checkbox-sm">
-						<input type="checkbox" id="hide-this-modal" aria-labelledby="hide-this-label"/>
+					<label for="hide-basic-modal" class="sui-checkbox sui-checkbox-sm">
+						<input type="checkbox" id="hide-basic-modal" aria-labelledby="hide-basic-label"/>
 						<span aria-hidden="true"></span>
-						<span id="hide-this-label" class="sui-toggle-label">
+						<span id="hide-basic-label" class="sui-toggle-label">
 							<?php esc_html_e( "Don't show me this again", 'wphb' ); ?>
 						</span>
 					</label>

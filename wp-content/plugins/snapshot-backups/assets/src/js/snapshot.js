@@ -6,4 +6,4 @@ import './pages/settings-page.js';
 import './pages/destinations-page.js';
 import './main-snapshot.js';
 import './restore-backups.js';
-
+import './react/index.js';

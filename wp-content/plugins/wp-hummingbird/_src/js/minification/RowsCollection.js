@@ -2,6 +2,7 @@ const RowsCollection = () => {
 	const items = [];
 	let currentFilter = '';
 	let currentSecondaryFilter = '';
+	let currentTypeFilter = '';
 
 	return {
 		push( row ) {
@@ -73,11 +74,25 @@ const RowsCollection = () => {
 		},
 
 		addFilter( filter, type ) {
-			if ( type === 'secondary' ) {
+			if ( type === 'type' ) {
+				currentTypeFilter = filter;
+			} else if ( type === 'secondary' ) {
 				currentSecondaryFilter = filter;
 			} else {
 				currentFilter = filter;
 			}
+		},
+
+		/**
+		 * Clear selected filters.
+		 *
+		 * @since 2.7.1
+		 */
+		clearFilters() {
+			currentFilter = '';
+			currentSecondaryFilter = '';
+			currentTypeFilter = '';
+			this.applyFilters();
 		},
 
 		applyFilters() {
@@ -87,7 +102,8 @@ const RowsCollection = () => {
 						items[ i ].matchFilter( currentFilter ) &&
 						items[ i ].matchSecondaryFilter(
 							currentSecondaryFilter
-						)
+						) &&
+						items[ i ].matchTypeFilter( currentTypeFilter )
 					) {
 						items[ i ].show();
 					} else {

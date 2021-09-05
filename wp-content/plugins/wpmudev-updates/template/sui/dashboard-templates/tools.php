@@ -55,7 +55,7 @@
 
 			<tr>
 				<td class="dashui-item-content">
-					<h4><?php esc_html_e( 'Whitelabel', 'wpmudev' ); ?></h4>
+					<h4><?php esc_html_e( 'White Label', 'wpmudev' ); ?></h4>
 					<?php if ( ! $whitelabel_settings['enabled'] ) : ?>
 						<span class="sui-description" style="line-height: 22px;"><?php esc_html_e( "Remove WPMU DEV branding from all our plugins and replace it with your own branding for your clients.", 'wpmudev' ); ?></span>
 						<?php if ( 'free' !== $membership_data['membership'] ): ?>
@@ -91,4 +91,3 @@
 		<?php endif; ?>
 	</div>
 </div>
-

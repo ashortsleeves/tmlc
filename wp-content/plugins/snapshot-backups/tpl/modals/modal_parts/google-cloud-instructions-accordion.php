@@ -11,12 +11,12 @@
 	<div class="sui-accordion-item">
 
 		<div class="sui-accordion-item-header">
-			<div class="sui-accordion-item-title" style="flex: auto;"><i aria-hidden="true" class="sui-icon-warning-alert" style=" font-size: 12px; "></i>
+			<div class="sui-accordion-item-title" style="flex: auto;"><span aria-hidden="true" class="sui-icon-warning-alert" style=" font-size: 12px; "></span>
 			<?php esc_html_e( 'How to get Google Cloud credentials?', 'snapshot' ); ?>
 			</div>
 
 			<div>
-				<button class="sui-button-icon sui-accordion-open-indicator" aria-label="Open item"><i class="sui-icon-chevron-down" aria-hidden="true"></i></button>
+				<button class="sui-button-icon sui-accordion-open-indicator" aria-label="Open item"><span class="sui-icon-chevron-down" aria-hidden="true"></span></button>
 			</div>
 		</div>
 

@@ -127,7 +127,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 														</span>
 														<input type="text" class="sui-input-md" value="<?php echo esc_attr( $button['color']['background'] ); ?>" readOnly="readonly">
 														<button type="button">
-															<i class="sui-icon-close" aria-hidden="true"></i>
+															<span class="sui-icon-close" aria-hidden="true"></span>
 														</button>
 													</div>
 													<button class="sui-button"><?php esc_html_e( 'Select', 'wphb' ); ?></button>
@@ -149,7 +149,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 														</span>
 														<input type="text" class="sui-input-md" value="<?php echo esc_attr( $button['color']['border'] ); ?>" readOnly="readonly">
 														<button type="button">
-															<i class="sui-icon-close" aria-hidden="true"></i>
+															<span class="sui-icon-close" aria-hidden="true"></span>
 														</button>
 													</div>
 													<button class="sui-button"><?php esc_html_e( 'Select', 'wphb' ); ?></button>
@@ -171,7 +171,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 														</span>
 														<input type="text" value="<?php echo esc_attr( $button['color']['hover'] ); ?>" readOnly="readonly" />
 														<button type="button">
-															<i class="sui-icon-close" aria-hidden="true"></i>
+															<span class="sui-icon-close" aria-hidden="true"></span>
 														</button>
 													</div>
 													<button class="sui-button"><?php esc_html_e( 'Select', 'wphb' ); ?></button>
@@ -191,15 +191,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 													<div class="sui-side-tabs">
 														<div class="sui-tabs-menu" id="align-options">
 															<label for="align-left" class="sui-tab-item<?php echo checked( 'left', $button['alignment']['align'] ) ? ' active' : ''; ?>">
-																<i class="icon-align sui-icon-align-x-left" aria-hidden="true"></i>
+																<span class="icon-align sui-icon-align-x-left" aria-hidden="true"></span>
 																<input type="radio" name="button[alignment][align]" value="left" id="align-left" <?php checked( 'left', $button['alignment']['align'], true ); ?> name="button[alignment][align]">
 															</label>
 															<label for="align-center" class="sui-tab-item<?php echo checked( 'center', $button['alignment']['align'] ) ? ' active' : ''; ?>">
-																<i class="icon-align sui-icon-align-x-center" aria-hidden="true"></i>
+																<span class="icon-align sui-icon-align-x-center" aria-hidden="true"></span>
 																<input type="radio" name="button[alignment][align]" value="center" id="align-center" <?php checked( 'center', $button['alignment']['align'], true ); ?> name="button[alignment][align]">
 															</label>
 															<label for="align-right" class="sui-tab-item<?php echo checked( 'right', $button['alignment']['align'] ) ? ' active' : ''; ?>">
-																<i class="icon-align sui-icon-align-x-right" aria-hidden="true"></i>
+																<span class="icon-align sui-icon-align-x-right" aria-hidden="true"></span>
 																<input type="radio" name="button[alignment][align]" value="right" id="align-right" <?php checked( 'right', $button['alignment']['align'], true ); ?> name="button[alignment][align]">
 															</label>
 														</div>

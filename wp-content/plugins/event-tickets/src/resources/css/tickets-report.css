@@ -5,7 +5,7 @@
  * src/resources/postcss/ file. For more information, check out our engineering
  * docs on how we handle CSS in our engineering docs.
  *
- * @see: http://moderntribe.github.io/products-engineering/css/
+ * @see: https://the-events-calendar.github.io/products-engineering/docs/code-standards/css/
  */
 
 .tribe-report-panel {
@@ -72,7 +72,7 @@
 
 	.tribe-report-panel .welcome-panel-last .totals-header .order-total {
 				font-size: 16px;
-				margin: 1.20em 0 0;
+				margin: 1.2em 0 0;
 				font-weight: 600;
 			}
 
@@ -107,7 +107,7 @@
 	}
 
 .tribe-report-page .tickets_checked td {
-			opacity: .6;
+			opacity: 0.6;
 		}
 
 .tribe-report-page .tickets_checked td.check_in {
@@ -154,7 +154,8 @@
 	}
 
 .tribe-report-page .column-check_in {
-		width: 90px;
+		min-width: 90px;
+		width: auto;
 	}
 
 .tribe-report-page .attendees-actions input.print,
@@ -176,7 +177,7 @@
 .tribe-attendees-email-message ul {
 		font-size: 13px;
 		line-height: 1.5;
-		margin: .5em 0;
+		margin: 0.5em 0;
 		padding: 2px;
 	}
 
@@ -235,7 +236,9 @@
  * are unfortunately needed to override Thickbox's inline styles.
  */
 
-table.orders tr.refunded, table.orders tr.denied, table.orders tr.pending {
+table.orders tr.refunded,
+		table.orders tr.denied,
+		table.orders tr.pending {
 			font-style: italic;
 		}
 
@@ -312,10 +315,6 @@ table.orders tr.refunded, table.orders tr.denied, table.orders tr.pending {
 		.tribe-attendees-email-message .notice-dismiss {
 			padding: 9px;
 		}
-	}
-
-@media screen and ( max-width: 782px ) {
-
 	#TB_window {
 		height: auto !important;
 	}
@@ -328,7 +327,7 @@ table.orders tr.refunded, table.orders tr.denied, table.orders tr.pending {
 	#plugin-information-footer {
 		position: relative !important;
 	}
-}
+	}
 
 @media screen and (max-width: 440px) {
 	#TB_window {

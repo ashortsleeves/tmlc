@@ -2,7 +2,6 @@
 
 namespace WP_Defender\Component;
 
-use Calotes\Helper\HTTP;
 use WP_Defender\Component;
 
 class Blacklist_Lockout extends Component {

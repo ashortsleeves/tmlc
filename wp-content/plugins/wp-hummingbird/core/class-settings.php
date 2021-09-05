@@ -52,7 +52,7 @@ class Settings {
 	 *
 	 * @var array
 	 */
-	private static $network_modules = array( 'minify', 'page_cache', 'performance', 'advanced' );
+	private static $network_modules = array( 'caching', 'minify', 'page_cache', 'performance', 'advanced', 'cloudflare' );
 
 	/**
 	 * Return the plugin instance.
@@ -87,7 +87,7 @@ class Settings {
 				'file_path'    => '',
 				// Only for multisites. Toggles minification in a subsite
 				// By default is true as if 'minify'-'enabled' is set to false, this option has no meaning.
-				'minify_blog'  => true,
+				'minify_blog'  => false,
 				'view'         => 'basic', // Accepts: 'basic' or 'advanced'.
 				'type'         => 'speedy', // Accepts: 'speedy' or 'basic'.
 				'do_assets'    => array( // Assets to optimize.
@@ -123,6 +123,15 @@ class Settings {
 					'scripts' => array(),
 					'styles'  => array(),
 				),
+				'fonts'        => array(),
+				'preload'      => array(
+					'scripts' => array(),
+					'styles'  => array(),
+				),
+				'async'        => array(
+					'scripts' => array(),
+					'styles'  => array(),
+				),
 			),
 			'uptime'      => array(
 				'enabled'       => false,
@@ -141,7 +150,6 @@ class Settings {
 				// Only for multisites. Toggles page caching in a subsite
 				// By default is true as if 'page_cache'-'enabled' is set to false, this option has no meaning.
 				'cache_blog'   => true,
-				'control'      => false,
 				'detection'    => 'auto', // Accepts: manual, auto and none.
 				'pages_cached' => 0,
 				'integrations' => array(
@@ -167,11 +175,14 @@ class Settings {
 				'last_check'   => false,
 				'email'        => '',
 				'api_key'      => '',
+				'account_id'   => '',
 				'zone'         => '',
 				'zone_name'    => '',
 				'plan'         => false,
 				'page_rules'   => array(),
 				'cache_expiry' => 31536000,
+				'apo_paid'     => false,
+				'apo'          => array(),
 			),
 			'performance' => array(
 				'reports'       => array(
@@ -179,17 +190,6 @@ class Settings {
 				),
 				'subsite_tests' => true,
 				'dismissed'     => false,
-				'widget'        => array(
-					'desktop'       => true, // Desktop or mobile report.
-					'show_metrics'  => true,
-					'show_audits'   => true,
-					'show_historic' => true,
-				),
-				'hub'           => array(
-					'show_metrics'  => true,
-					'show_audits'   => true,
-					'show_historic' => true,
-				),
 			),
 			'advanced'    => array(
 				'query_string'         => false,
@@ -197,6 +197,7 @@ class Settings {
 				'emoji'                => false,
 				'emoji_global'         => false, // If true, will force emoji on all subsites.
 				'prefetch'             => array(),
+				'preconnect'           => array(),
 				'db_cleanups'          => false,
 				'cart_fragments'       => false,
 				'lazy_load'            => array(
@@ -234,6 +235,7 @@ class Settings {
 				'remove_settings'   => false,
 				'remove_data'       => false,
 				'tracking'          => false,
+				'control'           => false, // Cache control in admin bar.
 			),
 			'redis'       => array(
 				'enabled' => false,
@@ -262,10 +264,12 @@ class Settings {
 		}
 
 		$options = array(
-			'minify'      => array( 'minify_blog', 'view', 'type', 'do_assets', 'block', 'dont_minify', 'dont_combine', 'position', 'defer', 'inline', 'nocdn' ),
+			'caching'     => array( 'expiry_css', 'expiry_javascript', 'expiry_media', 'expiry_images' ),
+			'minify'      => array( 'minify_blog', 'view', 'type', 'do_assets', 'block', 'dont_minify', 'dont_combine', 'position', 'defer', 'inline', 'nocdn', 'fonts', 'preload', 'async' ),
 			'page_cache'  => array( 'cache_blog' ),
-			'performance' => array( 'dismissed', 'widget' ),
-			'advanced'    => array( 'query_string', 'emoji', 'prefetch', 'cart_fragments' ),
+			'performance' => array( 'dismissed' ),
+			'advanced'    => array( 'query_string', 'emoji', 'prefetch', 'preconnect', 'cart_fragments' ),
+			'cloudflare'  => array( 'enabled', 'connected', 'last_check', 'email', 'api_key', 'account_id', 'zone', 'zone_name', 'plan', 'page_rules', 'cache_expiry', 'apo_paid', 'apo' ),
 		);
 
 		return $options[ $module ];
@@ -434,6 +438,11 @@ class Settings {
 			'performance' => 'super-admins',
 		);
 
+		// Cache control in Settings can be an array or a boolean.
+		if ( 'settings' === $module && 'control' === $option_name && is_array( $options[ $option_name ] ) ) {
+			return true;
+		}
+
 		if ( isset( $exceptions[ $module ] ) && $exceptions[ $module ] === $options[ $option_name ] ) {
 			return true;
 		}
@@ -459,15 +468,16 @@ class Settings {
 	/**
 	 * Return a single WP Hummingbird option.
 	 *
-	 * @param string $option  Option.
+	 * @param string $option   Option.
+	 * @param mixed  $default  Optional. Default value to return if the option does not exist.
 	 *
 	 * @return mixed
 	 */
-	public static function get( $option ) {
+	public static function get( $option, $default = false ) {
 		if ( ! is_main_site() ) {
-			$value = get_option( $option );
+			$value = get_option( $option, $default );
 		} else {
-			$value = get_site_option( $option );
+			$value = get_site_option( $option, $default );
 		}
 
 		return $value;

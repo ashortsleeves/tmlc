@@ -19,7 +19,7 @@ wp_nonce_field( 'snapshot_cancel_backup', '_wpnonce-snapshot_cancel_backup' );
 		<div class="sui-box">
 			<div class="sui-box-header sui-flatten sui-content-center sui-spacing-top--60">
 				<button class="sui-button-icon sui-button-float--right snapshot-cancel-backup-cancel" data-modal-close="">
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text"><?php esc_html_e( 'Close', 'snapshot' ); ?></span>
 				</button>
 
@@ -33,7 +33,7 @@ wp_nonce_field( 'snapshot_cancel_backup', '_wpnonce-snapshot_cancel_backup' );
 				<button class="sui-button sui-button-ghost sui-button-red" id="snapshot-cancel-backup" aria-live="polite">
 					<span class="sui-button-text-default"><?php esc_html_e( 'Cancel backup', 'snapshot' ); ?></span>
 					<span class="sui-button-text-onload">
-						<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+						<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 						<?php esc_html_e( 'Cancelling backup', 'snapshot' ); ?>
 					</span>
 				</button>

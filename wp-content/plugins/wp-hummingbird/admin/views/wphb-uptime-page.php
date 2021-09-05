@@ -29,7 +29,7 @@ if ( $this->has_meta_boxes( 'box-uptime-disabled' ) ) {
 					<div class="sui-notice sui-notice-error">
 						<div class="sui-notice-content">
 							<div class="sui-notice-message">
-								<i class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></i>
+								<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
 								<p><?php echo esc_html( $error ); ?></p>
 								<p>
 									<a href="<?php echo esc_url( $retry_url ); ?>" class="sui-button sui-button-blue">

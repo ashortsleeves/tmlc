@@ -12,7 +12,7 @@
 	<div class="sui-box-header">
 		<h2 class="sui-box-title">
 			<i class="sui-icon-monitor" aria-hidden="true"></i>
-			<?php esc_html_e( 'Whitelabel', 'wpmudev' ); ?>
+			<?php esc_html_e( 'White Label', 'wpmudev' ); ?>
 		</h2>
 		<?php if ( 'free' === $membership_data['membership'] ) : ?>
 			<div class="sui-actions-left">

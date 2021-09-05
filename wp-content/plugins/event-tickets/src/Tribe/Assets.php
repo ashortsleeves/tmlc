@@ -1,4 +1,7 @@
 <?php
+
+use Tribe__Utils__Array as Arr;
+
 class Tribe__Tickets__Assets {
 	/**
 	 * Enqueue scripts for front end
@@ -19,6 +22,8 @@ class Tribe__Tickets__Assets {
 
 		if ( $this->should_enqueue_common_full() ) {
 			$tickets_deps[] = 'tribe-common-full-style';
+		} else {
+			$tickets_deps[] = 'tec-variables-full';
 		}
 
 		// Check wether we use v1 or v2. We need to update this when we deprecate tickets v1.
@@ -29,7 +34,7 @@ class Tribe__Tickets__Assets {
 			[
 				[ 'event-tickets-reset-css', 'reset.css' ],
 				[ 'event-tickets-tickets-css', $tickets_stylesheet, $tickets_deps ],
-				[ 'event-tickets-tickets-rsvp-css', 'rsvp-v1.css', [] ],
+				[ 'event-tickets-tickets-rsvp-css', 'rsvp-v1.css', [ 'tec-variables-full' ] ],
 				[ 'event-tickets-tickets-rsvp-js', 'rsvp.js', [ 'jquery' ] ],
 				[ 'event-tickets-attendees-list-js', 'attendees-list.js', [ 'jquery' ] ],
 				[ 'event-tickets-details-js', 'ticket-details.js', [] ],
@@ -44,10 +49,32 @@ class Tribe__Tickets__Assets {
 			$tickets_main,
 			'tribe-tickets-forms-style',
 			'tickets-forms.css',
-			[],
+			[ 'tec-variables-full' ],
 			null,
 			[
 				'groups' => [
+					'tribe-tickets-block-assets',
+					'tribe-tickets-rsvp',
+					'tribe-tickets-registration-page',
+					'tribe-tickets-admin',
+					'tribe-tickets-forms',
+				],
+			]
+		);
+
+		// Tickets loader library JS.
+		tribe_asset(
+			$tickets_main,
+			'tribe-tickets-loader',
+			'v2/tickets-loader.js',
+			[
+				'jquery',
+				'tribe-common',
+			],
+			null,
+			[
+				'conditionals' => [ $this, 'should_enqueue_tickets_loader' ],
+				'groups'       => [
 					'tribe-tickets-block-assets',
 					'tribe-tickets-rsvp',
 					'tribe-tickets-registration-page',
@@ -55,45 +82,24 @@ class Tribe__Tickets__Assets {
 			]
 		);
 
-		if (
-			tribe_tickets_new_views_is_enabled()
-			|| tribe_tickets_rsvp_new_views_is_enabled()
-		) {
-			// Tickets loader library JS.
-			tribe_asset(
-				$tickets_main,
-				'tribe-tickets-loader',
-				'v2/tickets-loader.js',
-				[
-					'jquery',
-					'tribe-common',
+		// @todo: Remove this once we solve the common breakpoints vs container based.
+		tribe_asset(
+			$tickets_main,
+			'tribe-common-responsive',
+			'common-responsive.css',
+			[ 'tribe-common-skeleton-style', 'tec-variables-full' ],
+			null,
+			[
+				'conditionals' => [ $this, 'should_enqueue_tickets_loader' ],
+				'groups'       => [
+					'tribe-tickets-block-assets',
+					'tribe-tickets-rsvp',
+					'tribe-tickets-registration-page',
+					'tribe-tickets-commerce',
+					'tribe-tickets-commerce-checkout',
 				],
-				null,
-				[
-					'groups' => [
-						'tribe-tickets-block-assets',
-						'tribe-tickets-rsvp',
-						'tribe-tickets-registration-page',
-					],
-				]
-			);
-
-			// @todo: Remove this once we solve the common breakpoints vs container based.
-			tribe_asset(
-				$tickets_main,
-				'tribe-common-responsive',
-				'common-responsive.css',
-				[ 'tribe-common-skeleton-style' ],
-				null,
-				[
-					'groups' => [
-						'tribe-tickets-block-assets',
-						'tribe-tickets-rsvp',
-						'tribe-tickets-registration-page',
-					],
-				]
-			);
-		}
+			]
+		);
 
 		if ( tribe_tickets_new_views_is_enabled() ) {
 			// Tribe tickets utils.
@@ -111,6 +117,12 @@ class Tribe__Tickets__Assets {
 						'tribe-tickets-block-assets',
 						'tribe-tickets-rsvp',
 						'tribe-tickets-registration-page',
+					],
+					'localize' => [
+						[
+							'name' => 'TribeCurrency',
+							'data' => [ 'Tribe__Tickets__Tickets', 'get_asset_localize_data_for_currencies' ],
+						],
 					],
 				]
 			);
@@ -157,7 +169,7 @@ class Tribe__Tickets__Assets {
 				$tickets_main,
 				'tribe-tickets-registration-page-styles',
 				'tickets-registration-page.css',
-				[],
+				[ 'tec-variables-full' ],
 				null,
 				[
 					'groups' => [
@@ -173,10 +185,13 @@ class Tribe__Tickets__Assets {
 	 *
 	 * @since 4.6
 	 * @since 4.10.9 Use customizable ticket name functions.
+	 * @since 5.1.2 Add Ticket Settings assets.
 	 */
 	public function admin_enqueue_scripts() {
-		// Set up some data for our localize scripts.
+		/** @var Tribe__Tickets__Main $tickets_main */
+		$tickets_main = tribe( 'tickets.main' );
 
+		// Set up some data for our localize scripts.
 		$upload_header_data = [
 			'title'  => esc_html( sprintf( __( '%s header image', 'event-tickets' ), tribe_get_ticket_label_singular( 'header_image_title' ) ) ),
 			'button' => esc_html( sprintf( __( 'Set as %s header', 'event-tickets' ), tribe_get_ticket_label_singular_lowercase( 'header_button' ) ) ),
@@ -189,22 +204,6 @@ class Tribe__Tickets__Assets {
 			'ajaxurl'             => admin_url( 'admin-ajax.php', ( is_ssl() ? 'https' : 'http' ) ),
 		];
 
-		$locale  = localeconv();
-		$decimal = isset( $locale['decimal_point'] ) ? $locale['decimal_point'] : '.';
-
-		/**
-		 * Filter the decimal point character used in the price.
-		 *
-		 * @since 4.6
-		 *
-		 * @param string $decimal The decimal character to filter.
-		 */
-		$decimal = apply_filters( 'tribe_event_ticket_decimal_point', $decimal );
-
-		/** @var Tribe__Tickets__Tickets_Handler $tickets_handler */
-		$tickets_handler = tribe( 'tickets.handler' );
-		$global_stock_mode = $tickets_handler->get_default_capacity_mode();
-
 		$ticket_js_deps = [ 'jquery-ui-datepicker', 'tribe-bumpdown', 'tribe-attrchange', 'tribe-moment', 'underscore', 'tribe-validation', 'event-tickets-admin-accordion-js', 'tribe-timepicker' ];
 
 		// While TEC is active, make sure we are loading TEC admin JS as dependency.
@@ -215,7 +214,7 @@ class Tribe__Tickets__Assets {
 		$assets = [
 			[ 'event-tickets-admin-css', 'tickets-admin.css', [ 'tribe-validation-style', 'tribe-jquery-timepicker-css', 'tribe-common-admin' ] ],
 			[ 'event-tickets-admin-refresh-css', 'tickets-refresh.css', [ 'event-tickets-admin-css', 'tribe-common-admin' ] ],
-			[ 'event-tickets-admin-tables-css', 'tickets-tables.css', [ 'event-tickets-admin-css' ] ],
+			[ 'event-tickets-admin-tables-css', 'tickets-tables.css', [  'tec-variables-full', 'event-tickets-admin-css' ] ],
 			[ 'event-tickets-attendees-list-js', 'attendees-list.js', [ 'jquery' ] ],
 			[ 'event-tickets-admin-accordion-js', 'accordion.js', [] ],
 			[ 'event-tickets-admin-accordion-css', 'accordion.css', [] ],
@@ -223,7 +222,7 @@ class Tribe__Tickets__Assets {
 		];
 
 		tribe_assets(
-			Tribe__Tickets__Main::instance(),
+			$tickets_main,
 			$assets,
 			'admin_enqueue_scripts',
 			[
@@ -240,7 +239,13 @@ class Tribe__Tickets__Assets {
 					],
 					[
 						'name' => 'tribe_ticket_vars',
-						'data' => [ 'stock_mode' => $global_stock_mode ],
+						'data' => static function() {
+							/** @var \Tribe__Tickets__Tickets_Handler $tickets_handler */
+							$tickets_handler = tribe( 'tickets.handler' );
+							$global_stock_mode = $tickets_handler->get_default_capacity_mode();
+
+							return [ 'stock_mode' => $global_stock_mode ];
+						},
 					],
 					[
 						'name' => 'tribe_ticket_notices',
@@ -256,12 +261,68 @@ class Tribe__Tickets__Assets {
 					],
 					[
 						'name' => 'price_format',
-						'data' => [
-							'decimal' => $decimal,
-							'decimal_error' => __( 'Please enter in without thousand separators and currency symbols.', 'event-tickets' ),
-						],
+						'data' => static function() {
+							$locale  = localeconv();
+							$decimal = Arr::get( $locale, 'decimal_point', '.' );
+
+							/**
+							 * Filter the decimal point character used in the price.
+							 *
+							 * @since 4.6
+							 *
+							 * @param string $decimal The decimal character to filter.
+							 */
+							$decimal = apply_filters( 'tribe_event_ticket_decimal_point', $decimal );
+
+							return [
+								'decimal'       => $decimal,
+								'decimal_error' => __( 'Please enter in without thousand separators and currency symbols.', 'event-tickets' ),
+							];
+						},
 					],
 				],
+			]
+		);
+
+		$admin_manager_js_data = [
+			'tribeTicketsAdminManagerNonce' => wp_create_nonce( 'tribe_tickets_admin_manager_nonce' ),
+			'ajaxurl'                       => admin_url( 'admin-ajax.php', ( is_ssl() ? 'https' : 'http' ) ),
+		];
+
+		tribe_asset(
+			$tickets_main,
+			'tribe-tickets-admin-manager',
+			'admin/tickets-manager.js',
+			[
+				'jquery',
+				'tribe-common',
+			],
+			null,
+			[
+				'localize' => [
+					[
+						'name' => 'TribeTicketsAdminManager',
+						'data' => $admin_manager_js_data,
+					],
+				],
+				'groups'   => [
+					'tribe-tickets-admin',
+				],
+			]
+		);
+
+		// Register Ticket Admin Settings page assets.
+		$settings_assets = [
+			[ 'event-tickets-admin-settings-css', 'tickets-admin-settings.css', [ 'tribe-common-admin' ] ],
+		];
+
+		tribe_assets(
+			$tickets_main,
+			$settings_assets,
+			'admin_enqueue_scripts',
+			[
+				'groups'       => 'event-tickets-admin-settings',
+				'conditionals' => [ $this, 'should_enqueue_admin_settings_assets' ],
 			]
 		);
 	}
@@ -292,6 +353,37 @@ class Tribe__Tickets__Assets {
 	}
 
 	/**
+	 * Check if we should add the Admin Settings Assets onto an admin page.
+	 *
+	 * @since 5.1.2
+	 *
+	 * @return bool
+	 */
+	public function should_enqueue_admin_settings_assets() {
+
+		$admin_helpers = Tribe__Admin__Helpers::instance();
+
+		// The list of admin tabs that the plugin hooks into.
+		$admin_tabs = [
+			'event-tickets',
+			'event-tickets-commerce',
+			'payments',
+		];
+
+		// Load specifically on Ticket Settings page only.
+		$should_enqueue = $admin_helpers->is_screen() && in_array( tribe_get_request_var( 'tab' ), $admin_tabs, true );
+
+		/**
+		 * Allow filtering of whether the base Admin Settings Assets should be loaded.
+		 *
+		 * @since 5.1.2
+		 *
+		 * @param bool $should_enqueue Should enqueue the settings asset or not.
+		 */
+		return apply_filters( 'event_tickets_should_enqueue_admin_settings_assets', $should_enqueue );
+	}
+
+	/**
 	 * Check if we should enqueue ET frontend styles
 	 *
 	 * @since 5.0.0
@@ -316,6 +408,27 @@ class Tribe__Tickets__Assets {
 		}
 
 		return $is_on_valid_post_type || $is_on_ar_page;
+	}
+
+	/**
+	 * Check if we should enqueue the new Tickets Loader script.
+	 *
+	 * @since 5.1.1
+	 *
+	 * @return bool
+	 */
+	public function should_enqueue_tickets_loader() {
+		$are_new_views_enabled = tribe_tickets_new_views_is_enabled()
+			|| tribe_tickets_rsvp_new_views_is_enabled();
+
+		/**
+		 * Allow filtering whether the Tickets Loader script should be enqueued.
+		 *
+		 * @since 5.1.1
+		 *
+		 * @param bool $should_enqueue_tickets_loader Whether the Tickets Loader script should be enqueued.
+		 */
+		return (bool) apply_filters( 'tribe_tickets_assets_should_enqueue_tickets_loader', $are_new_views_enabled );
 	}
 
 	/**

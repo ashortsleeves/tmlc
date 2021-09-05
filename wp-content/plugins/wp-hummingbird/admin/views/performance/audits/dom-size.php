@@ -61,12 +61,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 			<tr>
 				<td><strong><?php esc_html_e( 'Maximum DOM Depth', 'wphb' ); ?></strong></td>
-				<td><?php echo esc_html( $audit->details->items[1]->element->value ); ?></td>
+				<td>
+					<?php
+					if ( isset( $audit->details->items[1]->element ) ) {
+						echo esc_html( $audit->details->items[1]->element->value );
+					}
+					?>
+				</td>
 				<td><?php echo esc_html( $audit->details->items[1]->value ); ?></td>
 			</tr>
 			<tr>
 				<td><strong><?php esc_html_e( 'Maximum Child Elements', 'wphb' ); ?></strong></td>
-				<td><?php echo esc_html( $audit->details->items[2]->element->value ); ?></td>
+				<td>
+					<?php
+					if ( isset( $audit->details->items[2]->element ) ) {
+						echo esc_html( $audit->details->items[2]->element->value );
+					}
+					?>
+				</td>
 				<td><?php echo esc_html( $audit->details->items[2]->value ); ?></td>
 			</tr>
 			</tbody>

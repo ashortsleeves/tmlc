@@ -57,7 +57,7 @@
 
 .wpmud .wrap-wphb .box-dashboard-welcome.sui-summary:not(.sui-rebranded):not(.sui-unbranded):not(.sui-summary-sm) {
     @if variable-exists(summary-image) {
-        @include background-2x( "#{$image--path}/hb-graphic-dash-top", 'png', 192px, 182px, 30px 100% );
+        @include background-2x( "#{$image--path}/summary-graphic-dash", 'png', 192px, 182px, 30px 100% );
     }
 
     @include media(max-width, md) {
@@ -66,8 +66,12 @@
 }
 
 /* Dashboard background images */
-.wpmud .box-dashboard-welcome.sui-summary .sui-button-green {
+.wpmud .box-dashboard-welcome.sui-summary .sui-button-purple {
     border-radius: 20px;
+    min-width: 50px;
+    min-height: 18px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 /* Dashboard Performance Test */
@@ -94,9 +98,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            & > div {
+                width: 62px;
+            }
         }
 
-        i[class^=sui-icon] {
+        span[class^=sui-icon] {
             margin-left: 7px;
             margin-right: 0;
             vertical-align: sub;
@@ -111,12 +118,10 @@
 
     .sui-box-footer { border-top: 0 !important; }
 
-    .wphb-metrics-widget,
-    .wphb-historic-widget {
+    .wphb-metrics-widget {
         padding-bottom: 0 !important;
         .sui-notice { margin: 20px 0; }
     }
-    .wphb-audits-widget { padding-bottom: 20px !important; }
 }
 
 .wpmud .wphb-border-frame .wphb-caching-summary-item-type,
@@ -194,7 +199,7 @@
             &:last-of-type {
                 text-align: right;
 
-                i {
+                [class*="sui-icon-"] {
                     font-size: 16px;
                 }
             }
@@ -307,4 +312,24 @@
         margin-top: 0;
         color: #888;
     }
+}
+
+/**
+ * Clear cache modal.
+ *
+ * @since 2.7.1
+ */
+.wpmud #clear-cache-modal {
+    label.sui-checkbox { margin: 0 0 5px }
+    span.sui-checkbox-description { margin-bottom: 10px }
+}
+
+/**
+ * Tutorials
+ *
+ * @since 2.8.0
+ */
+.wpmud #wphb-dashboard-tutorials > .sui-notice,
+.wpmud .sui-tutorials-slider-box {
+    margin-bottom: 30px !important;
 }

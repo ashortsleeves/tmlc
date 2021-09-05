@@ -87,6 +87,15 @@ class Backup extends Controller\Service {
 	public function json_finish_backup( $params, $action, $request = false ) {
 		$data = ( ! is_object( $params ) ) ? json_decode( $params, true ) : (array) $params;
 
+		$snapshot_status = isset( $data['snapshot_status'] ) ? $data['snapshot_status'] : null;
+		$service_error   = apply_filters( 'snapshot_custom_service_error', $snapshot_status );
+		if ( $service_error && $service_error !== $snapshot_status ) {
+			// > frontend refresh interval to have time to backup id.
+			sleep( 6 );
+			$data['success']         = false;
+			$data['snapshot_status'] = $service_error;
+		}
+
 		$sucessful_backup = isset( $data['success'] ) ? boolval( $data['success'] ) : false;
 		$backup_status    = isset( $data['snapshot_status'] ) ? sanitize_text_field( $data['snapshot_status'] ) : false;
 
@@ -97,12 +106,16 @@ class Backup extends Controller\Service {
 		if ( true === $sucessful_backup ) {
 			delete_transient( 'snapshot_current_stats' );
 			Log::info( __( 'The backup has been completed.', 'snapshot' ) );
+			$this->send_email_success_notifications( $data['bu_frequency'], $data['snapshot_id'] );
 		} else {
+			$time = time();
 			/* translators: %s - Backups status from the API */
 			Log::error( sprintf( __( 'The backup has failed to complete. The API responded with: %s', 'snapshot' ), $backup_status ) );
 
+			self::save_backup_error( $data['snapshot_id'], $backup_status, $time );
+
 			Task\Request\Listing::add_backup_type( $data );
-			$this->send_email_notifications( $backup_status, time(), $data['type'], $data['snapshot_id'] );
+			$this->send_email_notifications( $backup_status, $time, $data['type'], $data['snapshot_id'] );
 		}
 
 		$this->send_response_success( true, $request );
@@ -142,13 +155,12 @@ class Backup extends Controller\Service {
 	 * @param int    $timestamp         Error time.
 	 * @param string $backup_type       Type of backup ("scheduled" or "manual").
 	 * @param string $backup_id         Backup ID.
-	 * @return type
 	 */
 	protected function send_email_notifications( $service_error, $timestamp, $backup_type, $backup_id ) {
 		$service_error = apply_filters( 'snapshot_custom_service_error', $service_error );
 
 		$email_settings = Settings::get_email_settings()['email_settings'];
-		if ( ! $email_settings['on_fail_send'] ) {
+		if ( ! $email_settings['on_fail_send'] || ! $email_settings['notify_on_fail'] ) {
 			return;
 		}
 		$recipients = $email_settings['on_fail_recipients'];
@@ -163,5 +175,44 @@ class Backup extends Controller\Service {
 				'backup_id'     => $backup_id,
 			)
 		);
+	}
+
+	/**
+	 * Send email when a backup completes
+	 *
+	 * @param string $frequency Backup frequency (scheduled or manual).
+	 * @param string $backup_id Backup ID.
+	 */
+	protected function send_email_success_notifications( $frequency, $backup_id ) {
+		$email_settings = Settings::get_email_settings()['email_settings'];
+		if ( ! $email_settings['on_fail_send'] || ! $email_settings['notify_on_complete'] ) {
+			return;
+		}
+		$recipients = $email_settings['on_fail_recipients'];
+
+		$task = new Task\Backup\Complete();
+		$task->apply(
+			array(
+				'recipients' => $recipients,
+				'frequency'  => $frequency,
+				'backup_id'  => $backup_id,
+			)
+		);
+	}
+
+	/**
+	 * Save backup error status.
+	 *
+	 * @param string $backup_id Backup ID.
+	 * @param string $backup_status Service error.
+	 * @param int    $timestamp Timestamp.
+	 */
+	public static function save_backup_error( $backup_id, $backup_status, $timestamp ) {
+		$data = array(
+			'backup_id'     => $backup_id,
+			'backup_status' => $backup_status,
+			'timestamp'     => $timestamp,
+		);
+		set_transient( 'snapshot_backup_error', $data, 30 * 60 );
 	}
 }

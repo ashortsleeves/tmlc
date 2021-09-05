@@ -17,13 +17,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="sui-box-settings-col-1">
 		<span class="sui-settings-label"><?php esc_html_e( 'Import', 'wphb' ); ?></span>
 		<span class="sui-description">
-			<?php esc_html_e( 'Use this tool to import the Hummingbird configuration from another site.', 'wphb' ); ?>
+			<?php esc_html_e( 'Use this tool to import the Manual Asset Optimization configuration from another site.', 'wphb' ); ?>
 		</span>
 	</div><!-- end col-third -->
 	<div class="sui-box-settings-col-2">
-		<strong><?php esc_html_e( 'Import configuration', 'wphb' ); ?></strong>
+		<strong><?php esc_html_e( 'Import configurations', 'wphb' ); ?></strong>
 		<span class="sui-description" style="margin-bottom: 10px;">
-			<?php esc_html_e( 'Import an exported Hummingbird settings file.', 'wphb' ); ?>
+			<?php esc_html_e( 'Import an exported Hummingbird settings file to apply the Manual Asset Optimization configuration.', 'wphb' ); ?>
 		</span>
 		<form id="wphb-import-frm" method="post" enctype="multipart/form-data">
 			<div class="sui-form-field">
@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</div>
 					<span type="button" id="wphb-import-btn" class="sui-button sui-button-blue" aria-live="polite" data-modal-open="settings-import-modal"  style="margin-left: 10px; padding-top:10px;" disabled>
 						<span class="sui-button-text-default">
-							<i class="sui-icon-download-cloud" aria-hidden="true"></i>
+							<span class="sui-icon-download-cloud" aria-hidden="true"></span>
 							<?php esc_html_e( 'Import', 'wphb' ); ?>
 						</span>
 					</span>
@@ -61,13 +61,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</span>
 	</div><!-- end col-third -->
 	<div class="sui-box-settings-col-2">
-		<strong><?php esc_html_e( 'Export configuration', 'wphb' ); ?></strong>
-		<div style="padding: 30px; border: 1px solid #e6e6e6; margin-bottom: 10px; border-radius: 5px;">
+		<strong><?php esc_html_e( 'Export configurations', 'wphb' ); ?></strong>
+		<div class="sui-description" style="padding: 30px; border: 1px solid #e6e6e6; margin-bottom: 10px; border-radius: 5px;">
 			<strong><?php esc_html_e( 'Asset Optimization/Manual', 'wphb' ); ?></strong><br>
-			<?php esc_html_e( 'Export your manual Asset Optimization configuration and use it on other sites by simply importing the file.', 'wphb' ); ?>
+			<?php esc_html_e( 'Export Asset Optimization manual configurations and use it on other sites by simply importing the file.', 'wphb' ); ?>
 		</div>
 		<a href="#" class="sui-button sui-button-icon-left" id="wphb-export-btn">
-			<i class="sui-icon-download-cloud" aria-hidden="true"></i>
+			<span class="sui-icon-download-cloud" aria-hidden="true"></span>
 			<?php esc_html_e( 'Export', 'wphb' ); ?>
 		</a>
 	</div>

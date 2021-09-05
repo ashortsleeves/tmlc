@@ -1,21 +1,19 @@
 === Recent Posts Widget With Thumbnails ===
-Contributors: Hinjiriyo
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TKZZ3US2R56RY
+Contributors: kybernetikservices,Hinjiriyo
+Donate link: https://www.paypal.com/donate?hosted_button_id=NSEQX73VHXKS8
 Tags: images, posts list, recent posts, thumbnails, widget
 Requires at least: 2.9
 Requires PHP: 5.2
-Tested up to: 5.6
-Stable tag: 7.0.2
+Tested up to: 5.8
+Stable tag: 7.1.1
 License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 List the most recent posts with post titles, thumbnails, excerpts, authors, categories, dates and more!
 
 == Description ==
 
 List the most recent posts with post titles, thumbnails, excerpts, authors, categories, dates and more!
-
-The plugin is available in Dutch (Nederlands), English, Spanish (Español), Galician, German (Deutsch), Persian (فارسی), Arabic (العربية), Polish (Polski) Russian (русский), Turkish (Türkçe), Japanese (日本語), Greek (Ελληνικά) and Catalan (Català).
 
 Although the plugin is built only for widget areas users reported that it **works in Elementor** and **works in Oxygen**. Whether it runs in other page builders is unknown. Please let me know in which **page builder** you were able to use the plugin successfully.
 
@@ -58,7 +56,7 @@ Some users published video tutorials on YouTube:
 1. Title of the widget
 2. Number of listed posts
 3. Open post links in new windows
-4. Random order of posts
+4. Different options for post order and sorting
 5. Hide current post in list
 6. Show only sticky posts
 7. Hide sticky posts
@@ -134,63 +132,27 @@ The plugin considers the output of actions hooked on:
 
 To design the list and its items you can use these CSS selectors:
 
-`.rpwwt-widget`
-: the element which contains the post list
-
-`.rpwwt-widget ul`
-: the list which contains the list items
-
-`.rpwwt-widget ul li`
-: the list item in the list
-
-`.rpwwt-widget ul li.rpwwt-sticky`
-: the list item of a sticky post
-
-`.rpwwt-widget ul li a`
-: link in the list
-
-`.rpwwt-widget ul li a img`
-: linked image
-
-`.rpwwt-widget ul li a span.rpwwt-post-title`
-: the post title
-
-`.rpwwt-widget ul li div.rpwwt-post-author`
-: the post author
-
-`.rpwwt-widget ul li div.rpwwt-post-categories`
-: the post category list
-
-`.rpwwt-widget ul li div.rpwwt-post-date`
-: the post date
-
-`.rpwwt-widget ul li div.rpwwt-post-excerpt`
-: the post excerpt
-
-`.rpwwt-widget ul li div.rpwwt-post-comments-number`
-: the number of comments
+`.rpwwt-widget`: the element which contains the post list
+`.rpwwt-widget ul`: the list which contains the list items
+`.rpwwt-widget ul li`: the list item in the list
+`.rpwwt-widget ul li.rpwwt-sticky`: the list item of a sticky post
+`.rpwwt-widget ul li a`: link in the list
+`.rpwwt-widget ul li a img`: linked image
+`.rpwwt-widget ul li a span.rpwwt-post-title`: the post title
+`.rpwwt-widget ul li div.rpwwt-post-author`: the post author
+`.rpwwt-widget ul li div.rpwwt-post-categories`: the post category list
+`.rpwwt-widget ul li div.rpwwt-post-date`: the post date
+`.rpwwt-widget ul li div.rpwwt-post-excerpt`: the post excerpt
+`.rpwwt-widget ul li div.rpwwt-post-excerpt .rpwwt-post-excerpt-more`: the "more" text following the excerpt.
+`.rpwwt-widget ul li div.rpwwt-post-comments-number`: the number of comments
 
 = Languages =
 
-The user interface is available in
+The user interface is available in several languages.
 
-* Arabic (العربية), kindly drawn up by [Shadi AlZard](https://profiles.wordpress.org/salzard)
-* Catalan (Català), kindly drawn up by [Ibidem Group](https://www.ibidemgroup.com/)
-* Dutch (Nederlands)
-* English (UK)
-* English (US)
-* Galician
-* German (Deutsch, Deutschland)
-* Greek (Ελληνικά), kindly drawn up by Kostas Arvanitidis
-* Japanese (日本語), kindly drawn up by [Kazuyuki Kumai](https://wordpress.org/support/users/kazuyk/)
-* Persian (فارسی), kindly drawn up by [Sajjad Panahi](https://profiles.wordpress.org/asreelm)
-* Polish (Polski), kindly drawn up by [Marcin Mikolajczyk](https://profiles.wordpress.org/marcinmik)
-* Russian (ру́сский), kindly drawn up by [dmitriynn](https://profiles.wordpress.org/dmitriynn)
-* Spanish (Español, Spain)
-* Spanish (Español, Venezuela)
-* Turkish (Türkçe), kindly drawn up by [Mehmet HAKAN](https://profiles.wordpress.org/memomelo)
-
-Further translations are welcome. If you want to give in your translation please leave a notice in the [plugin's support forum](https://wordpress.org/support/plugin/recent-posts-widget-with-thumbnails).
+Starting from version 7.1.0 the handling for translations are moved to [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/recent-posts-widget-with-thumbnails/).
+Please help to translate into more languages or you can re-work on the current translations, if you think it's needed.
+If you have done your translation please leave a comment in the [plugin's support forum](https://wordpress.org/support/plugin/recent-posts-widget-with-thumbnails). I'll take care of the review and approval.
 
 == Installation ==
 
@@ -200,7 +162,7 @@ Further translations are welcome. If you want to give in your translation please
 2. Search for 'Recent Posts Widget With Thumbnails'
 3. Click 'Install Now'
 4. Activate the plugin on the Plugin dashboard
-5. Go to 'Appereance' => 'Widgets' and select 'Recent Posts Widget With Thumbnails'
+5. Go to 'Appearance' => 'Widgets' and select 'Recent Posts Widget With Thumbnails'
 
 = Uploading in WordPress Dashboard =
 
@@ -209,7 +171,7 @@ Further translations are welcome. If you want to give in your translation please
 3. Select `recent-posts-widget-with-thumbnails.zip` from your computer
 4. Click 'Install Now'
 5. Activate the plugin in the Plugin dashboard
-6. Go to 'Appereance' => 'Widgets' and select 'Recent Posts Widget With Thumbnails'
+6. Go to 'Appearance' => 'Widgets' and select 'Recent Posts Widget With Thumbnails'
 
 = Using FTP =
 
@@ -217,7 +179,7 @@ Further translations are welcome. If you want to give in your translation please
 2. Extract the `recent-posts-widget-with-thumbnails` directory to your computer
 3. Upload the `recent-posts-widget-with-thumbnails` directory to the `/wp-content/plugins/` directory
 4. Activate the plugin in the Plugin dashboard
-5. Go to 'Appereance' => 'Widgets' and select 'Recent Posts Widget With Thumbnails'
+5. Go to 'Appearance' => 'Widgets' and select 'Recent Posts Widget With Thumbnails'
 
 == Frequently Asked Questions ==
 
@@ -255,7 +217,8 @@ If there is no text in the "Excerpt" box the plugin tries to build an excerpt vi
 
 = Where is the *.pot file for translating the plugin in any language? =
 
-If you want to contribute a translation of the plugin in your language it would be great! You would find the *.pot file in the 'languages' directory of this plugin. If you would send the *.po file to me I would include it in the next release of the plugin.
+There is not pot file coming anymore with the plugin. With version 7.1 the translation was moved to [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/recent-posts-widget-with-thumbnails/).
+If you want to contribute a translation of the plugin in your language it would be great!
 
 == Screenshots ==
 
@@ -263,6 +226,20 @@ If you want to contribute a translation of the plugin in your language it would 
 2. The second screenshot shows the widget on the Widget Management Page in the backend.
 
 == Changelog ==
+
+= 7.1.1 =
+* Restored PHP 5.x support
+
+= 7.1.0 =
+* Added feature for post order and sorting (feature request: https://wordpress.org/support/topic/sort-posts-by-title/)
+* Added class `.rpwwt-post-excerpt-more` for the "more" text following the excerpt. (feature request: https://wordpress.org/support/topic/class-for-more-sign/)
+* Dropped PHP 5 support
+* Moved language files to [translate.wordpress.org](https://translate.wordpress.org/projects/wp-plugins/recent-posts-widget-with-thumbnails/). So, please contribute as a translator to make Recent Posts Widget With Thumbnails available in more and more languages.
+* Compatibility with WordPress 5.8
+
+= 7.0.3 =
+* new branding
+* Tested successfully with WordPress 5.6.2
 
 = 7.0.2 =
 * Corrected comments in uninstall.php
@@ -605,8 +582,20 @@ Successfully tested with WordPress 4.0
 
 == Upgrade Notice ==
 
+= 7.1.1 =
+This version needs at least PHP 7 or above.
+
+= 7.1.0 =
+New feature for post order and sorting.
+Moving languages to GlotPress.
+Compatibility with WordPress 5.8
+
+= 7.0.3 =
+Added new branding
+
 = 7.0.2 =
-Tested successfully with WordPress 5.6
+Tested successfully with WordPress 5.6.2
+Tested successfully with WordPress 5.7
 
 = 7.0.1 =
 Added catalan translation, tested with WordPress 5.5.3

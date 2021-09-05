@@ -1,13 +1,13 @@
 <?php // phpcs:ignore
 /**
 Plugin Name: Snapshot Pro
-Plugin URI: https://premium.wpmudev.org/project/snapshot-backups/
+Plugin URI: https://wpmudev.com/project/snapshot/
 Description: Make and schedule incremental backups of your WordPress websites and store them on secure cloud storage. Snapshot Backups are logged and can be restored with a click or manually with the included installer. Snapshot gives you simple, faster, managed backups that take up less space.
-Version: 4.2.1
+Version: 4.3.5
 Network: true
 Text Domain: snapshot
 Author: WPMU DEV
-Author URI: http://premium.wpmudev.org
+Author URI: http://wpmudev.com
 WDP ID: 3760011
 
 @package snapshot
@@ -33,8 +33,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 use WPMUDEV\Snapshot4\Controller\Activate;
 use WPMUDEV\Snapshot4\Main;
 
-define( 'SNAPSHOT_BACKUPS_VERSION', '4.2.1' );
+define( 'SNAPSHOT_BACKUPS_VERSION', '4.3.5' );
 define( 'SNAPSHOT_PLUGIN_FILE', __FILE__ );
+
+if ( ! defined( 'SNAPSHOT4_BACKUP_TIMEOUT' ) ) {
+	define( 'SNAPSHOT4_BACKUP_TIMEOUT', 30 * 60 );
+}
 
 if ( ! defined( 'SNAPSHOT_IS_TEST_ENV' ) ) {
 	define( 'SNAPSHOT_IS_TEST_ENV', false );

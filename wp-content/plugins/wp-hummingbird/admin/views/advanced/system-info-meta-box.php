@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div>
 
 <div class="sui-form-field sui-input-md">
-	<select id="wphb-system-info-dropdown" class="sui-form-field wphb-system-info-dropdown" name="system-info" aria-label="<?php esc_attr_e( 'Select system', 'wphb' ); ?>">
+	<select id="wphb-system-info-dropdown" class="sui-select sui-form-field wphb-system-info-dropdown" name="system-info" aria-label="<?php esc_attr_e( 'Select system', 'wphb' ); ?>">
 		<option value="php"><?php esc_html_e( 'PHP', 'wphb' ); ?></option>
 		<option value="db"><?php esc_html_e( 'MySQL', 'wphb' ); ?></option>
 		<option value="wp"><?php esc_html_e( 'WordPress', 'wphb' ); ?></option>

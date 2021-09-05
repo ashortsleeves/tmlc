@@ -38,22 +38,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="sui-box-settings-col-2">
 		<ol class="sui-description">
 			<li>
-				<?php
-				esc_html_e(
-					'Add critical layout and styling CSS here.
-				We will insert into <style> tags in your <head> section of each page.',
-					'wphb'
-				);
-				?>
+				<?php esc_html_e( 'Add critical layout and styling CSS here. We will insert into <style> tags in your <head> section of each page.', 'wphb' ); ?>
 			</li>
 			<li>
-				<?php
-				esc_html_e(
-					'Next, switch to the advanced area of asset optimization and move all
-				of your CSS files to the footer area.',
-					'wphb'
-				);
-				?>
+				<?php esc_html_e( 'Next, switch to the manual mode in asset optimization and move all of your CSS files to the footer area.', 'wphb' ); ?>
 			</li>
 		</ol>
 

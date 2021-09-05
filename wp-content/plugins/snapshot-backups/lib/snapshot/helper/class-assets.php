@@ -64,4 +64,42 @@ class Assets {
 	public function get_asset_type( $relpath ) {
 		return strtolower( pathinfo( $relpath, PATHINFO_EXTENSION ) );
 	}
+
+	/**
+	 * Checks whether the WPMU DEV branding is hidden
+	 *
+	 * @return bool
+	 */
+	public static function is_branding_hidden() {
+		return (bool) apply_filters(
+			'wpmudev_branding_hide_branding',
+			false
+		);
+	}
+
+	/**
+	 * Gets custom hero image link
+	 *
+	 * @return string
+	 */
+	public static function get_custom_hero_image() {
+		return apply_filters( 'wpmudev_branding_hero_image', '' );
+	}
+
+	/**
+	 * Returns the correct branding SUI class.
+	 *
+	 * @return string
+	 */
+	public static function get_sui_branding_class() {
+		$sui_branding_class = '';
+		if ( ! empty( self::is_branding_hidden() ) ) {
+			$sui_branding_class = ' sui-unbranded';
+			if ( ! empty( self::get_custom_hero_image() ) ) {
+				$sui_branding_class = ' sui-rebranded';
+			}
+		}
+
+		return $sui_branding_class;
+	}
 }

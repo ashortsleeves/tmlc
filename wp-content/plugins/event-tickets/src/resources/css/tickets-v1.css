@@ -5,8 +5,16 @@
  * src/resources/postcss/ file. For more information, check out our engineering
  * docs on how we handle CSS in our engineering docs.
  *
- * @see: http://moderntribe.github.io/products-engineering/css/
+ * @see: https://the-events-calendar.github.io/products-engineering/docs/code-standards/css/
  */
+
+/**
+ * Ticket block view styles
+ *
+ * @since  0.3.0-alpha
+ */
+
+/* Import Mixins */
 
 /*
  * Common CSS
@@ -29,87 +37,7 @@
  *
  * ----------------------------------------------------------------------------- */
 
-/* Variables */
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Borders - Radius
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Borders - Width
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Box Shadows
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Layers of z-index
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Colors - Typography
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Colors - Iconography
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Colors - UI
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Colors - Borders & Misc
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Forms - Colors
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Forms - Box Shadows
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Gutter - Default
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Gutter - Page
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Grid Width - Default
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Grid Width - Relative
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Opacities
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Spacers
-	 * ----------------------------------------------------------------------------- */
-}
+/* Variables - needed everywhere. */
 
 /* -----------------------------------------------------------------------------
  * SVG - Arrow Right
@@ -195,6 +123,8 @@
  * SVG - Messages
  * ----------------------------------------------------------------------------- */
 
+/* stylelint-disable-line block-no-empty */
+
 /* -----------------------------------------------------------------------------
  * SVG - Month
  * ----------------------------------------------------------------------------- */
@@ -202,6 +132,8 @@
 /* -----------------------------------------------------------------------------
  * SVG - No Map
  * ----------------------------------------------------------------------------- */
+
+/* stylelint-disable-line block-no-empty */
 
 /* -----------------------------------------------------------------------------
  * SVG - Paper Plane
@@ -243,29 +175,11 @@
  * SVG - Week
  * ----------------------------------------------------------------------------- */
 
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Transitions
-	 * ----------------------------------------------------------------------------- */
-}
+/* -----------------------------------------------------------------------------
+ * SVG - Cal Export
+ * ----------------------------------------------------------------------------- */
 
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Font Stacks
-	 * ----------------------------------------------------------------------------- */ /* stylelint-disable-line value-keyword-case */
-
-	/* -----------------------------------------------------------------------------
-	 * Font Weights
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Font Sizing
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Line Height
-	 * ----------------------------------------------------------------------------- */
-}
+/* stylelint-disable-line block-no-empty */
 
 /* Mixins */
 
@@ -350,6 +264,13 @@
  * ----------------------------------------------------------------------------- */
 
 /* -----------------------------------------------------------------------------
+ * Anchor - Event Title
+ *
+ * This mixin intentionally only affects the text and border _colors_
+ * to make sure they all follow the Customizer overrides.
+ * ----------------------------------------------------------------------------- */
+
+/* -----------------------------------------------------------------------------
  * Button - Global
  * ----------------------------------------------------------------------------- */
 
@@ -413,7 +334,7 @@
 	width: 100%;
 }
 
-.accordion-header::before {
+.accordion-header:before {
 		background-color: #000;
 		border-radius: 100%;
 		box-sizing: border-box;
@@ -433,7 +354,7 @@
 		padding-right: 1px;
 	}
 
-.accordion-header::after {
+.accordion-header:after {
 		content: '';
 		border-bottom: 1px solid #ddd;
 		position: absolute;
@@ -443,7 +364,7 @@
 		transform: translateY(-50%);
 	}
 
-.accordion-header.is-active::before {
+.accordion-header.is-active:before {
 			content: '\f460';
 			line-height: 15px;
 		}
@@ -487,7 +408,7 @@
 .tribe-common-c-loader.tribe-tickets-loader__tickets-block,
 	.tribe-common-c-loader.tribe-tickets-loader__modal {
 		align-items: center;
-		background: rgba(255,255,255, 0.6);
+		background: var(--tec-color-background-transparent);
 		display: flex;
 		height: 100%;
 		justify-content: center;
@@ -496,7 +417,7 @@
 		position: absolute;
 		top: 0;
 		width: 100%;
-		z-index: 100;
+		z-index: var(--tec-z-index-spinner-container);
 	}
 
 .tribe-common-c-loader.tribe-tickets-loader__modal {
@@ -507,7 +428,7 @@
 
 .event-tickets .tribe-common-c-loader {
 		align-items: center;
-		background: rgba(255,255,255, 0.6);
+		background: var(--tec-color-background-transparent);
 		display: flex;
 		height: 100%;
 		justify-content: center;
@@ -516,14 +437,14 @@
 		position: absolute;
 		top: 0;
 		width: 100%;
-		z-index: 100;
+		z-index: var(--tec-z-index-spinner-container);
 	}
 
 .tribe-common .tribe-tickets__notice {
-		padding: 16px;
-		background-color: #f7f6f6;
-		border-radius: 4px;
-		margin: 20px 0;
+		padding: var(--tec-spacer-3);
+		background-color: var(--tec-color-background-secondary);
+		border-radius: var(--tec-border-radius-default);
+		margin: var(--tec-spacer-4) 0;
 	}
 
 .tribe-common .tribe-tickets__notice > *:last-child {
@@ -545,7 +466,7 @@
 	*/
 
 .tribe-common .tribe-tickets__notice--error {
-		background-color: rgba(218,57,77, 0.08);
+		background-color: var(--tec-color-background-error);
 		display: none;
 		padding-left: 50px;
 	}
@@ -558,11 +479,11 @@
 			background-image: url( "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Cg fill='none' fill-rule='evenodd' transform='translate(1 1)'%3E%3Ccircle cx='8' cy='8' r='7.467' stroke='%23141827' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'/%3E%3Ccircle cx='8' cy='11.733' r='1.067' fill='%23141827' fill-rule='nonzero'/%3E%3Cpath stroke='%23141827' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M8 3.733v4.8' fill='%23141827'/%3E%3C/g%3E%3C/svg%3E" );
 			background-size: contain;
 			content: '';
-			height: 16px;
-			left: -32px;
+			height: var(--tec-spacer-3);
+			left: calc(var(--tec-spacer-7)*-1);
 			position: absolute;
 			top: 2px;
-			width: 16px;
+			width: var(--tec-spacer-3);
 		}
 
 /*
@@ -570,22 +491,22 @@
 	*/
 
 .tribe-common .tribe-tickets__notice--barred {
-		background-color: #fff;
-		border: 4px solid #e4e4e4;
+		background-color: var(--tec-color-background);
+		border: var(--tec-spacer-0) solid var(--tec-color-border-secondary);
 		border-bottom: 0;
 		border-radius: 0;
 		border-top: 0;
-		padding: 0 12px;
+		padding: 0 var(--tec-spacer-2);
 	}
 
 .tribe-common .tribe-tickets__notice--barred-left {
 		border-right: 0;
-		padding: 0 0 0 12px;
+		padding: 0 0 0 var(--tec-spacer-2);
 	}
 
 .tribe-common .tribe-tickets__notice--barred-right {
 		border-left: 0;
-		padding: 0 12px 0 0;
+		padding: 0 var(--tec-spacer-2) 0 0;
 	}
 
 /* -------------------------------------------------------------------------
@@ -606,12 +527,12 @@
 /* Defining our tooltipster theme. */
 
 .tooltipster-base.tribe-tickets-tooltip-theme {
-	background-color: #fff;
-	border: 1px solid #d5d5d5;
-	border-radius: 4px;
-	box-shadow: 0 2px 12px 0 rgba(0,0,0, 0.14);
+	background-color: var(--tec-color-background);
+	border: 1px solid var(--tec-color-border-default);
+	border-radius: var(--tec-border-radius-default);
+	box-shadow: var(--tec-box-shadow-tooltip);
 	height: auto !important;
-	padding: 24px;
+	padding: var(--tec-spacer-5);
 	max-width: 254px;
 }
 
@@ -624,7 +545,7 @@
 	}
 
 .tooltipster-base.tribe-tickets-tooltip-theme .tooltipster-box .tooltipster-content {
-			color: #141827;
+			color: var(--tec-color-text-primary);
 			overflow: inherit;
 			padding: 0;
 			word-break: break-word;
@@ -645,7 +566,7 @@
 	 * ----------------------------------------------------------------------------- */
 
 .tribe-common button.tribe-common-c-btn--small, .tribe-common input[type="button"].tribe-common-c-btn--small, .tribe-common input[type="submit"].tribe-common-c-btn--small, .tribe-common a.tribe-common-c-btn--small {
-			background-color: #334aff;
+			background-color: var(--tec-color-accent-primary);
 			padding: 11px 14px;
 			width: auto;
 		}
@@ -661,11 +582,11 @@
 	 * ----------------------------------------------------------------------------- */
 
 .tribe-common button.tribe-common-c-btn-link, .tribe-common input[type="button"].tribe-common-c-btn-link, .tribe-common input[type="submit"].tribe-common-c-btn-link, .tribe-common a.tribe-common-c-btn-link {
-			color: #141827;
-			font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-			font-size: 14px;
-			line-height: 1.62;
-			font-weight: 400;
+			color: var(--tec-color-text-primary);
+			font-family: var(--tec-font-family-sans-serif);
+			font-size: var(--tec-font-size-2);
+			line-height: var(--tec-line-height-3);
+			font-weight: var(--tec-font-weight-regular);
 			border: 0;
 			cursor: pointer;
 			display: inline-block;
@@ -676,7 +597,7 @@
 			background-color: transparent;
 			text-align: center;
 			text-decoration: underline;
-			transition: color 0.2s ease;
+			transition: var(--tec-transition-color);
 		}
 
 .tribe-common button.tribe-common-c-btn-link:hover,
@@ -693,7 +614,7 @@
 .tribe-common button.tribe-common-c-btn-link, .tribe-common input[type="button"].tribe-common-c-btn-link, .tribe-common input[type="submit"].tribe-common-c-btn-link, .tribe-common a.tribe-common-c-btn-link {
 
 			background-color: transparent;
-			color: #334aff;
+			color: var(--tec-color-accent-primary);
 			padding: 11px 20px;
 			width: 100%;
 }
@@ -706,33 +627,26 @@
 			.tribe-common input[type="submit"].tribe-common-c-btn-link:hover,
 			.tribe-common a.tribe-common-c-btn-link:focus,
 			.tribe-common a.tribe-common-c-btn-link:hover {
-				color: rgba(51,74,255, 0.8);
+				color: var(--tec-color-accent-primary-hover);
 			}
 
 .tribe-common button.tribe-common-c-btn-link:active, .tribe-common input[type="button"].tribe-common-c-btn-link:active, .tribe-common input[type="submit"].tribe-common-c-btn-link:active, .tribe-common a.tribe-common-c-btn-link:active {
-				color: rgba(51,74,255, 0.9);
+				color: var(--tec-color-accent-primary-active);
 			}
 
 .tribe-common button.tribe-common-c-btn-link:disabled, .tribe-common input[type="button"].tribe-common-c-btn-link:disabled, .tribe-common input[type="submit"].tribe-common-c-btn-link:disabled, .tribe-common a.tribe-common-c-btn-link:disabled {
-				color: rgba(51,74,255, 0.07);
+				color: var(--tec-color-accent-primary-background);
 			}
 
-/**
- * Ticket block view styles
- *
- * @since  0.3.0-alpha
- */
-
 .tribe-common.tribe-tickets {
-	background-color: #fff;
-	border-radius: 4px;
-	border: 1px solid #e4e4e4;
+	background-color: var(--tec-color-background);
+	border-radius: var(--tec-border-radius-default);
+	border: 1px solid var(--tec-color-border-secondary);
 	-moz-osx-font-smoothing: grayscale;
 	-webkit-font-smoothing: antialiased;
-	font-smoothing: antialiased;
-	margin: 24px 0;
+	margin: var(--tec-spacer-5) 0;
 	max-width: 580px;
-	padding: 16px 16px  20px;
+	padding: var(--tec-spacer-3) var(--tec-spacer-3)  var(--tec-spacer-4);
 	position: relative;
 	width: 100%;
 }
@@ -762,38 +676,46 @@
 .tribe_horizontal_datepicker__container .tribe_horizontal_datepicker {
 		width: 100%;
 		min-width: 80px;
-		margin-top: 8px;
-		margin-bottom: 8px;
+		margin-top: var(--tec-spacer-1);
+		margin-bottom: var(--tec-spacer-1);
 	}
 
 .tribe_horizontal_datepicker__container .tribe_horizontal_datepicker:not(:last-child) {
-			margin-right: 8px;
+			margin-right: var(--tec-spacer-1);
 		}
 
 .tribe_horizontal_datepicker__container .tribe_horizontal_datepicker select {
-			border: 1px solid #7d7d7d;
-			border-radius: 4px;
+			border: 1px solid var(--tec-form-color-border-secondary);
+			border-radius: var(--tec-border-radius-default);
 			width: 100%;
 		}
 
 .tribe_horizontal_datepicker__container .tribe_horizontal_datepicker select:focus {
-				border-color: rgba(20,24,39, 0.8);
+				border-color: var(--tec-color-accent-secondary-hover);
 			}
 
 .tribe_horizontal_datepicker__container .tribe_horizontal_datepicker select.ticket-meta__has-error {
-				border-color: #da394d ! important;
+				border-color: var(--tec-color-icon-error) !important;
 			}
 
 .tribe_horizontal_datepicker__container .tribe_horizontal_datepicker select {
-			color: #141827;
-			font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-			font-size: 12px;
-			font-weight: 400;
-			line-height: 1.38;
+
+			color: var(--tec-color-text-primary);
+
+			font-family: var(--tec-font-family-sans-serif);
+
+			font-size: var(--tec-font-size-1);
+
+			font-weight: var(--tec-font-weight-regular);
+
+			line-height: var(--tec-line-height-0);
+
 			-webkit-appearance: none;
+
 			   -moz-appearance: none;
+
 			        appearance: none;
-			background-color: #fff;
+			background-color: var(--tec-color-background);
 			background-image: url('../images/select.png');
 			background-position: right center;
 			background-repeat: no-repeat;
@@ -809,19 +731,19 @@
 }
 
 .tribe-common .tribe-tickets__title, .entry .entry-content .tribe-common .tribe-tickets__title {
-		color: #141827;
-		margin: 0 0 8px;
+		color: var(--tec-color-text-primary);
+		margin: 0 0 var(--tec-spacer-1);
 	}
 
 /* Override since we don't have a header at this size */
 
 .tribe-common .tribe-tickets__notice--barred, .entry .entry-content .tribe-common .tribe-tickets__notice--barred {
-		margin-bottom: 16px;
+		margin-bottom: var(--tec-spacer-3);
 	}
 
 .tribe-common .tribe-tickets__item, .entry .entry-content .tribe-common .tribe-tickets__item {
 		align-items: center;
-		border-top: 1px solid #e4e4e4;
+		border-top: 1px solid var(--tec-color-border-secondary);
 		display: -ms-grid;
 		display: grid;
 		-ms-grid-columns: 10fr 1fr;
@@ -832,8 +754,8 @@
 		padding: 12px 0 16px;
 	}
 
-.tribe-common .tribe-tickets__item[data-available="false"], .entry .entry-content .tribe-common .tribe-tickets__item[data-available="false"] {
-			opacity: .5;
+.tribe-common .tribe-tickets__item[data-available='false'], .entry .entry-content .tribe-common .tribe-tickets__item[data-available='false'] {
+			opacity: 0.5;
 		}
 
 .tribe-common .tribe-tickets__item.show-optout, .entry .entry-content .tribe-common .tribe-tickets__item.show-optout {
@@ -843,7 +765,7 @@
 			grid-template-rows: auto;
 		}
 
-/* V1 views had a typo in "suffix" so we cover both. */
+/* V1 views had a typo in 'suffix' so we cover both. */
 
 .tribe-common .tribe-tickets__item--inactive + .tribe-tickets__item--inactive, .entry .entry-content .tribe-common .tribe-tickets__item--inactive + .tribe-tickets__item--inactive {
 		display: none;
@@ -863,14 +785,14 @@
 	*/
 
 .tribe-common .tribe-tickets__item__details__content, .entry .entry-content .tribe-common .tribe-tickets__item__details__content {
-		color: #5d5d5d;
+		color: var(--tec-color-text-secondary);
 		display: none;
 		-ms-grid-column: 1;
 		grid-column: 1;
 		-ms-grid-row: 3;
 		grid-row: 3;
 		line-height: 1;
-		margin: 4px 0;
+		margin: var(--tec-spacer-0) 0;
 	}
 
 .tribe-common .tribe-tickets__item__details__content.tribe__details--open, .entry .entry-content .tribe-common .tribe-tickets__item__details__content.tribe__details--open {
@@ -878,7 +800,7 @@
 		}
 
 .tribe-common .tribe-tickets__item__details__summary, .entry .entry-content .tribe-common .tribe-tickets__item__details__summary {
-		color: #5d5d5d;
+		color: var(--tec-color-text-secondary);
 		display: -ms-grid;
 		display: grid;
 		-ms-grid-column: 2;
@@ -886,27 +808,27 @@
 		-ms-grid-row: 1;
 		grid-row: 1;
 		justify-content: flex-start;
-		padding-left: 4px;
+		padding-left: var(--tec-spacer-0);
 	}
 
 .tribe-common .tribe-tickets__item__details__summary--more,
 	.tribe-common .tribe-tickets__item__details__summary--less,
 	.entry .entry-content .tribe-common .tribe-tickets__item__details__summary--more,
 	.entry .entry-content .tribe-common .tribe-tickets__item__details__summary--less {
-		color: #141827;
-		font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-		font-size: 12px;
-		font-weight: 400;
-		line-height: 1.38;
+		color: var(--tec-color-text-primary);
+		font-family: var(--tec-font-family-sans-serif);
+		font-size: var(--tec-font-size-1);
+		font-weight: var(--tec-font-weight-regular);
+		line-height: var(--tec-line-height-0);
 
 		background-color: transparent;
-		color: #5d5d5d;
+		color: var(--tec-color-text-secondary);
 		position: relative;
 		white-space: nowrap;
 	}
 
 .tribe-common .tribe-tickets__item__details__summary--more:after, .tribe-common .tribe-tickets__item__details__summary--less:after, .entry .entry-content .tribe-common .tribe-tickets__item__details__summary--more:after, .entry .entry-content .tribe-common .tribe-tickets__item__details__summary--less:after {
-			border: 4px solid rgba(255,255,255, 0.6);
+			border: var(--tec-spacer-0) solid var(--tec-color-background-transparent);
 			content: '';
 			display: inline-block;
 			margin-bottom: 1px;
@@ -914,7 +836,7 @@
 
 .tribe-common .tribe-tickets__item__details__summary--more:after, .entry .entry-content .tribe-common .tribe-tickets__item__details__summary--more:after {
 			border-bottom: 0 none;
-			border-top: 4px solid #5d5d5d;
+			border-top: var(--tec-spacer-0) solid var(--tec-color-text-secondary);
 		}
 
 .tribe-common .tribe-tickets__item__details__summary--less, .entry .entry-content .tribe-common .tribe-tickets__item__details__summary--less {
@@ -922,7 +844,7 @@
 	}
 
 .tribe-common .tribe-tickets__item__details__summary--less:after, .entry .entry-content .tribe-common .tribe-tickets__item__details__summary--less:after {
-			border-bottom: 4px solid #5d5d5d;
+			border-bottom: var(--tec-spacer-0) solid var(--tec-color-text-secondary);
 			border-top: 0 none;
 		}
 
@@ -936,14 +858,14 @@
 		}
 
 /*
-		Block "extras"
+		Block 'extras'
 	*/
 
 .tribe-common .tribe-tickets__item__extra, .entry .entry-content .tribe-common .tribe-tickets__item__extra {
 		align-items: baseline;
 		-ms-grid-row: 2;
 		grid-row: 2;
-		-ms-grid-columns:  min-content max-content auto;
+		-ms-grid-columns: min-content max-content auto;
 		grid-template-columns: -webkit-min-content -webkit-max-content auto;
 		grid-template-columns: min-content max-content auto;
 	}
@@ -954,29 +876,28 @@
 		}
 
 .tribe-common .tribe-tickets__item__extra__available, .entry .entry-content .tribe-common .tribe-tickets__item__extra__available {
-		color: #5d5d5d;
+		color: var(--tec-color-text-secondary);
 	}
 
 .tribe-common .tribe-tickets__item__extra__price, .entry .entry-content .tribe-common .tribe-tickets__item__extra__price {
-
-		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 .tribe-common .tribe-tickets__item__extra__price .tribe-formatted-currency-wrap, .entry .entry-content .tribe-common .tribe-tickets__item__extra__price .tribe-formatted-currency-wrap {
-			font-weight: 700;
+			font-weight: var(--tec-font-weight-bold);
 		}
 
 .tribe-common .tribe-tickets__item__extra__price .tribe-tickets__original_price, .entry .entry-content .tribe-common .tribe-tickets__item__extra__price .tribe-tickets__original_price {
-			color: #5d5d5d;
-			font-weight: 400;
+			color: var(--tec-color-text-secondary);
+			font-weight: var(--tec-font-weight-regular);
 			text-decoration: line-through;
 		}
 
 .tribe-common .tribe-tickets__sale-price-suffix, .entry .entry-content .tribe-common .tribe-tickets__sale-price-suffix {
-		color: #5d5d5d;
-		font-weight: 400;
+		color: var(--tec-color-text-secondary);
+		font-weight: var(--tec-font-weight-regular);
 	}
 
 .tribe-common .tribe-tickets__sale-price-suffix small, .entry .entry-content .tribe-common .tribe-tickets__sale-price-suffix small {
@@ -994,7 +915,7 @@
 
 .tribe-common .tribe-tickets__item__quantity, .entry .entry-content .tribe-common .tribe-tickets__item__quantity {
 		align-self: flex-start;
-		color: #5d5d5d;
+		color: var(--tec-color-text-secondary);
 		display: flex;
 		flex: 0 0 82px;
 		-ms-grid-row: 1;
@@ -1005,7 +926,7 @@
 		justify-content: center;
 	}
 
-.tribe-common .tribe-tickets__item[data-available="false"] .tribe-tickets__item__quantity, .entry .entry-content .tribe-common .tribe-tickets__item[data-available="false"] .tribe-tickets__item__quantity {
+.tribe-common .tribe-tickets__item[data-available='false'] .tribe-tickets__item__quantity, .entry .entry-content .tribe-common .tribe-tickets__item[data-available='false'] .tribe-tickets__item__quantity {
 		align-self: center;
 	}
 
@@ -1015,11 +936,11 @@
 	.entry .entry-content .tribe-common .tribe-tickets__item__quantity__remove {
 		align-self: center;
 		background-color: transparent;
-		color: #bababa;
+		color: var(--tec-color-icon-secondary);
 		display: inline-block;
 		font-size: 24px;
-		font-weight: 400;
-		margin-bottom: 4px;
+		font-weight: var(--tec-font-weight-regular);
+		margin-bottom: var(--tec-spacer-0);
 		width: 12px;
 	}
 
@@ -1032,7 +953,7 @@
 		.entry .entry-content .tribe-common .tribe-tickets__item__quantity__remove:hover,
 		.entry .entry-content .tribe-common .tribe-tickets__item__quantity__remove:focus {
 			background-color: transparent;
-			color: #5d5d5d;
+			color: var(--tec-color-icon-primary);
 		}
 
 .tribe-common .tribe-tickets__item__quantity__number, .entry .entry-content .tribe-common .tribe-tickets__item__quantity__number {
@@ -1043,19 +964,19 @@
 		background-color: transparent;
 		border: none;
 		cursor: pointer;
-		color: #bababa;
+		color: var(--tec-color-icon-secondary);
 		display: inline-flex;
 		height: 48px;
 		justify-content: center;
 		margin: 0;
-		outline:none;
+		outline: none;
 		overflow: hidden;
 		position: relative;
 		width: 40px;
 	}
 
 .tribe-common .tribe-tickets__item__quantity__unavailable, .entry .entry-content .tribe-common .tribe-tickets__item__quantity__unavailable {
-		margin-left: 8px;
+		margin-left: var(--tec-spacer-1);
 		white-space: nowrap;
 	}
 
@@ -1065,7 +986,7 @@
 		        appearance: textfield;
 		background: transparent;
 		border: none;
-		color: #141827;
+		color: var(--tec-color-text-primary);
 		padding: 0;
 		text-align: center;
 		width: -webkit-fit-content;
@@ -1081,11 +1002,11 @@
 		}
 
 .tribe-common .tribe-tickets-quantity:focus, .entry .entry-content .tribe-common .tribe-tickets-quantity:focus {
-			color: #141827;
+			color: var(--tec-color-text-primary);
 		}
 
 .tribe-common .tribe-tickets-quantity.tribe-tickets__item__quantity__number--active, .entry .entry-content .tribe-common .tribe-tickets-quantity.tribe-tickets__item__quantity__number--active {
-			color: #141827;
+			color: var(--tec-color-text-primary);
 		}
 
 .tribe-common.tribe-tickets .tribe-common-form-control-radio__input,
@@ -1100,9 +1021,9 @@
 		.entry .entry-content .tribe-common.event-tickets .tribe-common-form-control-checkbox__input,
 		.entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-radio__input,
 		.entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__input {
-			border-color: #7d7d7d;
+			border-color: var(--tec-form-color-border-secondary);
 			border-width: 1px;
-			margin-right: 8px;
+			margin-right: var(--tec-spacer-1);
 		}
 
 .tribe-common.tribe-tickets .tribe-common-form-control-radio__input:active,
@@ -1129,24 +1050,24 @@
 			.entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-radio__input:hover,
 			.entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__input:active,
 			.entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__input:hover {
-				border-color: #7d7d7d;
+				border-color: var(--tec-form-color-border-secondary);
 			}
 
 .tribe-common.tribe-tickets .tribe-common-form-control-radio__input:focus, .tribe-common.tribe-tickets .tribe-common-form-control-checkbox__input:focus, .tribe-common.event-tickets .tribe-common-form-control-radio__input:focus, .tribe-common.event-tickets .tribe-common-form-control-checkbox__input:focus, .tribe-common .tribe-ticket .tribe-common-form-control-radio__input:focus, .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__input:focus, .entry .entry-content .tribe-common.tribe-tickets .tribe-common-form-control-radio__input:focus, .entry .entry-content .tribe-common.tribe-tickets .tribe-common-form-control-checkbox__input:focus, .entry .entry-content .tribe-common.event-tickets .tribe-common-form-control-radio__input:focus, .entry .entry-content .tribe-common.event-tickets .tribe-common-form-control-checkbox__input:focus, .entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-radio__input:focus, .entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__input:focus {
-				border-color: var(--form-color-border-primary);
+				border-color: var(--tec-form-color-border-primary);
 			}
 
 .tribe-common.tribe-tickets .tribe-common-form-control-radio__input:checked, .tribe-common.tribe-tickets .tribe-common-form-control-checkbox__input:checked, .tribe-common.event-tickets .tribe-common-form-control-radio__input:checked, .tribe-common.event-tickets .tribe-common-form-control-checkbox__input:checked, .tribe-common .tribe-ticket .tribe-common-form-control-radio__input:checked, .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__input:checked, .entry .entry-content .tribe-common.tribe-tickets .tribe-common-form-control-radio__input:checked, .entry .entry-content .tribe-common.tribe-tickets .tribe-common-form-control-checkbox__input:checked, .entry .entry-content .tribe-common.event-tickets .tribe-common-form-control-radio__input:checked, .entry .entry-content .tribe-common.event-tickets .tribe-common-form-control-checkbox__input:checked, .entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-radio__input:checked, .entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__input:checked {
-				background-color: #334aff;
-				border-color: #334aff;
+				background-color: var(--tec-color-icon-focus);
+				border-color: var(--tec-color-icon-focus);
 			}
 
 .tribe-common.tribe-tickets .tribe-common-form-control-radio__input.ticket-meta__has-error, .tribe-common.tribe-tickets .tribe-common-form-control-checkbox__input.ticket-meta__has-error, .tribe-common.event-tickets .tribe-common-form-control-radio__input.ticket-meta__has-error, .tribe-common.event-tickets .tribe-common-form-control-checkbox__input.ticket-meta__has-error, .tribe-common .tribe-ticket .tribe-common-form-control-radio__input.ticket-meta__has-error, .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__input.ticket-meta__has-error, .entry .entry-content .tribe-common.tribe-tickets .tribe-common-form-control-radio__input.ticket-meta__has-error, .entry .entry-content .tribe-common.tribe-tickets .tribe-common-form-control-checkbox__input.ticket-meta__has-error, .entry .entry-content .tribe-common.event-tickets .tribe-common-form-control-radio__input.ticket-meta__has-error, .entry .entry-content .tribe-common.event-tickets .tribe-common-form-control-checkbox__input.ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-radio__input.ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__input.ticket-meta__has-error {
-				border-color: #da394d ! important;
+				border-color: var(--tec-color-icon-error) !important;
 			}
 
 .tribe-common.tribe-tickets .tribe-common-form-control-checkbox__input, .tribe-common.event-tickets .tribe-common-form-control-checkbox__input, .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__input, .entry .entry-content .tribe-common.tribe-tickets .tribe-common-form-control-checkbox__input, .entry .entry-content .tribe-common.event-tickets .tribe-common-form-control-checkbox__input, .entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__input {
-			border-radius: 4px;
+			border-radius: var(--tec-border-radius-default);
 		}
 
 .tribe-common.tribe-tickets .tribe-common-form-control-checkbox__label, .tribe-common.event-tickets .tribe-common-form-control-checkbox__label, .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__label, .entry .entry-content .tribe-common.tribe-tickets .tribe-common-form-control-checkbox__label, .entry .entry-content .tribe-common.event-tickets .tribe-common-form-control-checkbox__label, .entry .entry-content .tribe-common .tribe-ticket .tribe-common-form-control-checkbox__label {
@@ -1163,7 +1084,7 @@
 	}
 
 .tribe-common .tribe-tickets-attendees-list-optout--wrapper label, .entry .entry-content .tribe-common .tribe-tickets-attendees-list-optout--wrapper label {
-			font-size: 12px;
+			font-size: var(--tec-font-size-1);
 		}
 
 .tribe-common .tribe-tickets__item.show-optout .tribe-tickets-attendees-list-optout--wrapper, .entry .entry-content .tribe-common .tribe-tickets__item.show-optout .tribe-tickets-attendees-list-optout--wrapper {
@@ -1176,8 +1097,8 @@
 
 .tribe-common .tribe-tickets__footer, .entry .entry-content .tribe-common .tribe-tickets__footer {
 		align-items: baseline;
-		border-top: 1px solid #e4e4e4;
-		padding: 20px 0 0;
+		border-top: 1px solid var(--tec-color-border-secondary);
+		padding: var(--tec-spacer-4) 0 0;
 		display: flex;
 		flex-flow: row nowrap;
 		justify-content: flex-end;
@@ -1187,7 +1108,7 @@
 	.tribe-common .tribe-tickets__footer__quantity,
 	.entry .entry-content .tribe-common .tribe-tickets__footer__total,
 	.entry .entry-content .tribe-common .tribe-tickets__footer__quantity {
-		color: #5d5d5d;
+		color: var(--tec-color-text-secondary);
 		display: none;
 		text-align: center;
 	}
@@ -1204,7 +1125,7 @@
 		}
 
 .tribe-common .tribe-tickets__footer__total, .entry .entry-content .tribe-common .tribe-tickets__footer__total {
-		margin-left: 8px;
+		margin-left: var(--tec-spacer-1);
 	}
 
 .tribe-common .tribe-tickets__footer__total__wrap,
@@ -1213,20 +1134,20 @@
 	.entry .entry-content .tribe-common .tribe-tickets__footer__total__wrap,
 	.entry .entry-content .tribe-common .tribe-tickets__footer__total__number,
 	.entry .entry-content .tribe-common .tribe-tickets__footer__quantity__number {
-		color: #141827;
-		font-weight: 700;
+		color: var(--tec-color-text-primary);
+		font-weight: var(--tec-font-weight-bold);
 	}
 
 .tribe-common .tribe-tickets__attendee__fields__footer_checkout-button,
 	.tribe-common .tribe-tickets__buy,
 	.entry .entry-content .tribe-common .tribe-tickets__attendee__fields__footer_checkout-button,
 	.entry .entry-content .tribe-common .tribe-tickets__buy {
-		color: #141827;
-		font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-		font-size: 14px;
-		line-height: 1.62;
-		font-weight: 400;
-		font-weight: 700;
+		color: var(--tec-color-text-primary);
+		font-family: var(--tec-font-family-sans-serif);
+		font-size: var(--tec-font-size-2);
+		line-height: var(--tec-line-height-3);
+		font-weight: var(--tec-font-weight-regular);
+		font-weight: var(--tec-font-weight-bold);
 		border: 0;
 		cursor: pointer;
 		display: inline-block;
@@ -1234,10 +1155,11 @@
 		padding: 0;
 		text-decoration: none;
 		width: auto;
-		border-radius: 4px;
-		color: #fff;
+		border-radius: var(--tec-border-radius-default);
+		color: var(--tec-color-background);
 		text-align: center;
-		transition: background-color 0.2s ease;
+		transition: var(--tec-transition-background-color);
+
 		margin: 0;
 	}
 
@@ -1254,15 +1176,15 @@
 			.entry .entry-content .tribe-common .tribe-tickets__attendee__fields__footer_checkout-button.tribe-common-c-btn:hover,
 			.entry .entry-content .tribe-common .tribe-tickets__buy.tribe-common-c-btn:focus,
 			.entry .entry-content .tribe-common .tribe-tickets__buy.tribe-common-c-btn:hover {
-				background-color: rgba(51,74,255, 0.8);
+				background-color: var(--tec-color-accent-primary-hover);
 			}
 
 .tribe-common .tribe-tickets__attendee__fields__footer_checkout-button.tribe-common-c-btn:active, .tribe-common .tribe-tickets__buy.tribe-common-c-btn:active, .entry .entry-content .tribe-common .tribe-tickets__attendee__fields__footer_checkout-button.tribe-common-c-btn:active, .entry .entry-content .tribe-common .tribe-tickets__buy.tribe-common-c-btn:active {
-				background-color: rgba(51,74,255, 0.9);
+				background-color: var(--tec-color-accent-primary-active);
 			}
 
 .tribe-common .tribe-tickets__attendee__fields__footer_checkout-button.tribe-common-c-btn:disabled, .tribe-common .tribe-tickets__buy.tribe-common-c-btn:disabled, .entry .entry-content .tribe-common .tribe-tickets__attendee__fields__footer_checkout-button.tribe-common-c-btn:disabled, .entry .entry-content .tribe-common .tribe-tickets__buy.tribe-common-c-btn:disabled {
-				background-color: #334aff;
+				background-color: var(--tec-color-accent-primary);
 				cursor: not-allowed;
 			}
 
@@ -1271,8 +1193,8 @@
 	*/
 
 .tribe-common .tribe-tickets__item__disabled *, .entry .entry-content .tribe-common .tribe-tickets__item__disabled * {
-			color: rgba( #141827, 0.8);
-			color: rgba(0,0,0, 0.5);
+			color: var(--tec-color-text-disabled);
+			color: var(--tec-color-scroll-bar);
 		}
 
 .tribe-common .tribe-tickets__item__disabled .tribe-tickets__item__quantity,
@@ -1283,8 +1205,8 @@
 		.entry .entry-content .tribe-common .tribe-tickets__item__disabled .tribe-tickets__item__quantity__add,
 		.entry .entry-content .tribe-common .tribe-tickets__item__disabled .tribe-tickets__item__quantity__remove,
 		.entry .entry-content .tribe-common .tribe-tickets__item__disabled .tribe-tickets__item__quantity__number .tribe-tickets-quantity {
-			color: rgba( #141827, 0.8);
-			color: rgba(0,0,0, 0.5);
+			color: var(--tec-color-text-disabled);
+			color: var(--tec-color-scroll-bar);
 		}
 
 /*
@@ -1292,18 +1214,18 @@
 	*/
 
 .tribe-common .tribe-tickets__item__attendee__fields, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields {
-		margin-top: 24px;
+		margin-top: var(--tec-spacer-5);
 	}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__title, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__title {
-			margin-bottom: 20px;
+			margin-bottom: var(--tec-spacer-4);
 		}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket {
-			border: solid #e4e4e4;
+			border: solid var(--tec-color-border-secondary);
 			border-width: 1px 1px 1px 4px;
 			clear: both;
-			padding: 16px;
+			padding: var(--tec-spacer-3);
 			position: relative;
 		}
 
@@ -1311,13 +1233,13 @@
 			.tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket:before,
 			.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket:after,
 			.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket:before {
-				background: #e4e4e4;
+				background: var(--tec-color-border-secondary);
 				content: '';
 				display: block;
-				height: 4px;
-				left: -4px;
+				height: var(--tec-spacer-0);
+				left: calc(var(--tec-spacer-0)*-1);
 				position: absolute;
-				width: 4px;
+				width: var(--tec-spacer-0);
 			}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket:after, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket:after {
@@ -1329,35 +1251,35 @@
 			}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket.tribe-ticket-item__has-focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket.tribe-ticket-item__has-focus {
-				border-left-color: #334aff;
+				border-left-color: var(--tec-color-icon-focus);
 			}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket.tribe-ticket-item__has-focus:after,
 				.tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket.tribe-ticket-item__has-focus:before,
 				.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket.tribe-ticket-item__has-focus:after,
 				.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket.tribe-ticket-item__has-focus:before {
-					background: #334aff;
+					background: var(--tec-color-icon-focus);
 				}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket.tribe-ticket-item__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket.tribe-ticket-item__has-error {
-				border-left-color: #da394d ! important;
+				border-left-color: var(--tec-color-icon-error) !important;
 			}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket.tribe-ticket-item__has-error:after,
 				.tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket.tribe-ticket-item__has-error:before,
 				.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket.tribe-ticket-item__has-error:after,
 				.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket.tribe-ticket-item__has-error:before {
-					background: #da394d ! important;
+					background: var(--tec-color-icon-error) !important;
 				}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket + .tribe-ticket, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-ticket + .tribe-ticket {
-				margin-top: 16px;
+				margin-top: var(--tec-spacer-3);
 			}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-field, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-field {
 			display: flex;
 			flex-flow: column nowrap;
-			margin-bottom: 16px;
+			margin-bottom: var(--tec-spacer-3);
 		}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-field:last-child, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-field:last-child {
@@ -1377,26 +1299,26 @@
 
 /* Overrides ET+ */
 
-.tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets-meta-required header:first-child::after,
-			.tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets-meta-required label:first-child::after,
-			.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets-meta-required header:first-child::after,
-			.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets-meta-required label:first-child::after {
+.tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets-meta-required header:first-child:after,
+			.tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets-meta-required label:first-child:after,
+			.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets-meta-required header:first-child:after,
+			.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets-meta-required label:first-child:after {
 				content: '';
 			}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-required, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-required {
 			color: red;
-			margin-left: 4px;
+			margin-left: var(--tec-spacer-0);
 		}
 
 .tribe-common .tribe-tickets__item__attendee__fields label,
 		.tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets-meta-label,
 		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields label,
 		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets-meta-label {
-			color: #141827;
+			color: var(--tec-color-text-primary);
 			display: block;
-			font-weight: 400;
-			margin-bottom: 4px;
+			font-weight: var(--tec-font-weight-regular);
+			margin-bottom: var(--tec-spacer-0);
 			width: 134px;
 		}
 
@@ -1404,68 +1326,71 @@
 				cursor: pointer;
 				display: inline-block;
 				margin-bottom: 0;
-				margin-right: 20px;
+				margin-right: var(--tec-spacer-4);
 			}
 
-.tribe-common .tribe-tickets__item__attendee__fields input[type="text"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="email"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="url"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="password"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="search"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="number"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="tel"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="range"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="date"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="month"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="week"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="time"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="datetime"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="datetime-local"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="color"],
+.tribe-common .tribe-tickets__item__attendee__fields input[type='text'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='email'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='url'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='password'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='search'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='number'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='tel'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='range'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='date'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='month'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='week'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='time'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='datetime'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='datetime-local'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='color'],
 		.tribe-common .tribe-tickets__item__attendee__fields select,
 		.tribe-common .tribe-tickets__item__attendee__fields textarea,
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="text"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="email"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="url"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="password"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="search"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="number"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="tel"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="range"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="date"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="month"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="week"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="time"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="datetime"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="datetime-local"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="color"],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='text'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='email'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='url'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='password'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='search'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='number'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='tel'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='range'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='date'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='month'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='week'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='time'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='datetime'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='datetime-local'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='color'],
 		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields select,
 		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields textarea {
-			border-color: #7d7d7d;
-			border-radius: 4px;
+			border-color: var(--tec-form-color-border-secondary);
+			border-radius: var(--tec-border-radius-default);
 			border-style: solid;
 			border-width: 1px;
 			width: 100%;
 		}
 
-.tribe-common .tribe-tickets__item__attendee__fields input[type="text"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="email"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="url"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="password"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="search"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="number"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="tel"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="range"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="date"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="month"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="week"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="time"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="datetime"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="datetime-local"]:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type="color"]:focus, .tribe-common .tribe-tickets__item__attendee__fields select:focus, .tribe-common .tribe-tickets__item__attendee__fields textarea:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="text"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="email"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="url"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="password"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="search"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="number"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="tel"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="range"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="date"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="month"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="week"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="time"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="datetime"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="datetime-local"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="color"]:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields select:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields textarea:focus {
-				border-color: rgba(20,24,39, 0.8);
+.tribe-common .tribe-tickets__item__attendee__fields input[type='text']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='email']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='url']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='password']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='search']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='number']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='tel']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='range']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='date']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='month']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='week']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='time']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='datetime']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='datetime-local']:focus, .tribe-common .tribe-tickets__item__attendee__fields input[type='color']:focus, .tribe-common .tribe-tickets__item__attendee__fields select:focus, .tribe-common .tribe-tickets__item__attendee__fields textarea:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='text']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='email']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='url']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='password']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='search']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='number']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='tel']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='range']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='date']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='month']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='week']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='time']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='datetime']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='datetime-local']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='color']:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields select:focus, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields textarea:focus {
+				border-color: var(--tec-color-accent-secondary-hover);
 			}
 
-.tribe-common .tribe-tickets__item__attendee__fields input[type="text"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="email"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="url"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="password"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="search"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="number"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="tel"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="range"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="date"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="month"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="week"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="time"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="datetime"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="datetime-local"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type="color"].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields select.ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields textarea.ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="text"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="email"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="url"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="password"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="search"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="number"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="tel"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="range"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="date"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="month"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="week"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="time"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="datetime"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="datetime-local"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="color"].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields select.ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields textarea.ticket-meta__has-error {
-				border-color: #da394d ! important;
+.tribe-common .tribe-tickets__item__attendee__fields input[type='text'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='email'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='url'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='password'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='search'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='number'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='tel'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='range'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='date'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='month'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='week'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='time'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='datetime'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='datetime-local'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields input[type='color'].ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields select.ticket-meta__has-error, .tribe-common .tribe-tickets__item__attendee__fields textarea.ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='text'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='email'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='url'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='password'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='search'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='number'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='tel'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='range'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='date'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='month'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='week'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='time'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='datetime'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='datetime-local'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='color'].ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields select.ticket-meta__has-error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields textarea.ticket-meta__has-error {
+				border-color: var(--tec-color-icon-error) !important;
 			}
 
 .tribe-common .tribe-tickets__item__attendee__fields select, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields select {
-			color: #141827;
-			font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-			font-size: 12px;
-			font-weight: 400;
-			line-height: 1.38;
+			color: var(--tec-color-text-primary);
+			font-family: var(--tec-font-family-sans-serif);
+			font-size: var(--tec-font-size-1);
+			font-weight: var(--tec-font-weight-regular);
+			line-height: var(--tec-line-height-0);
+
 			-webkit-appearance: none;
+
 			   -moz-appearance: none;
+
 			        appearance: none;
-			background-color: #fff;
+			background-color: var(--tec-color-background);
 			background-image: url('../images/select.png');
 			background-position: right center;
 			background-repeat: no-repeat;
@@ -1475,14 +1400,14 @@
 		}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-options, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-options {
-			overflow:hidden;
+			overflow: hidden;
 			width: 100%;
 		}
 
 /* Field-type specific */
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-common-form-control-checkbox-radio-group > *, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-common-form-control-checkbox-radio-group > * {
-				margin-bottom: 4px;
+				margin-bottom: var(--tec-spacer-0);
 			}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-common-form-control-checkbox-radio-group label,
@@ -1495,7 +1420,7 @@
 			}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-common-form-control-text__input, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-common-form-control-text__input {
-			padding: 8px 16px;
+			padding: var(--tec-spacer-1) var(--tec-spacer-3);
 		}
 
 /* Notices */
@@ -1503,17 +1428,17 @@
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__error, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__error {
 			color: red;
 			display: none;
-			padding: 30px 0 0 0;
+			padding: 30px 0 0;
 		}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__success, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__success {
 			color: #19d900;
 			display: none;
-			padding: 30px 0 0 0;
+			padding: 30px 0 0;
 		}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__loader, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__loader {
-			background: rgba(255,255,255, 0.6);
+			background: var(--tec-color-background-transparent);
 			display: none;
 			height: 100%;
 			left: 0;
@@ -1537,18 +1462,18 @@
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__container.tribe-tickets--has-tickets, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__container.tribe-tickets--has-tickets {
 				display: block;
-				margin-bottom: 16px;
+				margin-bottom: var(--tec-spacer-3);
 			}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__container + .tribe-tickets__item__attendee__fields__container, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__container + .tribe-tickets__item__attendee__fields__container {
-				margin-top: 24px;
+				margin-top: var(--tec-spacer-5);
 			}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__button--next, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__button--next {
 			align-items: center;
-			border: 1px solid #e4e4e4;
-			background-color: #334aff;
-			color: #fff;
+			border: 1px solid var(--tec-color-border-secondary);
+			background-color: var(--tec-color-accent-primary);
+			color: var(--tec-color-background);
 			display: inline-flex;
 			justify-content: center;
 			min-height: 54px;
@@ -1556,7 +1481,7 @@
 		}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__button--next:hover, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__button--next:hover {
-				color: #fff;
+				color: var(--tec-color-background);
 			}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__footer, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__footer {
@@ -1566,9 +1491,9 @@
 		}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__footer__divider, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__footer__divider {
-			color: #5d5d5d;
-			font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-			margin-right: 20px;
+			color: var(--tec-color-text-secondary);
+			font-family: var(--tec-font-family-sans-serif);
+			margin-right: var(--tec-spacer-4);
 		}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__footer_submit, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__fields__footer_submit {
@@ -1581,25 +1506,19 @@
 	*/
 
 .tribe-common .tribe-tickets__registration, .entry .entry-content .tribe-common .tribe-tickets__registration {
-		border: 1px solid #e4e4e4;
-	}
-
-.tribe-common .tribe-tickets__registration__summary, .entry .entry-content .tribe-common .tribe-tickets__registration__summary {
+		border: 1px solid var(--tec-color-border-secondary);
 	}
 
 .tribe-common .tribe-tickets__registration__title h2, .entry .entry-content .tribe-common .tribe-tickets__registration__title h2 {
-			color: #141827;
+			color: var(--tec-color-text-primary);
 		}
 
 .tribe-common .tribe-tickets__registration__description, .entry .entry-content .tribe-common .tribe-tickets__registration__description {
 		margin-top: 10px;
 	}
 
-.tribe-common .tribe-tickets__registration__tickets, .entry .entry-content .tribe-common .tribe-tickets__registration__tickets {
-	}
-
 .tribe-common .tribe-tickets__registration__tickets__item, .entry .entry-content .tribe-common .tribe-tickets__registration__tickets__item {
-		border-bottom: 1px solid #e4e4e4;
+		border-bottom: 1px solid var(--tec-color-border-secondary);
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
@@ -1631,7 +1550,7 @@
 	}
 
 .tribe-common .tribe-ticket__heading, .entry .entry-content .tribe-common .tribe-ticket__heading {
-		margin-bottom: 16px;
+		margin-bottom: var(--tec-spacer-3);
 	}
 
 /*
@@ -1639,11 +1558,11 @@
 	*/
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar {
-		background-color: #fff;
+		background-color: var(--tec-color-background);
 		border-radius: 0;
 		height: 100%;
 		max-width: 100vw;
-		padding: 24px;
+		padding: var(--tec-spacer-5);
 		width: 800px;
 	}
 
@@ -1658,14 +1577,14 @@
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item {
 				-ms-grid-columns: 5fr 1fr 1fr 2fr;
 				grid-template-columns: 5fr 1fr 1fr 2fr;
-				padding-top: 16px;
+				padding-top: var(--tec-spacer-3);
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__total__wrap, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__total__wrap {
 				align-self: stretch;
 				display: flex;
 				justify-content: flex-end;
-				min-width: 40px;
+				min-width: var(--tec-spacer-8);
 				width: -webkit-fit-content;
 				width: -moz-fit-content;
 				width: fit-content;
@@ -1680,7 +1599,7 @@
 				align-content: center;
 				align-self: stretch;
 				display: none;
-				width: 20px;
+				width: var(--tec-spacer-4);
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__remove, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__remove {
@@ -1690,8 +1609,8 @@
 				background-repeat: no-repeat;
 				background-size: contain;
 				border-radius: 50%;
-				height: 20px;
-				width: 20px;
+				height: var(--tec-spacer-4);
+				width: var(--tec-spacer-4);
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__remove:hover,
@@ -1705,8 +1624,8 @@
 				}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__content__title, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__content__title {
-				font-size: 12px;
-				line-height: 1.38;
+				font-size: var(--tec-font-size-1);
+				line-height: var(--tec-line-height-0);
 
 				-ms-grid-column: 1;
 				grid-column: 1;
@@ -1731,7 +1650,7 @@
 				-ms-grid-row: 1;
 				-ms-grid-row-span: 2;
 				grid-row: 1 /span 2;
-				-ms-grid-columns:  auto;
+				-ms-grid-columns: auto;
 				grid-template-columns: auto;
 				-ms-grid-rows: auto;
 				grid-template-rows: auto;
@@ -1739,11 +1658,11 @@
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__extra__price, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__extra__price {
-				color: #141827;
-				font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-				font-size: 14px;
-				font-weight: 400;
-				line-height: 1.62;
+				color: var(--tec-color-text-primary);
+				font-family: var(--tec-font-family-sans-serif);
+				font-size: var(--tec-font-size-2);
+				font-weight: var(--tec-font-weight-regular);
+				line-height: var(--tec-line-height-3);
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__extra__available, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__extra__available {
@@ -1765,15 +1684,15 @@
 				grid-column: 1 / span 4;
 				-ms-grid-row: 3;
 				grid-row: 3;
-				margin: 4px 0;
+				margin: var(--tec-spacer-0) 0;
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__quantity, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__quantity {
-				color: #141827;
-				font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-				font-weight: 700;
-				font-size: 16px;
-				line-height: 1.5;
+				color: var(--tec-color-text-primary);
+				font-family: var(--tec-font-family-sans-serif);
+				font-weight: var(--tec-font-weight-bold);
+				font-size: var(--tec-font-size-3);
+				line-height: var(--tec-line-height-2);
 
 				flex: 0 0 64px;
 				-ms-grid-column: 3;
@@ -1784,25 +1703,27 @@
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__quantity__number, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__quantity__number {
-				color: #141827;
-				font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-				font-size: 12px;
-				font-weight: 400;
-				line-height: 1.38;
-				border: 1px solid #d5d5d5;
-				border-radius: 4px;
+				color: var(--tec-color-text-primary);
+				font-family: var(--tec-font-family-sans-serif);
+				font-size: var(--tec-font-size-1);
+				font-weight: var(--tec-font-weight-regular);
+				line-height: var(--tec-line-height-0);
+
+				border: 1px solid var(--tec-color-border-default);
+				border-radius: var(--tec-border-radius-default);
 				height: 40px;
-				margin: 0 12px;
+				margin: 0 var(--tec-spacer-2);
 				width: 44px;
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets-quantity, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets-quantity {
-				color: #141827;
-				font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-				font-size: 12px;
-				font-weight: 400;
-				line-height: 1.38;
-				font-weight: 400;
+				color: var(--tec-color-text-primary);
+				font-family: var(--tec-font-family-sans-serif);
+				font-size: var(--tec-font-size-1);
+				font-weight: var(--tec-font-weight-regular);
+				line-height: var(--tec-line-height-0);
+
+				font-weight: var(--tec-font-weight-regular);
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets-attendees-list-optout--wrapper, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets-attendees-list-optout--wrapper {
@@ -1817,11 +1738,11 @@
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__total__wrap, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__total__wrap {
-				color: #141827;
-				font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-				font-size: 14px;
-				font-weight: 400;
-				line-height: 1.62;
+				color: var(--tec-color-text-primary);
+				font-family: var(--tec-font-family-sans-serif);
+				font-size: var(--tec-font-size-2);
+				font-weight: var(--tec-font-weight-regular);
+				line-height: var(--tec-line-height-3);
 
 				-ms-grid-column: 4;
 				grid-column: 4;
@@ -1836,25 +1757,25 @@
 			.tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__footer__total,
 			.entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__footer__quantity,
 			.entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__footer__total {
-				color: #141827;
-				font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-				font-size: 14px;
-				font-weight: 400;
-				line-height: 1.62;
+				color: var(--tec-color-text-primary);
+				font-family: var(--tec-font-family-sans-serif);
+				font-size: var(--tec-font-size-2);
+				font-weight: var(--tec-font-weight-regular);
+				line-height: var(--tec-line-height-3);
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-tickets__item__attendee__fields__form, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-tickets__item__attendee__fields__form {
-			margin-bottom: 24px;
+			margin-bottom: var(--tec-spacer-5);
 		}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-tickets__attendee__title, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-tickets__attendee__title {
-			margin-bottom: 8px;
+			margin-bottom: var(--tec-spacer-1);
 		}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-block__tickets__item__attendee__fields__footer__divider, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-block__tickets__item__attendee__fields__footer__divider {
-			color: #5d5d5d;
-			font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-			margin-right: 16px;
+			color: var(--tec-color-text-secondary);
+			font-family: var(--tec-font-family-sans-serif);
+			margin-right: var(--tec-spacer-3);
 		}
 
 /* Hide the cart button and divider text for TC */
@@ -1883,10 +1804,9 @@
 		}
 
 .tribe-common.tribe-tickets {
-		padding: 24px 24px 20px
+		padding: var(--tec-spacer-5) var(--tec-spacer-5) var(--tec-spacer-4)
 }
 	/* Attendee Registration Page */
-
 		#tribe-tickets__registration__form .tribe_horizontal_datepicker__container {
 			display: flex;
 			align-items: flex-start;
@@ -1901,7 +1821,7 @@
 			}
 
 .tribe-common .tribe-tickets__title, .entry .entry-content .tribe-common .tribe-tickets__title {
-			font-size: 20px
+			font-size: var(--tec-font-size-5)
 	}
 
 .tribe-common .tribe-tickets__item, .entry .entry-content .tribe-common .tribe-tickets__item {
@@ -1953,8 +1873,8 @@
 				visibility: hidden
 		}
 			.tribe-tickets.tribe-common .tribe-tickets__item__details__summary--more, .tribe-tickets.tribe-common .tribe-tickets__item__details__summary--less, .tribe-tickets.entry .entry-content .tribe-common .tribe-tickets__item__details__summary--more, .tribe-tickets.entry .entry-content .tribe-common .tribe-tickets__item__details__summary--less {
-					display: none !important;
-					visibility: hidden;
+				display: none !important;
+				visibility: hidden;
 			}
 
 .tribe-common .tribe-tickets__item__extra, .entry .entry-content .tribe-common .tribe-tickets__item__extra {
@@ -1965,8 +1885,7 @@
 			grid-row-start: 1;
 			-ms-grid-row-end: 3;
 			grid-row-end: 3;
-
-			padding: 0 12px
+			padding: 0 var(--tec-spacer-2)
 	}
 
 .tribe-common .tribe-tickets-attendees-list-optout--wrapper, .entry .entry-content .tribe-common .tribe-tickets-attendees-list-optout--wrapper {
@@ -1975,19 +1894,19 @@
 	}
 
 .tribe-common .tribe-tickets-attendees-list-optout--wrapper label, .entry .entry-content .tribe-common .tribe-tickets-attendees-list-optout--wrapper label {
-				font-size: 14px
+				font-size: var(--tec-font-size-2)
 		}
 
 .tribe-common .tribe-tickets__footer__total, .entry .entry-content .tribe-common .tribe-tickets__footer__total {
-			margin-left: 24px
+			margin-left: var(--tec-spacer-5)
 	}
 
 .tribe-common .tribe-tickets__attendee__fields__footer_checkout-button.tribe-common-c-btn, .tribe-common .tribe-tickets__buy.tribe-common-c-btn, .entry .entry-content .tribe-common .tribe-tickets__attendee__fields__footer_checkout-button.tribe-common-c-btn, .entry .entry-content .tribe-common .tribe-tickets__buy.tribe-common-c-btn {
-				margin-left: 28px
+				margin-left: var(--tec-spacer-6)
 		}
 
 .tribe-common .tribe-tickets__item__attendee__fields, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields {
-			margin-top: 16px
+			margin-top: var(--tec-spacer-3)
 	}
 
 .tribe-common .tribe-tickets__item__attendee__fields .tribe-field, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-field {
@@ -2003,74 +1922,74 @@
 		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields label,
 		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets-meta-label {
 				flex: 0 0 134px;
-				margin-right: 20px
+				margin-right: var(--tec-spacer-4)
 		}
-				.tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__field__text label:not([for*="text-area"]), .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__field__select label:not([for*="text-area"]), .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__field__text label:not([for*="text-area"]), .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__field__select label:not([for*="text-area"]) {
+				.tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__field__text label:not([for*='text-area']), .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__field__select label:not([for*='text-area']), .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__field__text label:not([for*='text-area']), .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields .tribe-tickets__item__attendee__field__select label:not([for*='text-area']) {
 					align-self: center;
 				}
 
-.tribe-common .tribe-tickets__item__attendee__fields input[type="text"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="email"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="url"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="password"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="search"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="number"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="tel"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="range"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="date"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="month"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="week"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="time"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="datetime"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="datetime-local"],
-		.tribe-common .tribe-tickets__item__attendee__fields input[type="color"],
+.tribe-common .tribe-tickets__item__attendee__fields input[type='text'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='email'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='url'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='password'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='search'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='number'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='tel'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='range'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='date'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='month'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='week'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='time'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='datetime'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='datetime-local'],
+		.tribe-common .tribe-tickets__item__attendee__fields input[type='color'],
 		.tribe-common .tribe-tickets__item__attendee__fields select,
 		.tribe-common .tribe-tickets__item__attendee__fields textarea,
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="text"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="email"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="url"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="password"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="search"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="number"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="tel"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="range"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="date"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="month"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="week"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="time"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="datetime"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="datetime-local"],
-		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type="color"],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='text'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='email'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='url'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='password'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='search'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='number'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='tel'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='range'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='date'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='month'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='week'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='time'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='datetime'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='datetime-local'],
+		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields input[type='color'],
 		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields select,
 		.entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields textarea {
 				max-width: 600px
 		}
 
 .tribe-common .tribe-tickets__item__attendee__fields select, .entry .entry-content .tribe-common .tribe-tickets__item__attendee__fields select {
-				color: #141827;
-				font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-				font-size: 14px;
-				line-height: 1.62;
-				font-weight: 400
+				color: var(--tec-color-text-primary);
+				font-family: var(--tec-font-family-sans-serif);
+				font-size: var(--tec-font-size-2);
+				line-height: var(--tec-line-height-3);
+				font-weight: var(--tec-font-weight-regular)
 		}
 
 .tribe-common .tribe-ticket__heading, .entry .entry-content .tribe-common .tribe-ticket__heading {
-			margin-bottom: 20px
+			margin-bottom: var(--tec-spacer-4)
 	}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar {
-			border-radius: 4px;
+			border-radius: var(--tec-border-radius-default);
 			height: auto
 	}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal--ar__title, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal--ar__title {
-				font-size: 20px
+				font-size: var(--tec-font-size-5)
 		}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item {
 					-ms-grid-columns: 1fr 11fr 2fr 2fr 2fr;
 					grid-template-columns: 1fr 11fr 2fr 2fr 2fr;
-					padding-top: 12px
+					padding-top: var(--tec-spacer-2)
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item.tribe-tickets__item--price-sufix, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item.tribe-tickets__item--price-sufix {
@@ -2090,8 +2009,8 @@
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__content__title, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__content__title {
-					font-size: 16px;
-					line-height: 1.62;
+					font-size: var(--tec-font-size-3);
+					line-height: var(--tec-line-height-3);
 
 					-ms-grid-column: 2;
 					grid-column: 2
@@ -2100,7 +2019,7 @@
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__extra, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__extra {
 					-ms-grid-column: 3;
 					grid-column: 3;
-					margin-right: 8px
+					margin-right: var(--tec-spacer-1)
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__extra.tribe-tickets__item__extra--price-suffix, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__extra.tribe-tickets__item__extra--price-suffix {
@@ -2108,8 +2027,8 @@
 				}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__extra__price, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__extra__price {
-					font-size: 16px;
-					line-height: 1.62
+					font-size: var(--tec-font-size-3);
+					line-height: var(--tec-line-height-3)
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__details__summary, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__details__summary {
@@ -2124,16 +2043,17 @@
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__quantity, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__quantity {
-					font-size: 16px;
-					line-height: 1.62;
+					font-size: var(--tec-font-size-3);
+					line-height: var(--tec-line-height-3);
 
 					-ms-grid-column: 4;
 					grid-column: 4
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__quantity__number, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__quantity__number {
-					font-size: 14px;
-					line-height: 1.62;
+					font-size: var(--tec-font-size-2);
+					line-height: var(--tec-line-height-3);
+
 					border: 0;
 					height: 48px;
 					margin: 0;
@@ -2141,8 +2061,8 @@
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets-quantity, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets-quantity {
-					font-size: 16px;
-					line-height: 1.62
+					font-size: var(--tec-font-size-3);
+					line-height: var(--tec-line-height-3)
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__quantity__add,
@@ -2154,8 +2074,8 @@
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__total__wrap, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__item__total__wrap {
-					font-size: 16px;
-					line-height: 1.62;
+					font-size: var(--tec-font-size-3);
+					line-height: var(--tec-line-height-3);
 
 					-ms-grid-column: 5;
 					grid-column: 5
@@ -2165,29 +2085,26 @@
 			.tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__footer__total,
 			.entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__footer__quantity,
 			.entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-modal__content .tribe-tickets__footer__total {
-					font-size: 16px;
-					line-height: 1.62
+					font-size: var(--tec-font-size-3);
+					line-height: var(--tec-line-height-3)
 			}
 
 .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-tickets__attendee__title, .entry .entry-content .tribe-common .tribe-dialog__wrapper.tribe-modal__wrapper--ar .tribe-tickets__attendee__title {
-				margin-bottom: 16px
+				margin-bottom: var(--tec-spacer-3)
 		}
 		}
 
 @media (min-width: 600px) {
 		.tribe_horizontal_datepicker__container .tribe_horizontal_datepicker {
 			display: inline-block;
-			width: calc(33.33333% - 8px);
+			width: calc(33.33333% - var(--tec-spacer-1));
 			max-width: 280px;
 		}
 }
 
-@media(min-width: 400px max-width: 500px) {
-			}
-
-@media(min-width: 500px) {
+@media (min-width: 500px) {
 
 .tribe-common .tribe-tickets__attendee__fields__footer_checkout-button.tribe-common-c-btn, .tribe-common .tribe-tickets__buy.tribe-common-c-btn, .entry .entry-content .tribe-common .tribe-tickets__attendee__fields__footer_checkout-button.tribe-common-c-btn, .entry .entry-content .tribe-common .tribe-tickets__buy.tribe-common-c-btn {
-				margin-left: 16px
+				margin-left: var(--tec-spacer-3)
 		}
 			}

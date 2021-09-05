@@ -17,13 +17,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<button class="sui-button sui-button-ghost sui-tooltip sui-tooltip-top-right" aria-live="polite" data-tooltip="<?php esc_attr_e( 'Clear all locally cached Gravatars', 'wphb' ); ?>">
 		<!-- Default State Content -->
 		<span class="sui-button-text-default">
-			<i class="sui-icon-update" aria-hidden="true"></i>
+			<span class="sui-icon-update" aria-hidden="true"></span>
 			<?php esc_html_e( 'Clear cache', 'wphb' ); ?>
 		</span>
 
 		<!-- Loading State Content -->
 		<span class="sui-button-text-onload">
-			<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+			<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 			<?php esc_html_e( 'Clearing cache', 'wphb' ); ?>
 		</span>
 	</button>

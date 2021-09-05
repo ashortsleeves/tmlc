@@ -67,10 +67,10 @@ trait IP {
 	 * @return bool
 	 */
 	private function compare_v4_in_range( $ip, $first_in_range, $last_in_range ) {
-		$low  = sprintf( "%u", ip2long( $first_in_range ) );
-		$high = sprintf( "%u", ip2long( $last_in_range ) );
+		$low  = sprintf( '%u', ip2long( $first_in_range ) );
+		$high = sprintf( '%u', ip2long( $last_in_range ) );
 
-		$cip = sprintf( "%u", ip2long( $ip ) );
+		$cip = sprintf( '%u', ip2long( $ip ) );
 		if ( $high >= $cip && $cip >= $low ) {
 			return true;
 		}
@@ -91,7 +91,7 @@ trait IP {
 		$ip             = inet_pton( $this->expand_ip_v6( $ip ) );
 
 		if ( ( strlen( $ip ) === strlen( $first_in_range ) )
-		     && ( $ip >= $first_in_range && $ip <= $last_in_range ) ) {
+			&& ( $ip >= $first_in_range && $ip <= $last_in_range ) ) {
 			return true;
 		} else {
 			return false;
@@ -107,12 +107,15 @@ trait IP {
 	 */
 	private function compare_cidrv4( $ip, $block ) {
 		list ( $subnet, $bits ) = explode( '/', $block );
-		$ip     = ip2long( $ip );
-		$subnet = ip2long( $subnet );
-		$mask   = - 1 << ( 32 - $bits );
-		$subnet &= $mask; # nb: in case the supplied subnet wasn't correctly aligned
+		if ( is_null( $bits ) ) {
+			$bits = 32;
+		}
+		$ip      = ip2long( $ip );
+		$subnet  = ip2long( $subnet );
+		$mask    = - 1 << ( 32 - $bits );
+		$subnet &= $mask;// nb: in case the supplied subnet wasn't correctly aligned
 
-		return ( $ip & $mask ) == $subnet;
+		return ( $ip & $mask ) == $subnet;// phpcs:ignore
 	}
 
 	/**
@@ -122,18 +125,18 @@ trait IP {
 	 * @return bool
 	 */
 	private function compare_cidrv6( $ip, $block ) {
-		$ip  = $this->expand_ip_v6( $ip );
-		$ip  = inet_pton( $ip );
-		$bIP = $this->ine_to_bits( $ip );
+		$ip                     = $this->expand_ip_v6( $ip );
+		$ip                     = inet_pton( $ip );
+		$b_ip                   = $this->ine_to_bits( $ip );
 		list ( $subnet, $bits ) = explode( '/', $block );
-		$subnet  = $this->expand_ip_v6( $subnet );
-		$subnet  = inet_pton( $subnet );
-		$bSubnet = $this->ine_to_bits( $subnet );
+		$subnet                 = $this->expand_ip_v6( $subnet );
+		$subnet                 = inet_pton( $subnet );
+		$b_subnet               = $this->ine_to_bits( $subnet );
 
-		$ipNetBits  = substr( $bIP, 0, $bits );
-		$subnetBits = substr( $bSubnet, 0, $bits );
+		$ip_net_bits = substr( $b_ip, 0, $bits );
+		$subnet_bits = substr( $b_subnet, 0, $bits );
 
-		return $ipNetBits === $subnetBits;
+		return $ip_net_bits === $subnet_bits;
 	}
 
 	/**
@@ -226,72 +229,38 @@ trait IP {
 	}
 
 	/**
-	 * Get user IP
-	 * todo need to test with cloudflare & aws
+	 * Check if there are any cloudflare headers in the request
 	 *
-	 * @return string
+	 * @return bool
 	 */
-	public function get_user_ip() {
-		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : null;
-		if ( isset( $_SERVER["HTTP_CF_CONNECTING_IP"] ) ) {
-			//this looks like it come from cloudflare, so this should contain the actual IP, and REMOTE_ADDR is contain
-			//cloudflare IP
-			list( $cloudflare_ipv4_range, $cloudflare_ipv6_range ) = $this->cloudflare_ip_ranges();
-			$ip_helper = new IP_Helper();
-			if ( $this->is_v4($ip) ) {
-				foreach ( $cloudflare_ipv4_range as $cf_ip ) {
-					if ( $ip_helper->ipv4_in_range( $ip, $cf_ip ) ) {
-						$ip = $_SERVER["HTTP_CF_CONNECTING_IP"];
-						break;
-					}
-				}
-			} elseif ( $this->is_v6( $ip ) ) {
-				foreach ( $cloudflare_ipv6_range as $cf_ip ) {
-					if ( $ip_helper->ipv6_in_range( $ip, $cf_ip ) ) {
-						$ip = $_SERVER["HTTP_CF_CONNECTING_IP"];
-						break;
-					}
-				}
-			}
+	private function is_cloudflare_request() {
+		if ( isset( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ) {
+			return true;
+		}
+		if ( isset( $_SERVER['HTTP_CF_IPCOUNTRY'] ) ) {
+			return true;
+		}
+		if ( isset( $_SERVER['HTTP_CF_RAY'] ) ) {
+			return true;
+		}
+		if ( isset( $_SERVER['HTTP_CF_VISITOR'] ) ) {
+			return true;
 		}
 
-		if ( is_null( $ip ) || '127.0.0.1' === $ip || '::1' === $ip ) {
-			//this case can be behind a reserve proxy, however it should not happen,
-			//this must be a custom proxy, this can be sprof
-			$headers = [
-				'HTTP_CLIENT_IP',
-				'HTTP_X_FORWARDED_FOR',
-				'HTTP_X_FORWARDED',
-				'HTTP_X_CLUSTER_CLIENT_IP',
-				'HTTP_FORWARDED_FOR',
-				'HTTP_FORWARDED'
-			];
-
-			foreach ( $headers as $key ) {
-				if ( array_key_exists( $key, $_SERVER ) === true ) {
-					foreach ( explode( ',', $_SERVER[ $key ] ) as $tmp_ip ) {
-						$tmp_ip = trim( $tmp_ip );
-						if ( filter_var( $tmp_ip, FILTER_VALIDATE_IP,
-								FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) !== false ) {
-							$ip = $tmp_ip;
-						}
-					}
-				}
-			}
-		}
-
-		return apply_filters( 'defender_user_ip', $ip );
+		return false;
 	}
 
 	/**
 	 * We fetching the ip range here
 	 * https://www.cloudflare.com/ips/
 	 *
+	 * @since 2.5.0 Update the ip range
+	 *
 	 * @return array
 	 */
 	private function cloudflare_ip_ranges() {
-		return [
-			[
+		return array(
+			array(
 				'173.245.48.0/20',
 				'103.21.244.0/22',
 				'103.22.200.0/22',
@@ -303,19 +272,118 @@ trait IP {
 				'197.234.240.0/22',
 				'198.41.128.0/17',
 				'162.158.0.0/15',
-				'104.16.0.0/12',
 				'172.64.0.0/13',
 				'131.0.72.0/22',
-			],
-			[
+				'104.16.0.0/13',
+				'104.24.0.0/14',
+			),
+			array(
 				'2400:cb00::/32',
 				'2606:4700::/32',
 				'2803:f800::/32',
 				'2405:b500::/32',
 				'2405:8100::/32',
 				'2a06:98c0::/29',
-				'2c0f:f248::/32'
-			]
-		];
+				'2c0f:f248::/32',
+			),
+		);
+	}
+
+	/**
+	 * Check if the request is from cloudflare. If it is, we get the IP
+	 *
+	 * @return mixed
+	 */
+	private function cloudflare_ip() {
+		$ip = null;
+		if ( $this->is_cloudflare_request() ) {
+			//this looks like it come from cloudflare, so this should contain the actual IP, and REMOTE_ADDR is contain
+			//cloudflare IP
+			list( $cloudflare_ipv4_range, $cloudflare_ipv6_range ) = $this->cloudflare_ip_ranges();
+			$ip_helper = new IP_Helper();
+			if ( $this->is_v4( $ip ) ) {
+				foreach ( $cloudflare_ipv4_range as $cf_ip ) {
+					if ( $ip_helper->ipv4_in_range( $ip, $cf_ip ) ) {
+						$ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
+						break;
+					}
+				}
+			} elseif ( $this->is_v6( $ip ) ) {
+				foreach ( $cloudflare_ipv6_range as $cf_ip ) {
+					if ( $ip_helper->ipv6_in_range( $ip, $cf_ip ) ) {
+						$ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
+						break;
+					}
+				}
+			}
+		}
+
+		return $ip;
+	}
+
+	/**
+	 * Validate IP
+	 * @param $ip
+	 *
+	 * @return bool
+	 */
+	public function check_validate_ip( $ip ) {
+		// Validate the localhost IP address
+		if ( in_array( $ip, array( '127.0.0.1', '::1' ), true ) ) {
+			return true;
+		}
+
+		$filter_flags = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6;
+		/**
+		 * Since 2.4.7
+		 */
+		if ( apply_filters( 'wp_defender_filtered_internal_ip', false ) ) {
+			// Todo: improve display of IP log when filtering reserved or private IPv4/IPv6 ranges
+			$filter_flags = $filter_flags | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
+		}
+
+		if ( false === filter_var( $ip, FILTER_VALIDATE_IP, $filter_flags ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get user IP
+	 *
+	 * @return string
+	 */
+	public function get_user_ip() {
+		// Check if it's any cloudflare IP
+		$cf_ip = $this->cloudflare_ip();
+		if ( ! empty( $cf_ip ) && filter_var( $cf_ip, FILTER_VALIDATE_IP ) ) {
+			return apply_filters( 'defender_user_ip', $cf_ip );
+		}
+
+		$headers = array(
+			'HTTP_CLIENT_IP',
+			'HTTP_X_REAL_IP',
+			'HTTP_X_FORWARDED_FOR',
+			'HTTP_X_FORWARDED',
+			'HTTP_X_CLUSTER_CLIENT_IP',
+			'HTTP_FORWARDED_FOR',
+			'HTTP_FORWARDED',
+			'REMOTE_ADDR',
+		);
+		$ip = '';
+		foreach ( $headers as $key ) {
+			if ( array_key_exists( $key, $_SERVER ) && ! empty( $_SERVER[ $key ] ) ) {
+				$ip_array = explode( ',', $_SERVER[ $key ] );
+				$tmp_ip   = array_shift( $ip_array );
+				$tmp_ip   = trim( $tmp_ip );
+				if ( $this->check_validate_ip( $tmp_ip ) ) {
+					$ip = $tmp_ip;
+					break;
+				}
+			}
+		}
+
+		return apply_filters( 'defender_user_ip', $ip );
 	}
 }

@@ -50,7 +50,7 @@ class Dblist extends Task {
 		}
 
 		foreach ( $tables as $table ) {
-			if ( ! in_array( $table, self::$all_tables, true ) ) {
+			if ( ! in_array( $table, array_column( self::$all_tables, 'name' ), true ) ) {
 				// We can't go through with the db iteration.
 				return false;
 			}
@@ -81,12 +81,27 @@ class Dblist extends Task {
 	 * @param object $model Model\Backup\Dblist instance.
 	 */
 	public function get_tables( $model ) {
+		$new_tables = array();
 
 		$tables = $model->get( 'tables_left' );
 		if ( empty( $tables ) ) {
-			$tables = empty( self::$all_tables ) ? Db::get_all_database_tables() : self::$all_tables;
-			$tables = apply_filters( 'snapshot_tables_for_backup', $tables );
+			$tables          = empty( self::$all_tables ) ? Db::get_all_database_tables() : self::$all_tables;
+			$filtered_tables = apply_filters( 'snapshot_tables_for_backup', array_column( $tables, 'name' ) );
+			foreach ( $tables as $table ) {
+				if ( in_array( $table['name'], $filtered_tables, true ) ) {
+					$new_tables[] = $table;
+				}
+			}
+		} else {
+			$all_tables = empty( self::$all_tables ) ? Db::get_all_database_tables() : self::$all_tables;
+
+			foreach ( $all_tables as $db_table ) {
+				if ( in_array( $db_table['name'], $tables, true ) ) {
+					$new_tables[] = $db_table;
+				}
+			}
 		}
+		$tables = $new_tables;
 
 		if ( empty( $tables ) ) {
 			// Something went wrong with retrieving db tables. - Lets show an ERROR in the log and return error in service.
@@ -101,22 +116,28 @@ class Dblist extends Task {
 			$item  = array();
 			$table = array_pop( $tables );
 
-			$item['name']     = $table;
-			$item['checksum'] = $this->get_table_checksum( $table );
-			if ( null === $item['checksum'] ) {
-				// Something went wrong with getting the table's checksum. - Lets show an ERROR in the log.
-				$this->add_error(
-					self::WARNING_EMPTY_TABLE,
-					/* translators: %s - table name */
-					sprintf( __( 'Unreachable table %s: Snapshot faced an issue when trying to get the table\'s checksum.', 'snapshot' ), $table )
-				);
-				return false;
+			$item['name'] = $table['name'];
+
+			if ( $table['is_view'] ) {
+				$item['checksum'] = $this->get_view_checksum( $table['name'] );
+				$item['size']     = 0;
+			} else {
+				$item['checksum'] = $this->get_table_checksum( $table['name'] );
+				if ( null === $item['checksum'] ) {
+					// Something went wrong with getting the table's checksum. - Lets show an ERROR in the log.
+					$this->add_error(
+						self::WARNING_EMPTY_TABLE,
+						/* translators: %s - table name */
+						sprintf( __( 'Unreachable table %s: Snapshot faced an issue when trying to get the table\'s checksum.', 'snapshot' ), $table['name'] )
+					);
+					return false;
+				}
+
+				$item['size'] = $this->get_table_size( $table['name'] );
 			}
 
-			$item['size'] = $this->get_table_size( $table );
-
 			$model->add( 'tables', $item );
-			$model->set( 'tables_left', $tables );
+			$model->set( 'tables_left', array_column( $tables, 'name' ) );
 
 			// If we have exceed the imposed time limit, lets pause the iteration here.
 			if ( $model->has_exceeded_timelimit() ) {
@@ -139,6 +160,25 @@ class Dblist extends Task {
 		$results = $wpdb->get_row( esc_sql( "CHECKSUM TABLE `{$table}`" ), ARRAY_A ); // db call ok; no-cache ok.
 
 		return apply_filters( 'wp_snapshot_table_checksum', $results['Checksum'], $table );
+	}
+
+	/**
+	 * Emulates the "checksum" of the view based on its structure.
+	 *
+	 * @param string $view View to calculate its "checksum".
+	 * @return string "Checksum" of view.
+	 */
+	public function get_view_checksum( $view ) {
+		global $wpdb;
+
+		$row = $wpdb->get_row( esc_sql( "SHOW CREATE TABLE `{$view}`" ), ARRAY_A ); // db call ok; no-cache ok.
+
+		$result = '';
+		if ( $row['Create View'] ) {
+			$result = substr( sha1( $row['Create View'] ), 0, 10 );
+		}
+
+		return apply_filters( 'wp_snapshot_table_checksum', $result, $view );
 	}
 
 	/**

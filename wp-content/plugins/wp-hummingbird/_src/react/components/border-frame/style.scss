@@ -5,6 +5,10 @@
 
 @include body-class(true) {
 
+  #wphb-react-cloudflare .wphb-border-frame .table-row .wphb-caching-summary-item-type {
+    flex-basis: auto;
+  }
+
   .wphb-border-frame {
     border: 1px solid #E6E6E6;
     border-radius: 5px;

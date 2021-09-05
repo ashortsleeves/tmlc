@@ -115,4 +115,3 @@ $js_url = WPMUDEV_Dashboard::$site->plugin_url . 'assets/js/dashboard-notice.js'
 	</div>
 </div>
 <script src="<?php echo esc_url( $js_url ); ?>"></script> <?php //phpcs:ignore ?>
-

@@ -65,10 +65,8 @@ class Destination extends Controller\Ajax {
 
 		if ( $is_destination_page ) {
 			$template = new Helper\Template();
-			$schedule = Model\Schedule::get_schedule_info()['text'];
 
 			foreach ( $result as $key => $item ) {
-				$item['schedule'] = $schedule;
 				$item['tpd_type'] = isset( $item['tpd_type'] ) ? $item['tpd_type'] : null;
 
 				switch ( $item['tpd_type'] ) {

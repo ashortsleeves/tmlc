@@ -39,7 +39,7 @@ class Google_Service_Drive_DriveFileImageMediaMetadataLocation extends Google_Mo
   }
   public function setLongitude($longitude)
   {
-    $this->longitude = $longitude;
+    $this->longitude = $longitude;	   	    	         				
   }
   public function getLongitude()
   {

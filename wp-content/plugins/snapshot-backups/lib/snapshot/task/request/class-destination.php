@@ -66,6 +66,8 @@ class Destination extends Task {
 				'tpd_id'      => 'sanitize_text_field',
 				'aws_storage' => 'intval',
 			);
+		} elseif ( 'delete_all_destinations' === $action ) {
+			$this->required_params = array();
 		}
 	}
 
@@ -93,6 +95,11 @@ class Destination extends Task {
 				break;
 			case 'activate_destination':
 				$response = $request_model->activate_destination( $args['tpd_id'], $args['aws_storage'] );
+				break;
+			case 'delete_all_destinations':
+				$empty_for_404 = true;
+				$request_model->set( 'ok_codes', array( 404 ) );
+				$response = $request_model->delete_all_destinations();
 				break;
 			default:
 				break;

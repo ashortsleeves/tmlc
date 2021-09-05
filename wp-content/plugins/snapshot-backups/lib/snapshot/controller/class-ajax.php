@@ -13,6 +13,7 @@ use WPMUDEV\Snapshot4\Model;
 use WPMUDEV\Snapshot4\Main;
 use WPMUDEV\Snapshot4\Helper\Log;
 use WPMUDEV\Snapshot4\Helper\Settings;
+use WPMUDEV\Snapshot4\Helper\Api;
 use WPMUDEV\Snapshot4\Model\Env;
 
 /**
@@ -41,11 +42,13 @@ class Ajax extends Controller {
 		add_action( 'wp_ajax_snapshot-uninstall_v3_notice_dismiss', array( $this, 'json_uninstall_v3_notice_dismiss' ) );
 		add_action( 'wp_ajax_snapshot-get_storage', array( $this, 'json_get_storage' ) );
 		add_action( 'wp_ajax_snapshot_change_region', array( $this, 'snapshot_change_region' ) );
-		add_action( 'wp_ajax_snapshot-check_if_region', array( $this, 'check_if_region' ) );
+		add_action( 'wp_ajax_snapshot_change_storage_limit', array( $this, 'snapshot_change_storage_limit' ) );
+		add_action( 'wp_ajax_snapshot-check_creds', array( $this, 'check_creds' ) );
 		add_action( 'wp_ajax_snapshot-migrate_region', array( $this, 'migrate_region' ) );
 		add_action( 'wp_ajax_snapshot-recheck_requirements', array( $this, 'json_recheck_requirements' ) );
 		add_action( 'wp_ajax_snapshot-json_validate_email', array( $this, 'json_validate_email' ) );
 		add_action( 'wp_ajax_snapshot-whats_new_seen', array( $this, 'json_whats_new_seen' ) );
+		add_action( 'wp_ajax_snapshot-tutorials_slider_seen', array( $this, 'json_tutorials_slider_seen' ) );
 	}
 
 	/**
@@ -114,7 +117,8 @@ class Ajax extends Controller {
 		$result = json_decode( $result, true );
 
 		$response                  = array();
-		$response['width']         = 100 * $result['current_bytes'] / $result['user_limit'] . '%';
+		$response['width_float']   = round( $result['current_bytes'] / $result['user_limit'], 6 );
+		$response['width']         = round( 100 * $response['width_float'], 4 ) . '%';
 		$response['current_stats'] = esc_html( round( $result['current_bytes'] / ( 1024 * 1024 * 1024 ), 1 ) . ' GB/' . round( $result['user_limit'] / ( 1024 * 1024 * 1024 ), 1 ) . ' GB' );
 
 		$response['snapshot_extra_security_step'] = isset( $result['snapshot_extra_security_step'] )
@@ -149,10 +153,11 @@ class Ajax extends Controller {
 
 				wp_send_json_success(
 					array(
-						'action'        => 'activation',
-						'result'        => $result,
-						'redirect_to'   => $redirect_to,
-						'welcome_modal' => $welcome_modal,
+						'action'                => 'activation',
+						'result'                => $result,
+						'redirect_to'           => $redirect_to,
+						'welcome_modal'         => $welcome_modal,
+						'reactivate_membership' => Api::need_reactivate_membership(),
 					)
 				);
 			}
@@ -302,6 +307,12 @@ class Ajax extends Controller {
 			if ( isset( $email_settings['on_fail_send'] ) ) {
 				$sanitized_settings['on_fail_send'] = boolval( $email_settings['on_fail_send'] );
 			}
+			if ( isset( $email_settings['notify_on_fail'] ) ) {
+				$sanitized_settings['notify_on_fail'] = boolval( $email_settings['notify_on_fail'] );
+			}
+			if ( isset( $email_settings['notify_on_complete'] ) ) {
+				$sanitized_settings['notify_on_complete'] = boolval( $email_settings['notify_on_complete'] );
+			}
 			if ( isset( $email_settings['on_fail_recipients'] ) && is_array( $email_settings['on_fail_recipients'] ) ) {
 				foreach ( $email_settings['on_fail_recipients'] as $recipient ) {
 					$sanitized_settings['on_fail_recipients'][] = array_map( 'sanitize_text_field', $recipient );
@@ -311,6 +322,22 @@ class Ajax extends Controller {
 			Settings::update_email_settings( $sanitized_settings );
 			$result                    = Settings::get_email_settings();
 			$result['top_notice_text'] = __( 'Your settings have been updated successfully.', 'snapshot' );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( isset( $_POST['snapshot-backup-limit'] ) ) {
+			$limit = filter_input( INPUT_POST, 'snapshot-backup-limit', FILTER_SANITIZE_NUMBER_INT );
+
+			if ( $limit !== $_POST['existing_backup_limit'] ) {
+				$result['continue_ajax'] = true;
+				$result['next_action']   = 'change_storage_limit';
+				$result['next_args']     = array(
+					'action'        => 'snapshot_change_storage_limit',
+					'_wpnonce'      => wp_create_nonce( 'snapshot_change_storage_limit' ),
+					'storage_limit' => $limit
+				);
+			}
+
 		}
 
 		if ( count( $result ) ) {
@@ -366,23 +393,14 @@ class Ajax extends Controller {
 	public function reactivate_snapshot_schedule() {
 		$this->do_request_sanity_check( 'reactivate_snapshot_schedule', self::TYPE_POST );
 
-		$activate_schedule = get_site_option( 'snapshot_activate_schedule', null );
-		$stored_schedule   = get_site_option( 'wp_snapshot_backup_schedule' );
+		$activate_schedule = get_site_option( 'snapshot_activate_schedule', true );
+		$stored_schedule   = Task\Request\Schedule::get_current_schedule();
 
 		// Let's update the flag so that we dont keep displaying the Get Started modal.
 		Settings::set_started_seen( true );
 
 		// And let's update the flag so that we know we have gone through all that if we unistall/reinstall.
 		Settings::set_started_seen_persistent( true );
-
-		if ( is_null( $activate_schedule ) ) {
-			// This means this is the very first time we install Snapshot, so no need for further actions.
-			wp_send_json_success(
-				array(
-					'show_schedule_modal' => true,
-				)
-			);
-		}
 
 		if ( empty( $stored_schedule ) ) {
 			// We never had any schedules before, so lets go on with our lives.
@@ -401,10 +419,6 @@ class Ajax extends Controller {
 			// This means, we have uninstalled Snapshot before and selected to remove options in the event of re-install, or we had no active schedule before uninstalling.
 			$request_data['status'] = 'inactive';
 			$show_schedule_modal    = true;
-
-			$schedule_to_store              = $stored_schedule;
-			$schedule_to_store['bu_status'] = 'inactive';
-			update_site_option( 'wp_snapshot_backup_schedule', $schedule_to_store );
 		}
 
 		// Delete the entry telling us whether we should activate the schedule or not.
@@ -421,6 +435,9 @@ class Ajax extends Controller {
 			$request_data['time']               = isset( $stored_schedule['bu_time'] ) ? $stored_schedule['bu_time'] : null;
 			$request_data['frequency_weekday']  = isset( $stored_schedule['bu_frequency_weekday'] ) ? $stored_schedule['bu_frequency_weekday'] : null;
 			$request_data['frequency_monthday'] = isset( $stored_schedule['bu_frequency_monthday'] ) ? $stored_schedule['bu_frequency_monthday'] : null;
+
+			$request_data['frequency_weekday']  = 'null' !== $request_data['frequency_weekday'] ? $request_data['frequency_weekday'] : null;
+			$request_data['frequency_monthday'] = 'null' !== $request_data['frequency_monthday'] ? $request_data['frequency_monthday'] : null;
 
 			$schedule_model = new Model\Schedule( $request_data );
 			$request_model  = new Model\Request\Schedule();
@@ -489,8 +506,10 @@ class Ajax extends Controller {
 		}
 
 		// Then we see if there's an active schedule, to decide what notice we're gonna show on success.
-		$stored_schedule  = get_site_option( 'wp_snapshot_backup_schedule' );
-		$changed_schedule = 'active' === $stored_schedule['bu_status'] ? true : false;
+		$stored_schedule = Task\Request\Schedule::get_current_schedule( true );
+		if ( ! is_wp_error( $stored_schedule ) ) {
+			$changed_schedule = 'active' === $stored_schedule['bu_status'] ? true : false;
+		}
 
 		// And now we can actually store the region system-side.
 		$data           = array();
@@ -520,20 +539,25 @@ class Ajax extends Controller {
 	}
 
 	/**
-	 * Ajax for checking if region is set service-side.
+	 * Ajax for changing storage limit.
 	 */
-	public function check_if_region() {
-		$this->do_request_sanity_check( 'snapshot_check_if_region', self::TYPE_POST );
+	public function snapshot_change_storage_limit() {
+		$this->do_request_sanity_check( 'snapshot_change_storage_limit', self::TYPE_POST );
+
+		// phpcs:ignore WordPress.Security.NonceVerification
+		$storage_limit = ( isset( $_POST['storage_limit'] ) ) ? intval( $_POST['storage_limit'] ) : 30;
 
 		$data           = array();
-		$data['action'] = 'get';
+		$data['action'] = 'set_storage';
 
 		$task             = new Task\Request\Region();
 		$validated_params = $task->validate_request_data( $data );
 
 		$args                  = $validated_params;
 		$args['request_model'] = new Model\Request\Region();
-		$region                = $task->apply( $args );
+		$args['storage_limit'] = $storage_limit;
+
+		$changed_storage = $task->apply( $args );
 
 		if ( $task->has_errors() ) {
 			foreach ( $task->get_errors() as $error ) {
@@ -544,7 +568,38 @@ class Ajax extends Controller {
 
 		wp_send_json_success(
 			array(
-				'region' => $region,
+				'changed_storage' => $changed_storage,
+			)
+		);
+	}
+
+	/**
+	 * Ajax for checking creds (region, storage limit) service-side.
+	 */
+	public function check_creds() {
+		$this->do_request_sanity_check( 'snapshot_check_if_region', self::TYPE_POST );
+
+		$data           = array();
+		$data['action'] = 'get';
+
+		$task             = new Task\Request\Region();
+		$validated_params = $task->validate_request_data( $data );
+
+		$args                  = $validated_params;
+		$args['request_model'] = new Model\Request\Region();
+		$result                = $task->apply( $args );
+
+		if ( $task->has_errors() ) {
+			foreach ( $task->get_errors() as $error ) {
+				Log::error( $error->get_error_message() );
+			}
+			wp_send_json_error();
+		}
+
+		wp_send_json_success(
+			array(
+				'region'             => isset( $result['bu_region'] ) ? $result['bu_region'] : null,
+				'rotation_frequency' => isset( $result['rotation_frequency'] ) ? $result['rotation_frequency'] : 30,
 			)
 		);
 
@@ -576,7 +631,7 @@ class Ajax extends Controller {
 		$args                  = $validated_params;
 		$args['request_model'] = new Model\Request\Region();
 
-		$region = $get_task->apply( $args );
+		$result = $get_task->apply( $args );
 
 		if ( $get_task->has_errors() ) {
 			// The request failed, lets repeat in an hour.
@@ -584,6 +639,7 @@ class Ajax extends Controller {
 			wp_send_json_error();
 		}
 
+		$region = isset( $result['bu_region'] ) ? $result['bu_region'] : null;
 		if ( ! empty( $region ) ) {
 			// Region is set system-side, no need to update it.
 			wp_send_json_success();
@@ -662,6 +718,15 @@ class Ajax extends Controller {
 	public function json_whats_new_seen() {
 		$this->do_request_sanity_check( 'snapshot_whats_new_seen', self::TYPE_POST );
 		Settings::set_whats_new_seen();
+		wp_send_json_success();
+	}
+
+	/**
+	 * Set the Tuturials Slider as viewed
+	 */
+	public function json_tutorials_slider_seen() {
+		$this->do_request_sanity_check( 'snapshot_tutorials_slider_seen', self::TYPE_POST );
+		Settings::set_snapshot_tutorials_seen();
 		wp_send_json_success();
 	}
 }

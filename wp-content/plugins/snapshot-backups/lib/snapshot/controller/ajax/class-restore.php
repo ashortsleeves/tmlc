@@ -12,6 +12,7 @@ use WPMUDEV\Snapshot4\Task;
 use WPMUDEV\Snapshot4\Model;
 use WPMUDEV\Snapshot4\Helper\Lock;
 use WPMUDEV\Snapshot4\Helper\Log;
+use WPMUDEV\Snapshot4\Helper\Settings;
 use WPMUDEV\Snapshot4\Helper\Zip;
 
 /**
@@ -73,14 +74,16 @@ class Restore extends Controller\Ajax {
 	 */
 	public function json_process_restore() {
 		$this->do_request_sanity_check( 'snapshot_trigger_backup_restore', self::TYPE_POST );
+		$manual_restore = Settings::get_manual_restore_mode();
 
 		$data = array();
 
-		$data['backup_id'] = isset( $_POST['data']['backup_id'] ) ? $_POST['data']['backup_id'] : null; // phpcs:ignore
-		$data['export_id'] = isset( $_POST['data']['export_id'] ) ? $_POST['data']['export_id'] : null; // phpcs:ignore
-		$data['initial'] = isset( $_POST['data']['initial'] ) ? boolval( $_POST['data']['initial'] ) : null; // phpcs:ignore
+		$data['backup_id']     = isset( $_POST['data']['backup_id'] ) ? $_POST['data']['backup_id'] : null; // phpcs:ignore
+		$data['export_id']     = isset( $_POST['data']['export_id'] ) ? $_POST['data']['export_id'] : null; // phpcs:ignore
+		$data['initial']       = isset( $_POST['data']['initial'] ) ? boolval( $_POST['data']['initial'] ) : null; // phpcs:ignore
 		$data['download_link'] = isset( $_POST['data']['download_link'] ) ? $_POST['data']['download_link'] : null; // phpcs:ignore
 		$expand                = isset( $_POST['expand'] ) ? $_POST['expand'] : null;  // phpcs:ignore
+
 
 		$task = new Task\Restore();
 
@@ -89,9 +92,59 @@ class Restore extends Controller\Ajax {
 			wp_send_json_error( $validated_data );
 		}
 
+		// Artificially fail the restore.
+		$failed_restore = apply_filters(
+			'snapshot_manual_fail_restore',
+			false
+		);
+		switch ( $failed_restore ) {
+			case 'export':
+				$model = new Model\Request\Export();
+				wp_send_json_error(
+					array(
+						'failed_stage' => $model->get_trigger_error_string(),
+					)
+				);
+				break;
+			case 'exporting':
+				$model = new Model\Request\Export\Status();
+				wp_send_json_error(
+					array(
+						'failed_stage' => $model->get_status_error_string(),
+					)
+				);
+				break;
+			case 'download':
+				$model = new Model\Download();
+				wp_send_json_error(
+					array(
+						'failed_stage' => $model->get_download_error_string(),
+					)
+				);
+				break;
+			case 'files':
+				$model = new Model\Restore\Files( $validated_data['backup_id'] );
+				wp_send_json_error(
+					array(
+						'failed_stage' => $model->get_files_error_string(),
+					)
+				);
+				break;
+			case 'tables':
+				$model = new Model\Restore\Tables( $validated_data['backup_id'] );
+				wp_send_json_error(
+					array(
+						'failed_stage' => $model->get_tables_error_string(),
+					)
+				);
+				break;
+			default:
+				break;
+		}
+
 		if ( $data['initial'] ) {
-			// This is a brand new restore, we have to clear ot any residuals from older restores.
-			Model\Restore::clean_residuals();
+			// This is a brand new restore, we have to clear out any residuals from older restores.
+			Model\Restore::clean_residuals( $manual_restore );
 
 			Log::info( __( 'Restore has been initiated', 'snapshot' ), array(), $validated_data['backup_id'] );
 		}
@@ -99,30 +152,38 @@ class Restore extends Controller\Ajax {
 		// Now, we are going to identify the stage we're at, by reading the lock file.
 		$lock = Lock::read( $validated_data['backup_id'] );
 
-		if ( ! isset( $lock['stage'] ) ) {
-			$this->trigger_export( $validated_data['backup_id'] );
-		}
+		if ( $manual_restore && ! isset( $lock['stage'] ) ) {
+			// Let's go straight to the file restoration.
+			$result = $this->restore_files( $validated_data['backup_id'], false );
+		} else {
+			if ( ! isset( $lock['stage'] ) ) {
+				$this->trigger_export( $validated_data['backup_id'] );
+			}
 
-		$result = array();
-		switch ( $lock['stage'] ) {
-			case 'export':
-			case 'exporting':
-				$result = $this->get_export_status( $data['export_id'], $validated_data['backup_id'] );
-				break;
-			case 'download':
-				$result = $this->download_backup( $data['download_link'], $validated_data['backup_id'] );
-				break;
-			case 'files':
-				$result = $this->restore_files( $validated_data['backup_id'] );
-				break;
-			case 'tables':
-				$result = $this->restore_tables( $validated_data['backup_id'] );
-				break;
-			case 'finalize':
-				$result = $this->finalize_restore( $validated_data['backup_id'] );
-				break;
-			default:
-				break;
+			$result = array();
+			switch ( $lock['stage'] ) {
+				case 'export':
+				case 'exporting':
+					$result = $this->get_export_status( $data['export_id'], $validated_data['backup_id'] );
+					break;
+				case 'download':
+					$result = $this->download_backup( $data['download_link'], $validated_data['backup_id'] );
+					break;
+				case 'files':
+					$result = $this->restore_files( $validated_data['backup_id'], false );
+					break;
+				case 'last-files':
+					$result = $this->restore_files( $validated_data['backup_id'], true );
+					break;
+				case 'tables':
+					$result = $this->restore_tables( $validated_data['backup_id'] );
+					break;
+				case 'finalize':
+					$result = $this->finalize_restore( $validated_data['backup_id'] );
+					break;
+				default:
+					break;
+			}
 		}
 
 		if ( 'log' === $expand ) {
@@ -305,14 +366,17 @@ class Restore extends Controller\Ajax {
 	 * Deals with restoring the files from the exported backup.
 	 *
 	 * @param string $backup_id Backup id.
+	 * @param bool   $last_run Wether we have finished restoring main files and we're now restoring the leftovers.
 	 */
-	public function restore_files( $backup_id ) {
+	public function restore_files( $backup_id, $last_run ) {
 		$data['backup_id'] = $backup_id;
 
 		$task  = new Task\Restore\Files();
 		$model = new Model\Restore\Files( $data['backup_id'] );
 
 		$model->set( 'skipped_files', array() );
+		$model->set( 'last_files_run', $last_run );
+		$model->set( 'need_last_run', false );
 
 		$validated_data = $task->validate_request_data( $data );
 		if ( is_wp_error( $validated_data ) ) {
@@ -358,19 +422,38 @@ class Restore extends Controller\Ajax {
 			}
 		}
 
+		$last_run = $model->get( 'last_files_run' );
+
 		if ( true === $model->get( 'is_done' ) ) {
-			// We are done restoring files, please update the lock file.
+			// We're done restoring files, let's see if we have also restored the special files that we saved for last.
+
+			if ( $last_run ) {
+				// We are done restoring files, please update the lock file.
+				$lock_content = array(
+					'stage' => 'tables',
+				);
+				Lock::write( $lock_content, $backup_id );
+				Log::info( __( 'File restoration has been completed.', 'snapshot' ), array(), $backup_id );
+
+			} else {
+				// We are done restoring the main files, please update the lock file, so we can restore the leftover files in the next run.
+				$lock_content = array(
+					'stage' => 'last-files',
+				);
+				Lock::write( $lock_content, $backup_id );
+
+				$model->set( 'need_last_run', true );
+			}
+		} else {
 			$lock_content = array(
-				'stage' => 'tables',
+				'stage' => $last_run ? 'last-files' : 'files',
 			);
 			Lock::write( $lock_content, $backup_id );
-
-			Log::info( __( 'File restoration has been completed.', 'snapshot' ), array(), $backup_id );
 		}
 
 		return array(
 			'task'          => 'files',
-			'done'          => $model->get( 'is_done' ),
+			'done'          => $model->get( 'is_done' ) && ! $model->get( 'need_last_run' ),
 			'skipped_files' => $model->get( 'skipped_files', array() ),
 		);
 	}

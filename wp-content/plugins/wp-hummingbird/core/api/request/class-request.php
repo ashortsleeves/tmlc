@@ -1,4 +1,9 @@
 <?php
+/**
+ * Abstract request class.
+ *
+ * @package Hummingbird\Core\Api\Request
+ */
 
 namespace Hummingbird\Core\Api\Request;
 
@@ -173,8 +178,7 @@ abstract class Request {
 	 */
 	public function get( $path, $data = array() ) {
 		try {
-			$result = $this->request( $path, $data, 'get' );
-			return $result;
+			return $this->request( $path, $data, 'get' );
 		} catch ( Exception $e ) {
 			return new WP_Error( $e->getCode(), $e->getMessage() );
 		}
@@ -190,8 +194,7 @@ abstract class Request {
 	 */
 	public function post( $path, $data = array() ) {
 		try {
-			$result = $this->request( $path, $data, 'post' );
-			return $result;
+			return $this->request( $path, $data );
 		} catch ( Exception $e ) {
 			return new WP_Error( $e->getCode(), $e->getMessage() );
 		}
@@ -207,8 +210,7 @@ abstract class Request {
 	 */
 	public function patch( $path, $data = array() ) {
 		try {
-			$result = $this->request( $path, $data, 'patch' );
-			return $result;
+			return $this->request( $path, $data, 'patch' );
 		} catch ( Exception $e ) {
 			return new WP_Error( $e->getCode(), $e->getMessage() );
 		}
@@ -224,8 +226,7 @@ abstract class Request {
 	 */
 	public function head( $path, $data = array() ) {
 		try {
-			$result = $this->request( $path, $data, 'head' );
-			return $result;
+			return $this->request( $path, $data, 'head' );
 		} catch ( Exception $e ) {
 			return new WP_Error( $e->getCode(), $e->getMessage() );
 		}
@@ -260,8 +261,7 @@ abstract class Request {
 	 */
 	public function purge( $path, $data = array() ) {
 		try {
-			$result = $this->request( $path, $data, 'purge' );
-			return $result;
+			return $this->request( $path, $data, 'purge' );
 		} catch ( Exception $e ) {
 			return new WP_Error( $e->getCode(), $e->getMessage() );
 		}
@@ -277,7 +277,6 @@ abstract class Request {
 	 * @param string $method  Method.
 	 *
 	 * @return array|mixed|object
-	 * @throws Exception  Exception.
 	 */
 	public function request( $path, $data = array(), $method = 'post' ) {
 		$url = $this->get_api_url( $path );
@@ -334,6 +333,9 @@ abstract class Request {
 		return $response;
 	}
 
+	/**
+	 * Sign request.
+	 */
 	protected function sign_request() {}
 
 }

@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="sui-actions-right">
 		<p class="wphb-label-notice-inline sui-hidden-xs sui-hidden-sm">
 			<?php esc_html_e( 'Using Cloudflare?', 'wphb' ); ?>
-			<a href="#" class="connect-cloudflare-link">
+			<a href="#" data-modal-open="cloudflare-connect" data-modal-open-focus="cloudflare-email" data-modal-close-focus="wrap-wphb-browser-caching" data-modal-mask="false" data-esc-close="false">
 				<?php esc_html_e( 'Connect account', 'wphb' ); ?>
 			</a>
 		</p>

@@ -32,6 +32,7 @@ class Delete extends Task {
 		}
 
 		delete_transient( 'snapshot_listed_backups' );
+		delete_transient( 'snapshot_current_stats' );
 
 		$result = json_decode( wp_remote_retrieve_body( $response ), true );
 

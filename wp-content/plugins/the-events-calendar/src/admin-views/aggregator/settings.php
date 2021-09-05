@@ -379,7 +379,7 @@ if ( Tribe__Events__Aggregator::is_service_active() ) {
 			'type'            => 'html',
 			'html'            => '<p>' . sprintf(
 				esc_html__(
-					'To import Meetup events, please be sure to add your Meetup API key on %1$sEvents > Settings > APIs%2$s',
+					'To import Meetup events, please be sure to add your Meetup API key on %1$sEvents > Settings > Integrations%2$s',
 					'the-events-calendar'
 				),
 				'<a href="' . admin_url( Tribe__Settings::$parent_page . '&page=tribe-common&tab=addons' ) . '">',
@@ -701,7 +701,7 @@ if ( tribe( 'events-aggregator.main' )->is_service_active() ) {
 	ob_start();
 	?>
 	<p><?php esc_html_e( 'Use the options below to configure your imports. Looking for more ways to import events from other websites?', 'the-events-calendar' ); ?></p>
-	<a href="https://m.tri.be/196z"><?php esc_html_e( 'Check out Event Aggregator.', 'the-events-calendar' ); ?></a>
+	<a href="https://evnt.is/196z"><?php esc_html_e( 'Check out Event Aggregator.', 'the-events-calendar' ); ?></a>
 	<?php
 	$import_instructions = ob_get_clean();
 }

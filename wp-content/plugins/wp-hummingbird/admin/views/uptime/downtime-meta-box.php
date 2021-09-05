@@ -52,7 +52,7 @@ $this->admin_notices->show_inline_dismissible(
 						<?php $down = strtotime( get_date_from_gmt( date( 'Y-m-d H:i:s', $event->down ) ) ); ?>
 						<?php $up = strtotime( get_date_from_gmt( date( 'Y-m-d H:i:s', $event->up ) ) ); ?>
 						<div class="wphb-pills-group">
-							<span class="wphb-pills red sui-tooltip" data-tooltip="<?php echo esc_attr( $event->details ); ?>"><i class="sui-icon-chevron-down"></i> <?php echo esc_html( date_i18n( 'M j @ g:ia', $down ) ); ?></span>
+							<span class="wphb-pills red sui-tooltip" data-tooltip="<?php echo esc_attr( $event->details ); ?>"><span class="sui-icon-chevron-down"></span> <?php echo esc_html( date_i18n( 'M j @ g:ia', $down ) ); ?></span>
 							<?php
 							if ( $event->downtime ) :
 								echo '<span class="list-detail-stats">' . esc_html( $event->downtime ) . '</span>';
@@ -61,7 +61,7 @@ $this->admin_notices->show_inline_dismissible(
 							<img class="wphb-image-pills-divider"
 								src="<?php echo esc_url( WPHB_DIR_URL . 'admin/assets/image/downtime-splice.svg' ); ?>"
 								alt="<?php esc_attr_e( 'Spacer image', 'wphb' ); ?>">
-							<span class="wphb-pills green"><i class="sui-icon-chevron-up"></i> <?php echo esc_html( date_i18n( 'M j @ g:ia', $up ) ); ?></span>
+							<span class="wphb-pills green"><span class="sui-icon-chevron-up"></span> <?php echo esc_html( date_i18n( 'M j @ g:ia', $up ) ); ?></span>
 						</div>
 					<?php endif; ?>
 					</span>

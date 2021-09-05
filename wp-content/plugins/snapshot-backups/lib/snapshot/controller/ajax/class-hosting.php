@@ -11,6 +11,7 @@ use WPMUDEV\Snapshot4\Controller;
 use WPMUDEV\Snapshot4\Task;
 use WPMUDEV\Snapshot4\Helper;
 use WPMUDEV\Snapshot4\Model;
+use WPMUDEV\Snapshot4\Helper\Settings;
 
 /**
  * Hosting backups AJAX controller class
@@ -46,8 +47,8 @@ class Hosting extends Controller\Ajax {
 		foreach ( $backups as $key => $item ) {
 			$item['icon']              = $item['is_automate'] ? 'automate' : 'storage-server-data';
 			$item['icon_tooltip_text'] = $item['is_automate']
-				? __( 'WPMU DEV Automate backup', 'snapshot' )
-				: __( 'WPMU DEV Hosting backup', 'snapshot' );
+				? ( Settings::get_branding_hide_doc_link() ? __( 'Automate backup', 'snapshot' ) : __( 'WPMU DEV Automate backup', 'snapshot' ) )
+				: ( Settings::get_branding_hide_doc_link() ? __( 'Hosting backup', 'snapshot' ) : __( 'WPMU DEV Hosting backup', 'snapshot' ) );
 
 			$item['destination_icon']  = 'wpmudev-logo';
 			$item['destination_title'] = $item['is_automate']
@@ -55,7 +56,7 @@ class Hosting extends Controller\Ajax {
 				: __( 'WPMU DEV (Hosting)', 'snapshot' );
 
 			$site_id                  = Helper\Api::get_site_id();
-			$hub_hosting_backups_link = sprintf( 'https://premium.wpmudev.org/hub2/site/%s/backups', rawurlencode( $site_id ) );
+			$hub_hosting_backups_link = sprintf( 'https://wpmudev.com/hub2/site/%s/backups', rawurlencode( $site_id ) );
 			$item['manage_link']      = $hub_hosting_backups_link;
 
 			ob_start();

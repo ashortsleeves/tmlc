@@ -1,6 +1,6 @@
 <?php // phpcs:ignore
 /**
- * Snapshot models: Get/set region request model
+ * Snapshot models: Get/set creds request model
  *
  * @package snapshot
  */
@@ -10,13 +10,13 @@ namespace WPMUDEV\Snapshot4\Model\Request;
 use WPMUDEV\Snapshot4\Model;
 
 /**
- * Get/set region request model class
+ * Gets/sets creds (region, storage limit) request model class
  */
 class Region extends Model\Request {
 	const DEFAULT_ERROR = 'snapshot_region_service_unreachable';
 
 	/**
-	 * Set region request endpoint
+	 * Set creds request endpoint
 	 *
 	 * @var string
 	 */
@@ -36,11 +36,11 @@ class Region extends Model\Request {
 	}
 
 	/**
-	 * Make request to get the stored region from system-side.
+	 * Make request to get the stored creds from system-side.
 	 *
 	 * @return array|mixed|object
 	 */
-	public function get_region() {
+	public function get_credsls() {
 		$method         = 'get';
 		$this->endpoint = 'credsls';
 		$path           = $this->get_api_url();
@@ -56,7 +56,7 @@ class Region extends Model\Request {
 
 		$response = json_decode( $this->response_body, true );
 
-		return isset( $response['bu_region'] ) ? $response['bu_region'] : null;
+		return $response;
 	}
 
 	/**
@@ -72,6 +72,25 @@ class Region extends Model\Request {
 
 		$data              = array();
 		$data['bu_region'] = $region;
+
+		$response = $this->request( $path, $data, $method );
+
+		return $response;
+	}
+
+	/**
+	 * Make request to set the stored storage limit system-side.
+	 *
+	 * @param int $storage_limit The new storage limit based on which backups will be rotated.
+	 *
+	 * @return array|mixed|object
+	 */
+	public function set_storage( $storage_limit ) {
+		$method = 'post';
+		$path   = $this->get_api_url();
+		$data   = array();
+
+		$data['rotation_frequency'] = $storage_limit;
 
 		$response = $this->request( $path, $data, $method );
 

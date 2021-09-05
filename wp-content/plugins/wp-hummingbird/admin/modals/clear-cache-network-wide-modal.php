@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div id="ccnw-slide-one" class="sui-box sui-modal-slide sui-loaded sui-active" data-modal-size="sm">
 			<div class="sui-box-header sui-flatten sui-content-center sui-spacing-top--60">
 				<button type="button" class="sui-button-icon sui-button-float--right" data-modal-close>
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text">
 						<?php esc_html_e( 'Close this dialog window', 'wphb' ); ?>
 					</span>
@@ -53,7 +53,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div id="ccnw-slide-two" class="sui-box sui-modal-slide" data-modal-size="sm">
 			<div class="sui-box-header sui-flatten sui-content-center sui-spacing-top--60">
 				<button type="button" class="sui-button-icon sui-button-float--right" data-modal-close>
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text">
 						<?php esc_html_e( 'Close this dialog window', 'wphb' ); ?>
 					</span>
@@ -70,7 +70,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="sui-progress-block">
 					<div class="sui-progress">
 						<span class="sui-progress-icon" aria-hidden="true">
-							<i class="sui-icon-loader sui-loading"></i>
+							<span class="sui-icon-loader sui-loading"></span>
 						</span>
 						<div class="sui-progress-text">
 							<span>0%</span>
@@ -80,7 +80,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</div>
 					</div>
 					<button class="sui-button-icon sui-tooltip" type="button" data-tooltip="<?php esc_attr_e( 'Cancel', 'wphb' ); ?>">
-						<i class="sui-icon-close" aria-hidden="true"></i>
+						<span class="sui-icon-close" aria-hidden="true"></span>
 					</button>
 				</div>
 

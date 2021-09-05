@@ -7,15 +7,14 @@
 
 namespace WPMUDEV\Snapshot4\Task\Request;
 
-use WPMUDEV\Snapshot4;
 use WPMUDEV\Snapshot4\Task;
+use WPMUDEV\Snapshot4\Model;
 
 /**
  * Schedule requesting class
  */
 class Schedule extends Task {
 
-	const OPTION_BACKUP_SCHEDULE    = 'wp_snapshot_backup_schedule';
 	const ERR_STRING_REQUEST_PARAMS = 'Request for a backup schedule was not successful';
 
 	/**
@@ -43,6 +42,52 @@ class Schedule extends Task {
 	}
 
 	/**
+	 * Requests current schedule
+	 *
+	 * @return false|null|array
+	 */
+	private function fetch_current_schedule() {
+		$request_model = new Model\Request\Schedule();
+		$request_model->set( 'ok_codes', array( 404 ) );
+		$response = $request_model->schedule_request( 'get_status_all', new Model\Schedule( array() ) );
+		if ( $request_model->add_errors( $this ) ) {
+			return false;
+		}
+		$response_code     = wp_remote_retrieve_response_code( $response );
+		$current_schedules = json_decode( wp_remote_retrieve_body( $response ), true );
+		$current_schedule  = null;
+		if ( isset( $current_schedules[0] ) && 200 === $response_code ) {
+			$current_schedule = $current_schedules[0];
+		}
+
+		return $current_schedule;
+	}
+
+	/**
+	 * Returns current schedule
+	 *
+	 * @param bool $no_cache true if don't need to cache in static var.
+	 * @return \WP_Error|null|array
+	 */
+	public static function get_current_schedule( $no_cache = false ) {
+		static $schedule = null;
+
+		if ( ! is_null( $schedule ) && ! $no_cache ) {
+			return $schedule;
+		}
+
+		$task     = new self();
+		$response = $task->fetch_current_schedule();
+		if ( $task->has_errors() ) {
+			foreach ( $task->get_errors() as $error ) {
+				return $error;
+			}
+		}
+		$schedule = $response;
+		return $schedule;
+	}
+
+	/**
 	 * Places the request calls to the service for processing the backup schedule.
 	 *
 	 * @param array $args Arguments coming from the ajax call.
@@ -52,44 +97,28 @@ class Schedule extends Task {
 		$schedule_model = $args['schedule_model'];
 		$action         = $args['action'];
 
-		$stored_schedule = get_site_option( self::OPTION_BACKUP_SCHEDULE );
-		if ( 'delete' === $action && ( ( isset( $stored_schedule['bu_status'] ) && 'inactive' === $stored_schedule['bu_status'] ) || ! $stored_schedule ) ) {
-			return;
+		$current_schedule = $this->fetch_current_schedule();
+		if ( $this->has_errors() ) {
+			return false;
+		}
+		if ( $current_schedule ) {
+			$schedule_model->set( 'schedule_id', $current_schedule['schedule_id'] );
 		}
 
-		if ( 'create' === $action ) {
-			// We must ensure there's not another schedule remotely, before creating one.
-
-			// if site id *** has no schedules.
-			$request_model->set( 'ok_codes', array( 404 ) );
-
-			$first_response = $request_model->schedule_request( 'get_status_all', $schedule_model );
-
-			if ( $request_model->add_errors( $this ) ) {
-				return false;
+		if ( 'delete' === $action ) {
+			if ( ! $current_schedule || 'inactive' === $current_schedule['bu_status'] ) {
+				return;
 			}
-
-			$first_response_data = json_decode( wp_remote_retrieve_body( $first_response ), true );
-			if ( is_array( $first_response_data ) && isset( $first_response_data[0]['created_at'] ) ) {
-				// So, a remote schedule exists, lets first try to match the local and remote schedules, by deleting both.
-				Snapshot4\Main::handle_schedules();
-
-				// OK, now retry.
-				$first_response = $request_model->schedule_request( 'get_status_all', $schedule_model );
-
-				if ( $request_model->add_errors( $this ) ) {
-					return false;
-				}
-
-				$second_response_data = json_decode( wp_remote_retrieve_body( $first_response ), true );
-				if ( is_array( $second_response_data ) && isset( $second_response_data[0]['created_at'] ) ) {
-					$this->add_error(
-						'snapshot_schedule_duplication_attempt',
-						__( 'Snapshot tried to create a schedule while one already exists API-side.', 'snapshot' )
-					);
-					return false;
-				}
-			}
+			$schedule_model->set( 'frequency', $current_schedule['bu_frequency'] );
+			$schedule_model->set( 'files', $current_schedule['bu_files'] );
+			$schedule_model->set( 'tables', $current_schedule['bu_tables'] );
+			$schedule_model->set( 'time', $current_schedule['bu_time'] );
+			$schedule_model->set( 'frequency_weekday', $current_schedule['bu_frequency_weekday'] );
+			$schedule_model->set( 'frequency_monthday', $current_schedule['bu_frequency_monthday'] );
+		} elseif ( 'create' === $action && $current_schedule ) {
+			$action = 'update';
+		} elseif ( 'update' === $action && ! $current_schedule ) {
+			$action = 'create';
 		}
 
 		$request_model->set( 'ok_codes', array() );
@@ -101,27 +130,6 @@ class Schedule extends Task {
 
 		$response_data = json_decode( wp_remote_retrieve_body( $response ), true );
 		$schedule_model->set_data( $response_data );
-
-		switch ( strtolower( $action ) ) {
-			case 'create':
-			case 'get_status':
-				update_site_option( self::OPTION_BACKUP_SCHEDULE, $schedule_model->get_data() );
-				break;
-			case 'update':
-			case 'delete':
-				// The "service" does not return schedule_id, read it from DB.
-				$active_schedule = get_site_option( self::OPTION_BACKUP_SCHEDULE );
-				update_site_option(
-					self::OPTION_BACKUP_SCHEDULE,
-					array_merge(
-						$schedule_model->get_data(),
-						array(
-							'schedule_id' => $active_schedule['schedule_id'],
-						)
-					)
-				);
-				break;
-		}
 
 		return $response_data;
 	}

@@ -75,7 +75,7 @@ $this->modal( 'reset-settings' );
 		</div><!-- end col-third -->
 		<div class="sui-box-settings-col-2">
 			<a href="#" class="sui-button sui-button-ghost sui-button-icon-left" data-modal-open="wphb-reset-settings-modal" data-modal-open-focus="dialog-close-div" data-modal-mask="true">
-				<i class="sui-icon-undo" aria-hidden="true"></i>
+				<span class="sui-icon-undo" aria-hidden="true"></span>
 				<?php esc_html_e( 'Reset Settings', 'wphb' ); ?>
 			</a>
 			<span class="sui-description">

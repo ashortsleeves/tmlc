@@ -28,6 +28,17 @@ trait Formats {
 	}
 
 	/**
+	 * Persistent date & time formats for Hub data
+	 *
+	 * @param $timestamp
+	 *
+	 * @return string
+	 */
+	public function persistent_hub_datetime_format( $timestamp ) {
+		return gmdate( 'Y-m-d g:i a', $timestamp );
+	}
+
+	/**
 	 * @param $bytes
 	 *
 	 * @return string
@@ -236,5 +247,30 @@ trait Formats {
 		];
 
 		return strtr( $format, $replacements );
+	}
+
+	/**
+	 * This will calculate the date interval time
+	 * @param string $date
+	 *
+	 * @return string $time
+	 */
+	public function calculate_date_interval( $date ) {
+		$interval = '';
+		if ( '24 hours' == $date ) {
+			$interval = 'P1D';
+		} else if ( '7 days' == $date ) {
+			$interval = 'P7D';
+		} else if ( '30 days' == $date ) {
+			$interval = 'P30D';
+		} else if ( '3 months' == $date ) {
+			$interval = 'P3M';
+		} else if ( '6 months' == $date ) {
+			$interval = 'P6M';
+		} else if ( '12 months' == $date ) {
+			$interval = 'P12M';
+		}
+
+		return $interval;
 	}
 }

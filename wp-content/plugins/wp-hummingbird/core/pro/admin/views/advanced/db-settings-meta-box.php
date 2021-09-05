@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="sui-border-frame with-padding schedule-box <?php echo $schedule ? '' : 'hidden'; ?>">
 			<div class="sui-form-field">
 				<label class="sui-label" for="cleanup_frequency" id="cleanup_frequency-label"><?php esc_html_e( 'Frequency', 'wphb' ); ?></label>
-				<select name="cleanup_frequency" id="cleanup_frequency" aria-labelledby="cleanup_frequency-label">
+				<select name="cleanup_frequency" id="cleanup_frequency" class="sui-select" data-width="250" aria-labelledby="cleanup_frequency-label">
 					<option <?php selected( 1, $frequency ); ?> value="1">
 						<?php esc_html_e( 'Daily', 'wphb' ); ?>
 					</option>

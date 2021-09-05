@@ -10,6 +10,7 @@ namespace WPMUDEV\Snapshot4\Task\Backup\Zipstream;
 use WPMUDEV\Snapshot4\Task;
 use WPMUDEV\Snapshot4\Model;
 use WPMUDEV\Snapshot4\Helper\Db;
+use WPMUDEV\Snapshot4\Helper\Settings;
 
 /**
  * Backup zipstream task class
@@ -49,7 +50,7 @@ class Tables extends Task\Backup\Zipstream {
 			self::$all_tables = Db::get_all_database_tables();
 		}
 
-		if ( ! in_array( $table, self::$all_tables, true ) ) {
+		if ( ! in_array( $table, array_column( self::$all_tables, 'name' ), true ) ) {
 			// We can't go through with the db iteration.
 			return false;
 		}
@@ -77,6 +78,9 @@ class Tables extends Task\Backup\Zipstream {
 		// Enable output of HTTP headers.
 		$zipstream_options = new \ZipStream\Option\Archive();
 		$zipstream_options->setSendHttpHeaders( true );
+		if ( Settings::get_zipstream_flush_buffer() ) {
+			$zipstream_options->setFlushOutput( true );
+		}
 
 		// Actually zipstream the rows of the requested table.
 		$this->zipstream_table( $model, $zipstream_options );

@@ -10,6 +10,49 @@
 	var destination_backup_count = {};
 	var edit_destination_id = null;
 	var delete_destination_id = null;
+	var snapshot_stored_schedule = {};
+
+	function load_schedule() {
+		var url = ajaxurl + '?action=snapshot-get_schedule';
+		var request_data = {
+			_wpnonce: $('#_wpnonce-get-schedule').val()
+		};
+
+		$.ajax({
+			type: 'GET',
+			url: url,
+			data: request_data,
+			cache: false,
+			dataType: 'json',
+			beforeSend: function () {
+				snapshot_stored_schedule = {};
+				$('.snapshot-loading-schedule').show();
+			},
+			success: function (response) {
+				if (response.success) {
+					snapshot_stored_schedule = response.data;
+					update_destination_rows_schedule();
+				} else {
+					on_load_schedule_error();
+				}
+			},
+			complete: function () {
+				$('.snapshot-loading-schedule').hide();
+			},
+			error: function () {
+				on_load_schedule_error();
+			}
+		});
+	}
+
+	function on_load_schedule_error() {
+		$('.destination-schedule-text').text('-');
+	}
+
+	function update_destination_rows_schedule() {
+		$('.destination-schedule-text').text(snapshot_stored_schedule.text);
+		$('.snapshot-loading-schedule').hide();
+	}
 
 	function load_backup_count() {
 		$.ajax({
@@ -34,6 +77,23 @@
 				$('.snapshot-page-destinations .wpmudev-backup-count').text(data.data.backup_count);
 				destination_backup_count = data.data.destination_backup_count || {};
 				update_destination_backup_counts();
+
+				var last_destination = $('.sui-summary-segment .snapshot-last-destination');
+				var backups = data.data.backups;
+				if (backups.length) {
+					var row = $(backups[0].row);
+					var destination_span = $('<span></span>');
+					destination_span.text(row.data('destination_text'));
+					var destination_tooltip = row.data('destination_tooltip');
+					if (destination_tooltip) {
+						destination_span.addClass('sui-tooltip sui-tooltip-left-mobile sui-tooltip-constrained');
+						destination_span.css('--tooltip-width', '170px');
+						destination_span.attr('data-tooltip', destination_tooltip);
+					}
+					last_destination.empty().append(destination_span);
+				} else {
+					last_destination.text(snapshot_messages.no_destinations);
+				}
 			}
 		});
 	}
@@ -99,7 +159,7 @@
 			$('#error-'+destination_type+'-connection-secret-access-key').show();
 			$('#error-'+destination_type+'-connection-secret-access-key').html(snapshot_messages.required_s3_cred.replace('%s', $('.'+destination_type+'-connection-secret-access-key-label').text() ));
 			$('#error-'+destination_type+'-connection-secret-access-key').closest('.sui-form-field').addClass('sui-form-field-error');
-			$('#'+destination_type+'-connection-secret-access-key').focus();
+			$('#'+destination_type+'-connection-secret-access-key').trigger('focus');
 
 			abort_test_connection = true;
 		}
@@ -108,7 +168,7 @@
 			$('#error-'+destination_type+'-connection-access-key-id').show();
 			$('#error-'+destination_type+'-connection-access-key-id').html(snapshot_messages.required_s3_cred.replace('%s', $('.'+destination_type+'-connection-access-key-id-label').text() ));
 			$('#error-'+destination_type+'-connection-access-key-id').closest('.sui-form-field').addClass('sui-form-field-error');
-			$('#'+destination_type+'-connection-access-key-id').focus();
+			$('#'+destination_type+'-connection-access-key-id').trigger('focus');
 
 			abort_test_connection = true;
 		}
@@ -163,32 +223,32 @@
 						$.each(response.data.api_response, function(val, text) {
 							buckets_dropdown.append($("<option />").val(text).text(text));
 						});
-	
+
 						buckets_dropdown.SUIselect2( {
 							placeholder: snapshot_messages.choose_bucket,
 							dropdownCssClass: 'sui-select-dropdown',
 							dropdownParent: snapshot_s3_middle_form
 						} );
-	
+
 						// Since the connection is good, pass the data to the final step.
 						snapshot_s3_final_form.find("[name='tpd_accesskey']").val(data['tpd_accesskey']);
 						snapshot_s3_final_form.find("[name='tpd_secretkey']").val(data['tpd_secretkey']);
 						snapshot_s3_final_form.find("[name='tpd_region']").val(data['tpd_region']);
 						snapshot_s3_final_form.find("[name='tpd_type']").val(data['tpd_type']);
-	
+
 						//Also pass the data to the intermediate step.
 						snapshot_s3_middle_form.find("[name='tpd_accesskey']").val(data['tpd_accesskey']);
 						snapshot_s3_middle_form.find("[name='tpd_secretkey']").val(data['tpd_secretkey']);
 						snapshot_s3_middle_form.find("[name='tpd_region']").val(data['tpd_region']);
 						snapshot_s3_middle_form.find("[name='tpd_type']").val(data['tpd_type']);
-	
+
 						// Also, hide any previous results in the intermediate step.
 						$('#snapshot-wrong-s3-details').hide();
 						$('#snapshot-duplicate-s3-details, #snapshot-duplicate-s3-bucket-details').hide();
 						$('#snapshot-correct-s3-details').hide();
 
 						$('#s3-save-name').val(check_if_on_aws() ? 'S3/Amazon' : 'S3/'+selectedProviderName);
-	
+
 						SUI.slideModal( 'snapshot-add-destination-dialog-slide-3-s3' );
 
 					} else {
@@ -212,7 +272,7 @@
         return false;
 	}
 
-	
+
 	/**
 	 * Handles AJAX for testing Google Drive connection.
 	 */
@@ -302,7 +362,7 @@
 			$('#error-s3-details-limit').show();
 			$('#error-s3-details-limit').html(snapshot_messages.require_limit);
 			$('#error-s3-details-limit').closest('.sui-form-field').addClass('sui-form-field-error');
-			$('#s3-details-limit').focus();
+			$('#s3-details-limit').trigger('focus');
 
 			abort_details_connection = true;
 		}
@@ -319,7 +379,7 @@
 			$('#error-s3-details-directory').show();
 			$('#error-s3-details-directory').html(snapshot_messages.require_valid_path);
 			$('#error-s3-details-directory').closest('.sui-form-field').addClass('sui-form-field-error');
-			$('#s3-details-directory').focus();
+			$('#s3-details-directory').trigger('focus');
 
 			abort_details_connection = true;
 		}
@@ -340,7 +400,7 @@
 			$('#snapshot-wrong-s3-details').hide();
 			$('#snapshot-duplicate-s3-details, #snapshot-duplicate-s3-bucket-details').hide();
 			$('#snapshot-correct-s3-details').hide();
-	
+
 			SUI.slideModal( 'snapshot-add-destination-dialog-slide-4-s3' );
 		} else {
 			// Don't forget to add the final path too.
@@ -435,7 +495,7 @@
 			$('#snapshot-wrong-gd-details').hide();
 			$('#snapshot-duplicate-gd-details').hide();
 			$('#snapshot-correct-gd-details').hide();
-	
+
 			SUI.slideModal( 'snapshot-add-destination-dialog-slide-4-gd' );
 		} else {
 			// We'll add a name too, as it's required for the endpoint. Since it isn't actually stored, it can be anything.
@@ -498,7 +558,7 @@
 			$('#error-' + type + '-save-name').show();
 			$('#error-' + type + '-save-name').html(snapshot_messages.require_name);
 			$('#error-' + type + '-save-name').closest('.sui-form-field').addClass('sui-form-field-error');
-			$('#' + type + '-save-name').focus();
+			$('#' + type + '-save-name').trigger('focus');
 
 			return false;
 		}
@@ -560,7 +620,7 @@
 		$('[id^="error-s3-compatible-connection-"]').closest('.sui-form-field').removeClass('sui-form-field-error');
 	}
 
-	function hide_errors_pass_details(type) {		
+	function hide_errors_pass_details(type) {
 		$('[id^="error-'+ type +'-details-"]').hide();
 		$('[id^="error-'+ type +'-details-"]').html("");
 
@@ -569,7 +629,7 @@
 		$('#error-'+ type +'-details-bucket').closest('.sui-form-field').find('.select2-selection.select2-selection--single').removeClass('snapshot-error-select');
 	}
 
-	function hide_errors_save() {		
+	function hide_errors_save() {
 		$('#error-s3-save-name').hide();
 		$('#error-s3-save-name').html("");
 		$('#error-s3-save-name').closest('.sui-form-field').removeClass('sui-form-field-error');
@@ -625,6 +685,7 @@
 				tbody.append(item.html_row);
 			});
 			update_destination_backup_counts();
+			update_destination_rows_schedule();
 
 			if (edit_destination_id) {
 				row_dropdown_click('edit', edit_destination_id);
@@ -769,11 +830,12 @@
 					}
 				}
 			}
+
 			hide_errors_edit_destination(type);
 			SUI.openModal('modal-destination-'+ type + '-edit', this);
 
 			if ( type !== 'gdrive') {
-				form.find('select').change();
+				form.find('select').trigger('change');
 				$('#edit-s3-connection-region').SUIselect2({
 					placeholder: snapshot_messages.choose_region,
 					dropdownCssClass: 'sui-select-dropdown',
@@ -819,7 +881,7 @@
 						dropdownCssClass: 'sui-select-dropdown',
 						dropdownParent: $('#snapshot-edit-s3-connection')
 					});
-					el.val(val).change().trigger('sui:change');
+					el.val(val).trigger('change').trigger('change');
 				}
 			}
 		});
@@ -854,7 +916,7 @@
 			$('#error-edit-' + type + '-connection-name').show();
 			$('#error-edit-' + type + '-connection-name').html(snapshot_messages.require_name);
 			$('#error-edit-' + type + '-connection-name').closest('.sui-form-field').addClass('sui-form-field-error');
-			$('#edit-' + type + '-connection-name').focus();
+			$('#edit-' + type + '-connection-name').trigger('focus');
 			abort = true;
 		}
 
@@ -862,7 +924,7 @@
 			$('#error-edit-s3-connection-secret-access-key').show();
 			$('#error-edit-s3-connection-secret-access-key').html(snapshot_messages.require_secret_key);
 			$('#error-edit-s3-connection-secret-access-key').closest('.sui-form-field').addClass('sui-form-field-error');
-			$('#edit-s3-connection-secret-access-key').focus();
+			$('#edit-s3-connection-secret-access-key').trigger('focus');
 			abort = true;
 		}
 
@@ -870,7 +932,7 @@
 			$('#error-edit-s3-connection-access-key-id').show();
 			$('#error-edit-s3-connection-access-key-id').html(snapshot_messages.require_access_key);
 			$('#error-edit-s3-connection-access-key-id').closest('.sui-form-field').addClass('sui-form-field-error');
-			$('#edit-s3-connection-access-key-id').focus();
+			$('#edit-s3-connection-access-key-id').trigger('focus');
 			abort = true;
 		}
 
@@ -893,7 +955,7 @@
 				$('#error-edit-gdrive-connection-path').show();
 				$('#error-edit-gdrive-connection-path').html(snapshot_messages.require_directory_id);
 				$('#error-edit-gdrive-connection-path').closest('.sui-form-field').addClass('sui-form-field-error');
-				$('#edit-gdrive-connection-path').focus();
+				$('#edit-gdrive-connection-path').trigger('focus');
 				abort = true;
 			}
 		} else {
@@ -901,7 +963,7 @@
 				$('#error-edit-s3-connection-path').show();
 				$('#error-edit-s3-connection-path').html(snapshot_messages.require_valid_path);
 				$('#error-edit-s3-connection-path').closest('.sui-form-field').addClass('sui-form-field-error');
-				$('#edit-s3-connection-path').focus();
+				$('#edit-s3-connection-path').trigger('focus');
 				abort = true;
 			}
 		}
@@ -910,7 +972,7 @@
 			$('#error-edit-' + type + '-connection-limit').show();
 			$('#error-edit-' + type + '-connection-limit').html(snapshot_messages.require_limit);
 			$('#error-edit-' + type + '-connection-limit').closest('.sui-form-field').addClass('sui-form-field-error');
-			$('#edit-' + type + '-connection-limit').focus();
+			$('#edit-' + type + '-connection-limit').trigger('focus');
 			abort = true;
 		}
 
@@ -1060,19 +1122,22 @@
 		hide_errors_test_connection();
 
 		var selectedProvider = $('#s3-compatible-connection-provider').find(':selected').val();
-		
+
 		// Create the special UI for Google Cloud.
 		if (selectedProvider==='googlecloud') {
 			$('.snapshot-s3-compatible-key').addClass('sui-control-with-icon');
-			$('.snapshot-s3-compatible-key i').show();
+			$('.snapshot-s3-compatible-key .sui-icon-profile-male').show();
+			$('.snapshot-s3-compatible-key .sui-icon-key').show();
 			$('#label-s3-compatible-connection-provider .sui-label-link').show();
 		} else if (selectedProvider==='s3_other') {
 			$('.snapshot-s3-compatible-key').removeClass('sui-control-with-icon');
-			$('.snapshot-s3-compatible-key i').hide();
+			$('.snapshot-s3-compatible-key .sui-icon-profile-male').hide();
+			$('.snapshot-s3-compatible-key .sui-icon-key').hide();
 			$('#label-s3-compatible-connection-provider .sui-label-link').hide();
 		} else {
 			$('.snapshot-s3-compatible-key').removeClass('sui-control-with-icon');
-			$('.snapshot-s3-compatible-key i').hide();
+			$('.snapshot-s3-compatible-key .sui-icon-profile-male').hide();
+			$('.snapshot-s3-compatible-key .sui-icon-key').hide();
 			$('#label-s3-compatible-connection-provider .sui-label-link').show();
 		}
 		['access-key-id','secret-access-key','region'].forEach(function(element) {
@@ -1133,10 +1198,46 @@
 		history_replace_state(true);
 	}
 
+	function fix_last_destination_tooltip() {
+		$('.snapshot-last-destination').on('mouseenter', function () {
+			var rect = this.getBoundingClientRect();
+			var last_destination = $(this);
+			var tooltip = last_destination.find('>.sui-tooltip');
+			if (!tooltip.length) {
+				return;
+			}
+
+			var summary = last_destination.closest('.sui-summary');
+			var position = last_destination.position();
+			var wrap = last_destination.closest('.sui-wrap');
+			var copy = $('#snapshot-last-destination-copy');
+			if (!copy.length) {
+				var copy = $('<div id="snapshot-last-destination-copy"></div>');
+				wrap.append(copy);
+			}
+			copy.css({
+				position:'fixed',
+				top: rect.top - 5,
+				left: rect.left
+			});
+
+			var tooltip_clone = tooltip.clone();
+			tooltip_clone.empty().css({
+				display: 'inline-block',
+				width: Math.min(tooltip.width(), summary.width() - position.left + 15),
+				height: tooltip.height()
+			});
+			tooltip_clone.appendTo(copy);
+			tooltip.removeClass('sui-tooltip').addClass('not-sui-tooltip');
+		}).on('mouseleave', function () {
+			$(this).find('>span.not-sui-tooltip').removeClass('not-sui-tooltip').addClass('sui-tooltip');
+		});
+	}
+
 	$(window).on('load', function () {
 		var matches;
 		if ('#add-destination' === window.location.hash) {
-			$('#snapshot-add-destination').click();
+			$('#snapshot-add-destination').trigger('click');
 			history_replace_state(false);
 		} else if (matches = window.location.hash.match(/^#edit\-destination\-(.+)/)) {
 			edit_destination_id = matches[1];
@@ -1160,6 +1261,8 @@
 
 			load_destinations();
 
+			load_schedule();
+
 			// Expand AWS instructions when "Follow the instructions" is clicked.
 			$('.snapshot-expand-aws-instructions').on('click', function(e){
 				$('.snapshot-aws-credentials-howto .sui-accordion-item').addClass('sui-accordion-item--open');
@@ -1182,7 +1285,7 @@
 				hide_errors_test_connection();
 				hide_errors_pass_details('s3')
 				hide_errors_save();
-				
+
 				// Create the AWS S3 region dropdown from the start.
 				$('#s3-connection-region').SUIselect2("destroy");
 				$("#s3-connection-region option").prop("selected", false);
@@ -1219,9 +1322,9 @@
 			$('#snapshot-submit-s3-connection-test').on('click', function(e){
 				if (e && e.preventDefault) e.preventDefault();
 				if (check_if_on_aws()) {
-					$('form#snapshot-test-s3-connection').submit();
+					$('form#snapshot-test-s3-connection').trigger('submit');
 				} else {
-					$('form#snapshot-test-s3-compatible-connection').submit();
+					$('form#snapshot-test-s3-compatible-connection').trigger('submit');
 				}
 			});
 
@@ -1239,14 +1342,14 @@
 			$('#snapshot-submit-s3-connection-details').on('click', function(e){
 				if (e && e.preventDefault) e.preventDefault();
 				snapshot_s3_middle_form.find("[name='tpd_action']").val('move_to_next_screen');
-				snapshot_s3_middle_form.submit();
+				snapshot_s3_middle_form.trigger('submit');
 			});
 
 			// Perform the non-required 'Test Connection' action on the 2st S3 modal screen.
 			$('#snapshot-test-s3-connection-path').on('click', function(e){
 				if (e && e.preventDefault) e.preventDefault();
 				snapshot_s3_middle_form.find("[name='tpd_action']").val('test_connection_final');
-				snapshot_s3_middle_form.submit();
+				snapshot_s3_middle_form.trigger('submit');
 			});
 
 			snapshot_s3_middle_form.on('submit', destination_intermediate_s3_step);
@@ -1270,7 +1373,7 @@
 			// Submit the final form on the last S3 modal screen.
 			$('#snapshot-submit-save-s3').on('click', function(e){
 				if (e && e.preventDefault) e.preventDefault();
-				snapshot_s3_final_form.submit();
+				snapshot_s3_final_form.trigger('submit');
 			});
 
 			snapshot_s3_final_form.on('submit', function(e){
@@ -1293,14 +1396,14 @@
 			});
 
 			// Hide the Require Region notice when selecting a region
-			$('#s3-connection-region').on('select2:select', function (e) {				
+			$('#s3-connection-region').on('select2:select', function (e) {
 				$('#error-s3-connection-region').hide();
 				$('#error-s3-connection-region').html('');
 				$('#error-s3-connection-region').closest('.sui-form-field').find('.select2-selection.select2-selection--single').removeClass('snapshot-error-select');
 			});
 
 			  // Hide the Require Bucket notice when selecting a region
-			$('#s3-details-bucket').on('select2:select', function (e) {				
+			$('#s3-details-bucket').on('select2:select', function (e) {
 				$('#error-s3-details-bucket').hide();
 				$('#error-s3-details-bucket').html('');
 				$('#error-s3-details-bucket').closest('.sui-form-field').find('.select2-selection.select2-selection--single').removeClass('snapshot-error-select');
@@ -1337,5 +1440,8 @@
 		$(window).on('snapshot:toggle_destination_active', function (e, element, callback) {
 			toggle_destination_active.bind(element)(callback);
 		});
+
+		// Fix tooltip in block with overflow: hidden
+		fix_last_destination_tooltip();
 	});
 })(jQuery);

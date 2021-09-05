@@ -9,6 +9,7 @@ use Calotes\Helper\HTTP;
 use Calotes\Helper\Route;
 use WP_Defender\Behavior\WPMUDEV;
 use WP_Defender\Component\Blacklist_Lockout;
+use WP_Defender\Component\Config\Config_Hub_Helper;
 use WP_Defender\Component\Table_Lockout;
 use WP_Defender\Model\Lockout_Ip;
 use WP_Defender\Model\Lockout_Log;
@@ -27,6 +28,11 @@ class Firewall extends \WP_Defender\Controller2 {
 	 */
 	protected $model;
 
+	/**
+	 * @var \WP_Defender\Component\Firewall
+	 */
+	public $service;
+
 	public function __construct() {
 		$this->register_page(
 			esc_html__( 'Firewall', 'wpdef' ),
@@ -37,20 +43,64 @@ class Firewall extends \WP_Defender\Controller2 {
 			),
 			$this->parent_slug
 		);
-		$this->model = wd_di()->get( \WP_Defender\Model\Setting\Firewall::class );
+		$this->model   = wd_di()->get( \WP_Defender\Model\Setting\Firewall::class );
+		$this->service = wd_di()->get( \WP_Defender\Component\Firewall::class );
 		$this->register_routes();
 		$this->maybe_show_demo_lockout();
 		$this->maybe_lockout();
-		//init the controller
+
 		wd_di()->get( \WP_Defender\Controller\Login_Lockout::class );
 		wd_di()->get( Nf_Lockout::class );
 		wd_di()->get( Blacklist::class );
 		wd_di()->get( Firewall_Logs::class );
+
+		add_filter( 'cron_schedules', array( &$this, 'add_cron_schedules' ) );
+		// We will schedule the time to clean up old firewall logs.
+		if ( ! wp_next_scheduled( 'firewall_clean_up_logs' ) ) {
+			wp_schedule_event( time() + 10, 'hourly', 'firewall_clean_up_logs' );
+		}
+
+		// Schedule cleanup blocklist ips event.
+		$this->schedule_cleanup_blocklist_ips_event();
+
+		add_action( 'firewall_clean_up_logs', array( &$this, 'clean_up_firewall_logs' ) );
+		add_action( 'firewall_cleanup_temp_blocklist_ips', array( &$this, 'clean_up_temporary_ip_blocklist' ) );
+		// Additional hooks.
 		add_action( 'defender_enqueue_assets', array( &$this, 'enqueue_assets' ), 11 );
 	}
 
 	/**
-	 * This is for handling request from dashboard
+	 * Add a new cron schedule for the firewall clear temporary IPs cron interval.
+	 *
+	 * @param array $schedules
+	 *
+	 * @return array $schedules
+	 */
+	public function add_cron_schedules( $schedules ) {
+		$schedules['monthly'] = array(
+			'interval' => MONTH_IN_SECONDS,
+			'display' => esc_html__( 'Once Monthly', 'wpdef'  ),
+		);
+
+		return $schedules;
+	}
+
+	/**
+	 * Clean up all the old logs from the local storage, this will happen per hourly basis.
+	 */
+	public function clean_up_firewall_logs() {
+		$this->service->firewall_clean_up_logs();
+	}
+
+	/**
+	 * Clean up temporary IP block list.
+	 */
+	public function clean_up_temporary_ip_blocklist() {
+		$this->service->firewall_clean_up_temporary_ip_blocklist();
+	}
+
+	/**
+	 * This is for handling request from dashboard.
 	 * @defender_route
 	 */
 	public function dashboard_activation() {
@@ -65,32 +115,26 @@ class Firewall extends \WP_Defender\Controller2 {
 	}
 
 	/**
-	 * Render the view page
+	 * Render the view page.
 	 */
 	public function main_view() {
 		$this->render( 'main' );
 	}
 
 	/**
-	 * Save the main settings
+	 * Save the main settings.
 	 * @param Request $request
 	 *
 	 * @return Response
 	 * @defender_route
 	 */
 	public function save_settings( Request $request ) {
-		$data = $request->get_data(
-			array(
-				'storage_days' => array(
-					'type'     => 'int',
-					'sanitize' => 'sanitize_text_field',
-				),
-			)
-		);
-
+		$data = $request->get_data_by_model( $this->model );
 		$this->model->import( $data );
 		if ( $this->model->validate() ) {
+			$this->service->update_cron_schedule_interval( $data['ip_blocklist_cleanup_interval']);
 			$this->model->save();
+			Config_Hub_Helper::set_clear_active_flag();
 
 			return new Response(
 				true,
@@ -183,7 +227,7 @@ class Firewall extends \WP_Defender\Controller2 {
 	}
 
 	/**
-	 * We wil check and prevent the access if the current IP is blacklist, or get temporary banned
+	 * We wil check and prevent the access if the current IP is blacklist, or get temporary banned.
 	 */
 	public function maybe_lockout() {
 		do_action( 'wd_before_lockout' );
@@ -221,12 +265,12 @@ class Firewall extends \WP_Defender\Controller2 {
 			/**
 			 * We don't need to check the IP if:
 			 * the current user can logged in and no blacklisted,
-			 * the option detect_404_logged is disabled
+			 * the option detect_404_logged is disabled.
 			 */
 			return;
 		}
 
-		//check blacklist
+		// Check blacklist.
 		$model = Lockout_Ip::get( $ip );
 		if ( is_object( $model ) && $model->is_locked() ) {
 			if ( ! defined( 'DONOTCACHEPAGE' ) ) {
@@ -246,7 +290,7 @@ class Firewall extends \WP_Defender\Controller2 {
 	}
 
 	/**
-	 * Check if the access is from our staff access
+	 * Check if the access is from our staff access.
 	 * @return bool
 	 */
 	private function is_a_staff_access() {
@@ -266,7 +310,7 @@ class Firewall extends \WP_Defender\Controller2 {
 	}
 
 	/**
-	 * Query the data
+	 * Query the data.
 	 */
 	public function query_logs() {
 		if ( ! $this->check_permission() ) {
@@ -295,7 +339,7 @@ class Firewall extends \WP_Defender\Controller2 {
 
 		$tl_component = new Table_Lockout();
 		$ip           = $tl_component->get_user_ip();
-		// If 'ban_status' is selected
+		// If 'ban_status' is selected.
 		$key_status = HTTP::post( 'ban_status', '' );
 
 		$new_logs     = array();
@@ -330,7 +374,7 @@ class Firewall extends \WP_Defender\Controller2 {
 	}
 
 	/**
-	 * CSV exporter for IP logs
+	 * CSV exporter for IP logs.
 	 */
 	public function export_ip_logs() {
 		if ( ! $this->check_permission() ) {
@@ -366,7 +410,7 @@ class Firewall extends \WP_Defender\Controller2 {
 		$cache_name = $filters['from'] . '-' . $filters['to'];
 		$logs       = Lockout_Log::query_logs( $cache_name, $filters, $paged, $order_by, $order, $page_size );
 
-		// If 'ban_status' is selected
+		// If 'ban_status' is selected.
 		$key_status = HTTP::get( 'ban_status', '' );
 
 		$tl_component = new Table_Lockout();
@@ -387,13 +431,13 @@ class Firewall extends \WP_Defender\Controller2 {
 		fseek( $fp, 0 );
 		header( 'Content-Type: text/csv' );
 		header( 'Content-Disposition: attachment; filename="' . $filename . '";' );
-		// make php send the generated csv lines to the browser
+		// Make php send the generated csv lines to the browser.
 		fpassthru( $fp );
 		exit();
 	}
 
 	/**
-	 * Endpoint for toggle IP blocklist or allowlist, use on logs item content
+	 * Endpoint for toggle IP blocklist or allowlist, use on logs item content.
 	 */
 	public function toggle_ip_action() {
 		if ( ! $this->check_permission() ) {
@@ -455,7 +499,7 @@ class Firewall extends \WP_Defender\Controller2 {
 	}
 
 	/**
-	 * Remove all IP logs
+	 * Remove all IP logs.
 	 * @param Request $request
 	 *
 	 * @return Response
@@ -482,7 +526,7 @@ class Firewall extends \WP_Defender\Controller2 {
 	}
 
 	/**
-	 * Return summary data
+	 * Return summary data.
 	 *
 	 * @return array
 	 */
@@ -548,7 +592,7 @@ class Firewall extends \WP_Defender\Controller2 {
 	}
 
 	/**
-	 * Endpoint for bulk action
+	 * Endpoint for bulk action.
 	 */
 	public function bulk_action() {
 		if ( ! $this->check_permission() ) {
@@ -646,7 +690,7 @@ class Firewall extends \WP_Defender\Controller2 {
 	}
 
 	/**
-	 * All the variables that we will show on frontend, both in the main page, or dashboard widget
+	 * All the variables that we will show on frontend, both in the main page, or dashboard widget.
 	 * @return array
 	 */
 	function data_frontend() {
@@ -712,5 +756,63 @@ class Firewall extends \WP_Defender\Controller2 {
 		}
 
 		return $strings;
+	}
+
+	/**
+	 * @param array $config
+	 * @param bool $is_pro
+	 *
+	 * @return array
+	 */
+	public function config_strings( $config, $is_pro ) {
+		$strings = array( __( 'Active', 'wpdef' ) );
+
+		if ( isset( $config['notification'] ) && 'enabled' === $config['notification'] ) {
+			$strings[] = __( 'Email notifications active', 'wpdef' );
+		}
+		if ( $is_pro && 'enabled' === $config['report'] ) {
+			$strings[] = sprintf(
+			/* translators: ... */
+				__( 'Email reports sending %s', 'wpdef' ),
+				$config['report_frequency']
+			);
+		} elseif ( ! $is_pro ) {
+			$strings[] = sprintf(
+			/* translators: ... */
+				__( 'Email report inactive %s', 'wpdef' ),
+				'<span class="sui-tag sui-tag-pro">Pro</span>'
+			);
+		}
+
+		return $strings;
+	}
+
+	/**
+	 * Schedule cleanup blocklist ips event.
+	 */
+	private function schedule_cleanup_blocklist_ips_event() {
+		// Sometimes multiple requests comes at the same time.
+		// So we will only count the web requests.
+		if ( defined( 'DOING_AJAX' ) || defined( 'DOING_CRON' ) ) {
+			return;
+		}
+
+		$clear = get_site_option( 'wpdef_clear_schedule_firewall_cleanup_temp_blocklist_ips', false );
+
+		if ( $clear ) {
+			wp_clear_scheduled_hook( 'firewall_cleanup_temp_blocklist_ips' );
+		}
+
+		if ( wp_next_scheduled( 'firewall_cleanup_temp_blocklist_ips' ) ) {
+			return;
+		}
+
+		$interval = $this->model->ip_blocklist_cleanup_interval;
+
+		if ( ! $interval || 'never' === $interval ) {
+			return;
+		}
+
+		wp_schedule_event( time() + 15, $interval, 'firewall_cleanup_temp_blocklist_ips' );
 	}
 }

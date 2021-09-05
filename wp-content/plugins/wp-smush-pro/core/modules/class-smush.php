@@ -376,7 +376,7 @@ class Smush extends Abstract_Module {
 		}
 
 		// Check if premium member, add API key.
-		$api_key = $this->get_api_key();
+		$api_key = Helper::get_wpmudev_apikey();
 		if ( ! empty( $api_key ) && WP_Smush::is_pro() ) {
 			$headers['apikey'] = $api_key;
 		}
@@ -405,7 +405,7 @@ class Smush extends Abstract_Module {
 
 			// Check for timeout error and suggest to filter timeout.
 			if ( strpos( $er_msg, 'timed out' ) ) {
-				$data['message'] = esc_html__( "Skipped due to a timeout error. You can increase the request timeout to make sure Smush has enough time to process larger files. define('WP_SMUSH_API_TIMEOUT', 150);", 'wp-smushit' );
+				$data['message'] = esc_html__( "Skipped due to a timeout error. You can increase the request timeout to make sure Smush has enough time to process larger files. define('WP_SMUSH_TIMEOUT', 150);", 'wp-smushit' );
 			} else {
 				// Handle error.
 				/* translators: %s error message */
@@ -571,9 +571,11 @@ class Smush extends Abstract_Module {
 		// Set a flag if any image got error during webp conversion.
 		$webp_has_error         = false;
 		$should_convert_to_webp = WP_Smush::get_instance()->core()->mod->webp->should_be_converted( $id );
+		// Keep all new webp image path in this list.
+		$webp_files = array();
 
 		// If images has other registered size, smush them first.
-		if ( ! empty( $meta['sizes'] ) ) {
+		if ( ! empty( $meta['sizes'] ) && ! has_filter( 'wp_image_editors', 'photon_subsizes_override_image_editors' ) ) {
 			foreach ( $meta['sizes'] as $size_key => $size_data ) {
 				// Check if registered size is supposed to be Smushed or not.
 				if ( 'full' !== $size_key && $this->skip_image_size( $size_key ) ) {
@@ -623,8 +625,6 @@ class Smush extends Abstract_Module {
 				 * @since 3.8.0
 				 */
 				if ( $should_convert_to_webp ) {
-					// Keep all new webp image path in this list.
-					$webp_files    = array();
 					$webp_response = WP_Smush::get_instance()->core()->mod->smush->do_smushit( $attachment_file_path_size, true );
 
 					if ( is_wp_error( $webp_response ) || ! $webp_response ) {
@@ -675,7 +675,7 @@ class Smush extends Abstract_Module {
 					$stats['stats']['keep_exif']   = ! empty( $response['data']->keep_exif ) ? $response['data']->keep_exif : 0;
 				}
 			}
-		} else {
+		} elseif ( ! has_filter( 'wp_image_editors', 'photon_subsizes_override_image_editors' ) ) {
 			$smush_full = true;
 		}
 
@@ -706,11 +706,9 @@ class Smush extends Abstract_Module {
 
 		// If original size is supposed to be smushed.
 		if ( $smush_full && $smush_full_image ) {
-
 			$full_image_response = $this->do_smushit( $attachment_file_path );
 
 			if ( is_wp_error( $full_image_response ) ) {
-
 				/**
 				 * If webp is active and some images have been converted to webp already
 				 * delete those new webp files.
@@ -919,8 +917,11 @@ class Smush extends Abstract_Module {
 		// Check if auto is enabled.
 		$auto_smush = $this->is_auto_smush_enabled();
 
+		// Allow downloading the file from S3 all throughout the process.
+		do_action( 'smush_s3_integration_fetch_file' );
+
 		// Get the file path for backup.
-		$attachment_file_path = Helper::get_attached_file( $id );
+		$attachment_file_path = get_attached_file( $id );
 
 		Helper::check_animated_status( $attachment_file_path, $id );
 
@@ -986,8 +987,11 @@ class Smush extends Abstract_Module {
 
 		$attachment_id = absint( (int) $attachment_id );
 
+		// Allow downloading the file from S3 all throughout the process.
+		do_action( 'smush_s3_integration_fetch_file' );
+
 		// Get the file path for backup.
-		$attachment_file_path = Helper::get_attached_file( $attachment_id );
+		$attachment_file_path = get_attached_file( $attachment_id );
 
 		Helper::check_animated_status( $attachment_file_path, $attachment_id );
 
@@ -1053,25 +1057,6 @@ class Smush extends Abstract_Module {
 	}
 
 	/**
-	 * Returns api key.
-	 *
-	 * @return mixed
-	 */
-	private function get_api_key() {
-		$api_key = false;
-
-		// If API key defined manually, get that.
-		if ( defined( 'WPMUDEV_APIKEY' ) && WPMUDEV_APIKEY ) {
-			$api_key = WPMUDEV_APIKEY;
-		} elseif ( class_exists( 'WPMUDEV_Dashboard' ) ) {
-			// If dashboard plugin is active, get API key from db.
-			$api_key = get_site_option( 'wpmudev_apikey' );
-		}
-
-		return $api_key;
-	}
-
-	/**
 	 * If auto smush is set to true or not, default is true
 	 *
 	 * @return int|mixed
@@ -1094,7 +1079,7 @@ class Smush extends Abstract_Module {
 	 *
 	 * @param int $image_id  Attachment ID.
 	 *
-	 * @return bool
+	 * @return bool|void
 	 */
 	public function delete_images( $image_id ) {
 		// Update the savings cache.
@@ -1119,11 +1104,13 @@ class Smush extends Abstract_Module {
 		WP_Smush::get_instance()->core()->mod->backup->delete_backup_files( $image_id );
 
 		/**
-		 * Detete webp.
+		 * Delete webp.
+		 *
 		 * Run WebP::delete_images always even when the module is deactivated.
+		 *
 		 * @since 3.8.0
 		 */
-		WP_Smush::get_instance()->core()->mod->webp->delete_images( $image_id , false );
+		WP_Smush::get_instance()->core()->mod->webp->delete_images( $image_id, false );
 	}
 
 	/**
@@ -1280,8 +1267,9 @@ class Smush extends Abstract_Module {
 	 * @return mixed
 	 */
 	public function remove_sizes_from_s3_upload( $paths, $attachment_id, $meta ) {
-		// Only run when S3 integration is active. It won't run otherwise, but check just in case.
-		if ( ! $this->settings->get( 's3' ) ) {
+		// Only run when S3 integration is active (it shouldn't run otherwise, but check just in case),
+		// and when the image does have sizes.
+		if ( ! $this->settings->get( 's3' ) || empty( $meta['sizes'] ) ) {
 			return $paths;
 		}
 

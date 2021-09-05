@@ -5,6 +5,7 @@
  * @package snapshot
  */
 use WPMUDEV\Snapshot4\Task;
+use WPMUDEV\Snapshot4\Helper\Settings;
 
 ?>
 <div class="sui-modal-slide sui-loaded" id="snapshot-add-destination-dialog-slide-2-gd" data-modal-size="md">
@@ -20,7 +21,7 @@ use WPMUDEV\Snapshot4\Task;
 			</figure>
 
 			<button class="sui-button-icon sui-button-float--right" data-modal-close>
-				<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+				<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 			</button>
 
 			<h3 class="sui-box-title sui-lg"><?php echo esc_html( __( 'Connect Google Drive', 'snapshot' ) ); ?></h3>
@@ -28,7 +29,7 @@ use WPMUDEV\Snapshot4\Task;
 			<span class="sui-description"><?php echo wp_kses_post( __( 'Easily connect with Google to authorize Snapshot for Google Drive and store your backups in their directory.', 'snapshot' ) ); ?></span>
 
 			<button class="sui-button-icon sui-button-float--left" data-modal-slide="snapshot-add-destination-dialog-slide-1">
-				<i class="sui-icon-chevron-left sui-md" aria-hidden="true"></i>
+				<span class="sui-icon-chevron-left sui-md" aria-hidden="true"></span>
 				<span class="sui-screen-reader-text"><?php esc_html_e( 'Back' ); ?></span>
 			</button>
 
@@ -44,8 +45,12 @@ use WPMUDEV\Snapshot4\Task;
 
 						<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
 
-						<?php /* translators: %s - Link for support */ ?>
-						<p><?php echo wp_kses_post( sprintf( __( 'It appears the authorization process went wrong. Please try again by clicking the "Connect with Google" button and make sure you authorize Snapshot to access your Google Drive. If you run into further issues, you can <a href="%s" target="_blank">contact our Support</a> team for help.', 'snapshot' ), Task\Backup\Fail::URL_CONTACT_SUPPORT ) ); ?></p>
+						<?php if ( Settings::get_branding_hide_doc_link() ) { ?>
+							<p><?php esc_html_e( 'It appears the authorization process went wrong. Please try again by clicking the "Connect with Google" button and make sure you authorize Snapshot to access your Google Drive. If you run into further issues, you can contact support for help.', 'snapshot' ); ?></p>
+						<?php } else { ?>
+							<?php /* translators: %s - Link for support */ ?>
+							<p><?php echo wp_kses_post( sprintf( __( 'It appears the authorization process went wrong. Please try again by clicking the "Connect with Google" button and make sure you authorize Snapshot to access your Google Drive. If you run into further issues, you can <a href="%s" target="_blank">contact our Support</a> team for help.', 'snapshot' ), Task\Backup\Fail::URL_CONTACT_SUPPORT ) ); ?></p>
+						<?php } ?>
 
 					</div>
 
@@ -84,9 +89,9 @@ use WPMUDEV\Snapshot4\Task;
 					</form>
 
 					<?php /* translators: %s - Privacy Policy link */ ?>
-					<p class="sui-description"><?php echo wp_kses_post( sprintf( __( 'Connect with Google to authorize Snapshot to access your Google Drive account. Please read the <a href="%s" target="_blank">privacy policy</a> concerning the use of our Google Drive authorisation.', 'snapshot' ), 'https://premium.wpmudev.org/docs/privacy/our-plugins/#snapshot-privacy-policy' ) ); ?></p>
+					<p class="sui-description"><?php echo wp_kses_post( sprintf( __( 'Connect with Google to authorize Snapshot to access your Google Drive account. Please read the <a href="%s" target="_blank">privacy policy</a> concerning the use of our Google Drive authorisation.', 'snapshot' ), 'https://wpmudev.com/docs/privacy/our-plugins/#snapshot-privacy-policy' ) ); ?></p>
 
-					<a type="button" href="<?php echo esc_url( $auth_url ); ?>" class="sui-button sui-button-lg snapshot-connect-google"><i aria-hidden="true" class="sui-icon-google-connect"></i> <?php echo esc_html( __( 'Connect with Google', 'snapshot' ) ); ?> </a>
+					<a type="button" href="<?php echo esc_url( $auth_url ); ?>" class="sui-button sui-button-lg snapshot-connect-google"><span aria-hidden="true" class="sui-icon-google-connect"></span> <?php echo esc_html( __( 'Connect with Google', 'snapshot' ) ); ?> </a>
 
 				</div>
 			</div>
@@ -96,18 +101,18 @@ use WPMUDEV\Snapshot4\Task;
 		<div class="sui-box-footer sui-flatten sui-lg sui-content-separated">
 
 			<button class="sui-button sui-button-ghost" data-modal-slide="snapshot-add-destination-dialog-slide-1" >
-				<i class="sui-icon-arrow-left" aria-hidden="true"></i>
+				<span class="sui-icon-arrow-left" aria-hidden="true"></span>
 				<?php esc_html_e( 'Back' ); ?>
 			</button>
 
 			<button class="sui-button sui-button-icon-right snapshot-next-destination-screen" style="display:none;" id="snapshot-submit-gd-generate-tokens">
 				<span class="sui-button-text-default">
 					<?php esc_html_e( 'Next' ); ?>
-					<i class="sui-icon-arrow-right" aria-hidden="true"></i>
+					<span class="sui-icon-arrow-right" aria-hidden="true"></span>
 				</span>
 
 				<span class="sui-button-text-onload">
-					<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+					<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 					<?php esc_html_e( 'Connecting...' ); ?>
 				</span>
 			</button>

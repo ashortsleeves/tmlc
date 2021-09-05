@@ -124,6 +124,8 @@ class Sql extends Codec {
 				'CREATE TABLE IF NOT EXISTS' .
 				'|' .
 				'INSERT INTO' .
+				'|' .
+				'CREATE OR REPLACE .*?VIEW' .
 			')' .
 			'\s*' .
 			'(' .

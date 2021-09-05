@@ -15,7 +15,8 @@ use WPMUDEV\Snapshot4\Helper\Lock;
  * File restore tasks model class
  */
 class Files extends Model {
-	const KEY_PATHS = 'snapshot4_restore_key_paths';
+	const KEY_PATHS      = 'snapshot4_restore_key_paths';
+	const KEY_LAST_PATHS = 'snapshot4_restore_key_last_paths';
 
 	/**
 	 * Constructor
@@ -74,11 +75,13 @@ class Files extends Model {
 			return $this->get( 'files' );
 		}
 
-		$processed   = 0;
-		$limit       = $this->get_paths_limit();
-		$limit_files = $limit * 6;
+		$last_files_run = $this->get( 'last_files_run' );
+		$processed      = 0;
+		$limit          = $this->get_paths_limit();
+		$limit_files    = $limit * 6;
 
-		$paths = get_site_option( self::KEY_PATHS, array( $this->get_root() ) );
+		$root  = $last_files_run ? $this->get_last_files_root() : $this->get_root();
+		$paths = $last_files_run ? get_site_option( self::KEY_LAST_PATHS, array( $root ) ) : get_site_option( self::KEY_PATHS, array( $root ) );
 		while ( ! empty( $paths ) ) {
 			$path = array_pop( $paths );
 			$processed++;
@@ -136,5 +139,33 @@ class Files extends Model {
 	 */
 	public function get_root() {
 		return path_join( Model\Restore::get_intermediate_destination( $this->get( 'backup_id' ) ), 'www' );
+	}
+
+	/**
+	 * Gets dir of the folder where we'll be placing the files to be restored at the very end of the file restoration.
+	 *
+	 * @return string
+	 */
+	public function get_last_files_root() {
+		return path_join( Model\Restore::get_intermediate_destination( $this->get( 'backup_id' ) ), 'last_files' );
+	}
+
+	/**
+	 * Checks if file is possible to be one of the files W3 Total Cache installs in the wp-content.
+	 *
+	 * @param string $file_path File path.
+	 *
+	 * @return bool
+	 */
+	public function check_if_w3tc_file( $file_path ) {
+		$advanced_cache = WP_CONTENT_DIR . '/advanced-cache.php';
+		$db             = WP_CONTENT_DIR . '/db.php';
+		$object_cache   = WP_CONTENT_DIR . '/object-cache.php';
+
+		if ( 0 === strcmp( $advanced_cache, $file_path ) || 0 === strcmp( $db, $file_path ) || 0 === strcmp( $object_cache, $file_path ) ) {
+			return true;
+		}
+
+		return false;
 	}
 }

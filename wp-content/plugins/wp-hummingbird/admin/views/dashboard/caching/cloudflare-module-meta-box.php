@@ -1,6 +1,6 @@
 <?php
 /**
- * Browser caching meta box on dashboard page when CloudFlare is active.
+ * Browser caching meta box on dashboard page when Cloudflare is active.
  *
  * @package Hummingbird
  *
@@ -9,9 +9,9 @@
  * @var array  $recommended              Array of recommended values.
  * @var array  $results                  Array of results. Raw.
  * @var int    $issues                   Number of issues.
- * @var bool   $show_cf_notice           Show the CloudFlare notice.
- * @var string $cf_notice                CloudFlare copy to show.
- * @var string $cf_connect_url           Connect CloudFlare URL.
+ * @var bool   $show_cf_notice           Show the Cloudflare notice.
+ * @var string $cf_notice                Cloudflare copy to show.
+ * @var string $cf_connect_url           Connect Cloudflare URL.
  * @var array  $caching_type_tooltips    Caching types array if browser caching is enabled.
  */
 
@@ -71,8 +71,6 @@ if ( $issues ) {
 							echo 'img';
 							break;
 						case 'css':
-							echo esc_html( $type );
-							break;
 						case 'media':
 							echo esc_html( $type );
 							break;

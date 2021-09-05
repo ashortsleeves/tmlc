@@ -78,6 +78,24 @@ class Settings {
 	}
 
 	/**
+	 * Returns true if output buffer must be flashed after every zipstream write.
+	 *
+	 * @return bool
+	 */
+	public static function get_zipstream_flush_buffer() {
+		return boolval( defined( 'SNAPSHOT4_ZIPSTREAM_FLUSH_BUFFER' ) && SNAPSHOT4_ZIPSTREAM_FLUSH_BUFFER );
+	}
+
+	/**
+	 * Returns true if "manual" restore mode is enabled.
+	 *
+	 * @return bool
+	 */
+	public static function get_manual_restore_mode() {
+		return boolval( defined( 'SNAPSHOT4_MANUAL_RESTORE_MODE' ) && SNAPSHOT4_MANUAL_RESTORE_MODE );
+	}
+
+	/**
 	 * Returns API URL of the Service. By default it's a "prod" environment URL.
 	 *
 	 * @return string
@@ -105,6 +123,13 @@ class Settings {
 
 		$email_settings = get_site_option( 'snapshot_email_settings', $default );
 
+		if ( ! isset( $email_settings['notify_on_fail'] ) ) {
+			$email_settings['notify_on_fail'] = true;
+		}
+		if ( ! isset( $email_settings['notify_on_complete'] ) ) {
+			$email_settings['notify_on_complete'] = false;
+		}
+
 		if ( empty( $email_settings['on_fail_recipients'] ) ) {
 			$email_settings['on_fail_recipients'] = array(
 				array(
@@ -118,12 +143,12 @@ class Settings {
 
 		$result['notice_type'] = $email_settings['on_fail_send'] && $on_fail_recipients_count > 0 ? 'success' : null;
 		if ( 'success' !== $result['notice_type'] ) {
-			$result['notice_text'] = __( 'Failed backup email notification is currently disabled.', 'snapshot' );
+			$result['notice_text'] = __( 'Email notifications are currently disabled.', 'snapshot' );
 		} elseif ( 1 === $on_fail_recipients_count ) {
-			$result['notice_text'] = __( 'Failed backup email notification is enabled for 1 recipient.', 'snapshot' );
+			$result['notice_text'] = __( 'Email notifications are enabled for 1 recipient.', 'snapshot' );
 		} else {
 			/* translators: %d - Number of email recipients */
-			$result['notice_text'] = sprintf( __( 'Failed backup email notification is enabled for %d recipients.', 'snapshot' ), $on_fail_recipients_count );
+			$result['notice_text'] = sprintf( __( 'Email notifications are enabled for %d recipients.', 'snapshot' ), $on_fail_recipients_count );
 		}
 
 		$result['email_settings'] = $email_settings;
@@ -145,6 +170,11 @@ class Settings {
 		if ( isset( $email_settings['on_fail_recipients'] ) && ! count( $email_settings['on_fail_recipients'] ) ) {
 			$email_settings['on_fail_send'] = false;
 		}
+		if ( isset( $email_settings['notify_on_fail'] ) && ! $email_settings['notify_on_fail'] &&
+			isset( $email_settings['notify_on_complete'] ) && ! $email_settings['notify_on_complete'] ) {
+			$email_settings['notify_on_fail'] = true;
+			$email_settings['on_fail_send']   = false;
+		}
 		update_site_option( 'snapshot_email_settings', $email_settings );
 	}
 
@@ -163,11 +193,14 @@ class Settings {
 	 * @return bool
 	 */
 	public static function get_whats_new_seen() {
-		$seen_version = get_site_option( 'snapshot_whats_new_seen' );
+		$seen_version  = get_site_option( 'snapshot_whats_new_seen' );
+		$patch_version = self::get_plugin_patch_version();
 		if ( ! $seen_version ) {
-			return false;
+			// Fresh install.
+			self::set_whats_new_seen( $patch_version );
+			return true;
 		}
-		return version_compare( self::get_plugin_patch_version(), $seen_version ) <= 0;
+		return version_compare( $patch_version, $seen_version ) <= 0;
 	}
 
 	/**
@@ -180,6 +213,21 @@ class Settings {
 			$value = self::get_plugin_patch_version();
 		}
 		update_site_option( 'snapshot_whats_new_seen', $value );
+	}
+
+	/**
+	 * Returns true if "Docs, Tutorials & Products" is "Hide"
+	 *
+	 * @return bool
+	 */
+	public static function get_branding_hide_doc_link() {
+		static $value = null;
+
+		if ( is_null( $value ) ) {
+			$value = boolval( apply_filters( 'wpmudev_branding_hide_doc_link', false ) );
+		}
+
+		return $value;
 	}
 
 	/**
@@ -213,4 +261,26 @@ class Settings {
 		return boolval( $value );
 	}
 
+	/**
+	 * Returns true if the Tutorials Slider was viewed
+	 *
+	 * @return bool
+	 */
+	public static function get_snapshot_tutorials_seen() {
+		$value = get_site_option( 'snapshot_tutorials_slider_seen' );
+		return boolval( $value );
+	}
+
+	/**
+	 * Mark the Tutorials Slider as viewed
+	 *
+	 * @param bool $value true - set as viewed.
+	 */
+	public static function set_snapshot_tutorials_seen( $value = true ) {
+		if ( $value ) {
+			update_site_option( 'snapshot_tutorials_slider_seen', 1 );
+		} else {
+			delete_site_option( 'snapshot_tutorials_slider_seen' );
+		}
+	}
 }

@@ -1,10 +1,10 @@
 /* global WPHB_Admin */
-/* global wphb */
 
 /**
  * Internal dependencies
  */
 import Fetcher from '../utils/fetcher';
+import { getString } from '../utils/helpers';
 import { OrphanedScanner, BATCH_SIZE } from '../scanners/OrphanedScanner';
 
 ( function ( $ ) {
@@ -61,7 +61,7 @@ import { OrphanedScanner, BATCH_SIZE } from '../scanners/OrphanedScanner';
 							WPHB_Admin.notices.show();
 						} else {
 							WPHB_Admin.notices.show(
-								wphb.strings.errorSettingsUpdate,
+								getString( 'errorSettingsUpdate' ),
 								'error'
 							);
 						}
@@ -89,7 +89,7 @@ import { OrphanedScanner, BATCH_SIZE } from '../scanners/OrphanedScanner';
 			/**
 			 * Show/hide system information tables on dropdown change.
 			 */
-			systemInfoDropdown.change( function ( e ) {
+			systemInfoDropdown.on( 'change', function ( e ) {
 				e.preventDefault();
 				$( '.wphb-sys-info-table' ).addClass( 'sui-hidden' );
 				$( '#wphb-system-info-' + $( this ).val() ).removeClass(
@@ -171,7 +171,7 @@ import { OrphanedScanner, BATCH_SIZE } from '../scanners/OrphanedScanner';
 			}
 
 			/**
-			 * Purge cache on site health page.
+			 * Purge cache on plugin health page.
 			 *
 			 * @since 2.7.0
 			 */
@@ -179,38 +179,16 @@ import { OrphanedScanner, BATCH_SIZE } from '../scanners/OrphanedScanner';
 			if ( purgeBtn ) {
 				purgeBtn.addEventListener( 'click', () => this.purgeDb() );
 			}
-			const purgeIcon = document.getElementById( 'icon-cache-purge' );
-			if ( purgeIcon ) {
-				purgeIcon.addEventListener( 'click', () => this.purgeDb() );
-			}
 
 			/**
-			 * Purge asset optimization on site health page.
+			 * Purge asset optimization on plugin health page.
 			 *
 			 * @since 2.7.0
 			 */
-			const purgeAOIcon = document.getElementById( 'icon-minify-purge' );
-			if ( purgeAOIcon ) {
-				purgeAOIcon.addEventListener( 'click', () =>
+			const purgeAObtn = document.getElementById( 'btn-minify-purge' );
+			if ( purgeAObtn ) {
+				purgeAObtn.addEventListener( 'click', () =>
 					this.purgeDb( 'minify' )
-				);
-			}
-
-			/**
-			 * Show modal.
-			 *
-			 * @since 2.7.0
-			 */
-			const modalTrigger = document.getElementById(
-				'icon-ao-orphan-purge'
-			);
-			if ( modalTrigger ) {
-				modalTrigger.addEventListener( 'click', () =>
-					window.SUI.openModal(
-						'site-health-orphaned-modal',
-						'icon-minify-purge',
-						'site-health-orphaned-clear'
-					)
 				);
 			}
 
@@ -244,13 +222,13 @@ import { OrphanedScanner, BATCH_SIZE } from '../scanners/OrphanedScanner';
 		 */
 		showModal( items, type ) {
 			const dialog =
-				wphb.strings.db_delete +
+				getString( 'db_delete' ) +
 				' ' +
 				items +
 				' ' +
-				wphb.strings.db_entries +
+				getString( 'db_entries' ) +
 				'? ' +
-				wphb.strings.db_backup;
+				getString( 'db_backup' );
 			const modal = $( '#wphb-database-cleanup-modal' );
 
 			modal.find( 'p' ).html( dialog );
@@ -298,7 +276,7 @@ import { OrphanedScanner, BATCH_SIZE } from '../scanners/OrphanedScanner';
 					for ( const prop in response.left ) {
 						if ( 'total' === prop ) {
 							const leftString =
-								wphb.strings.deleteAll +
+								getString( 'deleteAll' ) +
 								' (' +
 								response.left[ prop ] +
 								')';
@@ -360,7 +338,7 @@ import { OrphanedScanner, BATCH_SIZE } from '../scanners/OrphanedScanner';
 						),
 						$wpPickerButton = $wpPicker.find( '.wp-color-result' );
 					// Listen to color change
-					$suiPickerInput.bind( 'change', function () {
+					$suiPickerInput.on( 'change', function () {
 						// Change color preview
 						$suiPickerColor.find( 'span' ).css( {
 							'background-color': $wpPickerButton.css(
@@ -411,26 +389,24 @@ import { OrphanedScanner, BATCH_SIZE } from '../scanners/OrphanedScanner';
 		 */
 		purgeDb( type = 'cache' ) {
 			const button = document.getElementById( 'btn-' + type + '-purge' );
-			const icon = document.getElementById( 'icon-' + type + '-purge' );
 
-			if ( button ) {
-				button.classList.toggle( 'sui-button-onload-text' );
+			if ( ! button ) {
+				return;
 			}
-			icon.classList.toggle( 'sui-button-onload' );
+
+			button.classList.add( 'sui-button-onload-text' );
 
 			Fetcher.common.call( 'wphb_advanced_purge_' + type ).then( () => {
 				document.getElementById( 'count-' + type ).innerHTML = '0';
 
-				if ( button ) {
-					button.classList.toggle( 'sui-button-onload-text' );
-				}
-				icon.classList.toggle( 'sui-button-onload' );
+				button.classList.remove( 'sui-button-onload-text' );
 
 				const str =
 					'successAdvPurge' +
 					type.charAt( 0 ).toUpperCase() +
 					type.slice( 1 );
-				WPHB_Admin.notices.show( wphb.strings[ str ] );
+
+				WPHB_Admin.notices.show( getString( str ) );
 			} );
 		},
 	};

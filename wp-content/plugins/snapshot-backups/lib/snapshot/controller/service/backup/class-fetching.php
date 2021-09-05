@@ -66,7 +66,7 @@ class Fetching extends Controller\Service {
 			Log::info( __( 'Snapshot has completed sending back the filelist to the API, so we\'re ready to begin the actual backup of the files.', 'snapshot' ) );
 		} else {
 			/* translators: %s - number of files */
-			Log::info( sprintf( __( 'Snapshot has sent back the filelist consisting of %s files but the file iteration hasn\'t been completed yet. Awaiting for the next filelist request from the API.', 'snapshot' ), count( $model->get( 'files' ) ) ) );
+			Log::info( sprintf( __( 'Snapshot has sent back the filelist consisting of %s files but the file iteration hasn\'t been completed yet. Awaiting for the next filelist request from the API.', 'snapshot' ), count( $model->get( 'files', array() ) ) ) );
 		}
 
 		// Response to "service".
@@ -74,7 +74,7 @@ class Fetching extends Controller\Service {
 			'done'           => $model->get( 'is_done' ),
 			'site_root'      => $model->get( 'root_path' ),
 			'paths_left'     => $model->get( 'paths_left' ),
-			'files'          => $model->get( 'files' ),
+			'files'          => $model->get( 'files', array() ),
 			'excluded_files' => $model->get( 'excluded_files' ),
 		);
 		return $this->send_response_success( $response, $request );

@@ -4,7 +4,7 @@ namespace WP_Defender\Controller;
 
 use Calotes\Component\Request;
 use Calotes\Component\Response;
-use Calotes\Helper\HTTP;
+use WP_Defender\Component\Config\Config_Hub_Helper;
 use WP_Defender\Controller2;
 use WP_Defender\Model\Lockout_Ip;
 use WP_Defender\Model\Setting\Blacklist_Lockout;
@@ -115,6 +115,7 @@ class Blacklist extends Controller2 {
 		$this->model->import( $data );
 		if ( $this->model->validate() ) {
 			$this->model->save();
+			Config_Hub_Helper::set_clear_active_flag();
 
 			return new Response(
 				true,
@@ -152,6 +153,9 @@ class Blacklist extends Controller2 {
 		] );
 		$license_key = $data['license_key'];
 		$url         = "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=$license_key&suffix=tar.gz";
+		if ( ! function_exists( 'download_url' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
 		$tmp         = download_url( $url );
 		if ( ! is_wp_error( $tmp ) ) {
 			$phar = new \PharData( $tmp );
@@ -176,9 +180,27 @@ class Blacklist extends Controller2 {
 				'current_country'     => $country['iso']
 			] );
 		} else {
-			return new Response( false, [
-				'message' => $tmp->get_error_message()
-			] );
+			$this->log( 'Error from MaxMind: ' . $tmp->get_error_message() );
+			$string = sprintf(
+			/* translators: ... */
+				__(
+					'The license key you entered is not valid. You can find your license key on the <a target="_blank" href="%s">Services / My License Key page</a>.',
+					'wpdef'
+				),
+				'https://www.maxmind.com/en/accounts/current/license-key'
+			);
+
+			if ( ( new \WP_Defender\Behavior\WPMUDEV() )->show_support_links() ) {
+				$string .= sprintf(
+				/* translators: ... */
+					__(
+						' If you continue having connection issues, our <a target="_blank" href="%s">support team</a> is ready to help.',
+						'wpdef'
+					),
+					'https://wpmudev.com/hub2/support/#get-support'
+				);
+			}
+			return new Response( false, array( 'invalid_text' => $string ) );
 		}
 	}
 
@@ -232,11 +254,12 @@ class Blacklist extends Controller2 {
 				'sanitize' => 'sanitize_text_field'
 			],
 		] );
+
 		$ip     = $data['ip'];
 		$action = $data['behavior'];
-		$model  = Lockout_Ip::get( $ip );
+		$models  = Lockout_Ip::get( $ip, $action, true );
 
-		if ( is_object( $model ) ) {
+		foreach( $models as $model )  {
 			if ( 'unban' === $action ) {
 				$model->status = Lockout_Ip::STATUS_NORMAL;
 				$model->save();
@@ -244,8 +267,68 @@ class Blacklist extends Controller2 {
 				$model->status = Lockout_Ip::STATUS_BLOCKED;
 				$model->save();
 			}
-			$this->query_locked_ips( $request );
 		}
+
+		$this->query_locked_ips( $request );
+	}
+
+	/**
+	 * Bulk ban or unban IPs
+	 * @param Request $request
+	 *
+	 * @return Response
+	 * @throws \Exception
+	 * @defender_route
+	 */
+	public function bulk_ip_action( Request $request ) {
+		$data   = $request->get_data( [
+			'behavior' => [
+				'type'     => 'string',
+				'sanitize' => 'sanitize_text_field'
+			],
+			'ips' => [
+				'type'     => 'string',
+				'sanitize' => 'sanitize_text_field'
+			],
+		] );
+
+		$status   = 'unban' === $data['behavior'] ? Lockout_Ip::STATUS_BLOCKED : Lockout_Ip::STATUS_NORMAL;
+		$ips      = null;
+		$bulk_ips = null;
+		$limit	  = 50;
+
+		if ( ! empty( $data['ips'] ) ) {
+			$ips           = json_decode( $data['ips'] );
+			$first_nth_ips = array_slice( $ips, 0, $limit );
+			$bulk_ips      = wp_list_pluck( $first_nth_ips, 'ip' );
+		}
+
+		try {
+			$models  = Lockout_Ip::get_bulk( $status, $bulk_ips, $limit );
+			foreach( $models as $model )  {
+				$model->status = ( 'unban' === $data['behavior'] ) ? Lockout_Ip::STATUS_NORMAL : Lockout_Ip::STATUS_BLOCKED;
+				$model->save();
+			}
+			// While bulk banning the IPs, needs to slice the IPs array for next iteration
+			if ( 'ban' === $data['behavior'] ) {
+				$ips = array_slice( $ips, $limit );
+			}
+			// If the queried models are less than the limit it means we are on the last set of IPs
+			if ( count( $models ) < $limit ) {
+				return new Response( true, [
+					'status' => 'done'
+				] );
+			}
+		} catch( \Exception $e ) {
+			return new Response( true, [
+				'status' => 'error'
+			] );
+		}
+
+		return new Response( true, [
+			'status' => 'continue',
+			'ips' 	 => $ips
+		] );
 	}
 
 	/**
@@ -274,13 +357,9 @@ class Blacklist extends Controller2 {
 	}
 
 	/**
-	 * Export the data of this module, we will use this for export to HUB, create a preset etc
-	 *
-	 * @return array
+	 * Export the data of this module, we will use this for export to HUB, create a preset etc.
 	 */
-	public function to_array() {
-		// TODO: Implement to_array() method.
-	}
+	public function to_array() {}
 
 	private function adapt_data( $data ) {
 		$adapted_data = array(
@@ -302,11 +381,10 @@ class Blacklist extends Controller2 {
 	}
 
 	/**
-	 * Import the data of other source into this, it can be when HUB trigger the import, or user apply a preset
+	 * Import the data of other source into this, it can be when HUB trigger the import, or user apply a preset.
+	 * @param array $data
 	 *
-	 * @param $data array
-	 *
-	 * @return boolean
+	 * @return void
 	 */
 	public function import_data( $data ) {
 		if ( ! empty( $data ) ) {
@@ -325,22 +403,14 @@ class Blacklist extends Controller2 {
 	}
 
 	/**
-	 * Remove all settings, configs generated in this container runtime
-	 *
-	 * @return mixed
+	 * Remove all settings, configs generated in this container runtime.
 	 */
-	public function remove_settings() {
-		// TODO: Implement remove_settings() method.
-	}
+	public function remove_settings() {}
 
 	/**
-	 * Remove all data
-	 *
-	 * @return mixed
+	 * Remove all data.
 	 */
-	public function remove_data() {
-		// TODO: Implement remove_data() method.
-	}
+	public function remove_data() {}
 
 	/**
 	 * @return array

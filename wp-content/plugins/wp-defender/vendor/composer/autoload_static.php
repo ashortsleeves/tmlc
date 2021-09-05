@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832
+class ComposerStaticInita012de35a31bdc8623746fbedf8d5ad3
 {
     public static $files = array (
         'bbf73f3db644d3dced353b837903e74c' => __DIR__ . '/..' . '/php-di/php-di/src/DI/functions.php',
@@ -130,16 +130,19 @@ class ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832
         'WP_Defender\\Behavior\\Scan\\Malware_Deep_Scan' => __DIR__ . '/../..' . '/src/behavior/scan/malware-deep-scan.php',
         'WP_Defender\\Behavior\\Scan\\Malware_Quick_Scan' => __DIR__ . '/../..' . '/src/behavior/scan/malware-quick-scan.php',
         'WP_Defender\\Behavior\\Scan\\Malware_Scan' => __DIR__ . '/../..' . '/src/behavior/scan/malware-scan.php',
+        'WP_Defender\\Behavior\\Scan\\Plugin_Integrity' => __DIR__ . '/../..' . '/src/behavior/scan/plugin-integrity.php',
+        'WP_Defender\\Behavior\\Scan\\Theme_Integrity' => __DIR__ . '/../..' . '/src/behavior/scan/theme-integrity.php',
         'WP_Defender\\Behavior\\Scan_Item\\Core_Integrity' => __DIR__ . '/../..' . '/src/behavior/scan-item/core-integrity.php',
         'WP_Defender\\Behavior\\Scan_Item\\Malware_Result' => __DIR__ . '/../..' . '/src/behavior/scan-item/malware-result.php',
+        'WP_Defender\\Behavior\\Scan_Item\\Plugin_Integrity' => __DIR__ . '/../..' . '/src/behavior/scan-item/plugin-integrity.php',
         'WP_Defender\\Behavior\\Scan_Item\\Silent_Skin' => __DIR__ . '/../..' . '/src/behavior/scan-item/vuln-result.php',
+        'WP_Defender\\Behavior\\Scan_Item\\Theme_Integrity' => __DIR__ . '/../..' . '/src/behavior/scan-item/theme-integrity.php',
         'WP_Defender\\Behavior\\Scan_Item\\Vuln_Result' => __DIR__ . '/../..' . '/src/behavior/scan-item/vuln-result.php',
         'WP_Defender\\Behavior\\WPMUDEV' => __DIR__ . '/../..' . '/src/behavior/wpmudev.php',
         'WP_Defender\\Bootstrap' => __DIR__ . '/../..' . '/src/bootstrap.php',
         'WP_Defender\\Central' => __DIR__ . '/../..' . '/src/central.php',
         'WP_Defender\\Component' => __DIR__ . '/../..' . '/src/component.php',
         'WP_Defender\\Component\\Audit' => __DIR__ . '/../..' . '/src/component/audit.php',
-        'WP_Defender\\Component\\Audit\\Audit_Api' => __DIR__ . '/../..' . '/src/component/audit/audit-api.php',
         'WP_Defender\\Component\\Audit\\Audit_Event' => __DIR__ . '/../..' . '/src/component/audit/audit-event.php',
         'WP_Defender\\Component\\Audit\\Audit_Time' => __DIR__ . '/../..' . '/src/component/audit/audit-time.php',
         'WP_Defender\\Component\\Audit\\Comment_Audit' => __DIR__ . '/../..' . '/src/component/audit/comment-audit.php',
@@ -152,12 +155,16 @@ class ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832
         'WP_Defender\\Component\\Blacklist_Lockout' => __DIR__ . '/../..' . '/src/component/blacklist-lockout.php',
         'WP_Defender\\Component\\Cli' => __DIR__ . '/../..' . '/src/component/cli.php',
         'WP_Defender\\Component\\Config\\Config_Adapter' => __DIR__ . '/../..' . '/src/component/config/config-adapter.php',
+        'WP_Defender\\Component\\Config\\Config_Hub_Helper' => __DIR__ . '/../..' . '/src/component/config/config-hub-helper.php',
         'WP_Defender\\Component\\Error_Code' => __DIR__ . '/../..' . '/src/component/error-code.php',
+        'WP_Defender\\Component\\Feature_Modal' => __DIR__ . '/../..' . '/src/component/feature-modal.php',
         'WP_Defender\\Component\\Firewall' => __DIR__ . '/../..' . '/src/component/firewall.php',
+        'WP_Defender\\Component\\Legacy_Versions' => __DIR__ . '/../..' . '/src/component/legacy-versions.php',
         'WP_Defender\\Component\\Login_Lockout' => __DIR__ . '/../..' . '/src/component/login-lockout.php',
         'WP_Defender\\Component\\Mask_Login' => __DIR__ . '/../..' . '/src/component/mask-login.php',
         'WP_Defender\\Component\\Notfound_Lockout' => __DIR__ . '/../..' . '/src/component/notfound-lockout.php',
         'WP_Defender\\Component\\Notification' => __DIR__ . '/../..' . '/src/component/notification.php',
+        'WP_Defender\\Component\\Password_Protection' => __DIR__ . '/../..' . '/src/component/password-protection.php',
         'WP_Defender\\Component\\Scan' => __DIR__ . '/../..' . '/src/component/scan.php',
         'WP_Defender\\Component\\Scan\\Tokens' => __DIR__ . '/../..' . '/src/component/scan/tokens.php',
         'WP_Defender\\Component\\Security_Header' => __DIR__ . '/../..' . '/src/component/security-header.php',
@@ -180,7 +187,6 @@ class ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832
         'WP_Defender\\Component\\Security_Tweaks\\Protect_Information' => __DIR__ . '/../..' . '/src/component/security-tweaks/protect-information.php',
         'WP_Defender\\Component\\Security_Tweaks\\Security_Key' => __DIR__ . '/../..' . '/src/component/security-tweaks/security-key.php',
         'WP_Defender\\Component\\Security_Tweaks\\Servers\\Apache' => __DIR__ . '/../..' . '/src/component/security-tweaks/servers/apache.php',
-        'WP_Defender\\Component\\Security_Tweaks\\Servers\\Cloudflare' => __DIR__ . '/../..' . '/src/component/security-tweaks/servers/cloudflare.php',
         'WP_Defender\\Component\\Security_Tweaks\\Servers\\Flywheel' => __DIR__ . '/../..' . '/src/component/security-tweaks/servers/flywheel.php',
         'WP_Defender\\Component\\Security_Tweaks\\Servers\\IIS_7' => __DIR__ . '/../..' . '/src/component/security-tweaks/servers/iis-7.php',
         'WP_Defender\\Component\\Security_Tweaks\\Servers\\Nginx' => __DIR__ . '/../..' . '/src/component/security-tweaks/servers/nginx.php',
@@ -206,6 +212,9 @@ class ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832
         'WP_Defender\\Controller\\Nf_Lockout' => __DIR__ . '/../..' . '/src/controller/nf-lockout.php',
         'WP_Defender\\Controller\\Notification' => __DIR__ . '/../..' . '/src/controller/notification.php',
         'WP_Defender\\Controller\\Onboard' => __DIR__ . '/../..' . '/src/controller/onboard.php',
+        'WP_Defender\\Controller\\Password_Protection' => __DIR__ . '/../..' . '/src/controller/password-protection.php',
+        'WP_Defender\\Controller\\Password_Reset' => __DIR__ . '/../..' . '/src/controller/password-reset.php',
+        'WP_Defender\\Controller\\Recaptcha' => __DIR__ . '/../..' . '/src/controller/recaptcha.php',
         'WP_Defender\\Controller\\Scan' => __DIR__ . '/../..' . '/src/controller/scan.php',
         'WP_Defender\\Controller\\Security_Headers' => __DIR__ . '/../..' . '/src/controller/security-headers.php',
         'WP_Defender\\Controller\\Security_Tweaks' => __DIR__ . '/../..' . '/src/controller/security-tweaks.php',
@@ -216,6 +225,7 @@ class ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832
         'WP_Defender\\Extra\\Base2n' => __DIR__ . '/../..' . '/src/extra/binary-to-text-php/Base2n.php',
         'WP_Defender\\Extra\\GeoIp' => __DIR__ . '/../..' . '/src/extra/geoip.php',
         'WP_Defender\\Extra\\IP_Helper' => __DIR__ . '/../..' . '/src/extra/ip-helper.php',
+        'WP_Defender\\Integrations\\Smush' => __DIR__ . '/../..' . '/src/integrations/class-smush.php',
         'WP_Defender\\Model\\Audit_Log' => __DIR__ . '/../..' . '/src/model/audit-log.php',
         'WP_Defender\\Model\\Email_Track' => __DIR__ . '/../..' . '/src/model/email-track.php',
         'WP_Defender\\Model\\Lockout_Ip' => __DIR__ . '/../..' . '/src/model/lockout-ip.php',
@@ -226,7 +236,6 @@ class ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832
         'WP_Defender\\Model\\Notification\\Firewall_Report' => __DIR__ . '/../..' . '/src/model/notification/firewall-report.php',
         'WP_Defender\\Model\\Notification\\Malware_Notification' => __DIR__ . '/../..' . '/src/model/notification/malware-notification.php',
         'WP_Defender\\Model\\Notification\\Malware_Report' => __DIR__ . '/../..' . '/src/model/notification/malware-report.php',
-        'WP_Defender\\Model\\Notification\\Notification' => __DIR__ . '/../..' . '/src/model/notification/notification.php',
         'WP_Defender\\Model\\Notification\\Tweak_Reminder' => __DIR__ . '/../..' . '/src/model/notification/tweak-reminder.php',
         'WP_Defender\\Model\\Scan' => __DIR__ . '/../..' . '/src/model/scan.php',
         'WP_Defender\\Model\\Scan_Item' => __DIR__ . '/../..' . '/src/model/scan-item.php',
@@ -237,6 +246,9 @@ class ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832
         'WP_Defender\\Model\\Setting\\Main_Setting' => __DIR__ . '/../..' . '/src/model/setting/main-setting.php',
         'WP_Defender\\Model\\Setting\\Mask_Login' => __DIR__ . '/../..' . '/src/model/setting/mask-login.php',
         'WP_Defender\\Model\\Setting\\Notfound_Lockout' => __DIR__ . '/../..' . '/src/model/setting/notfound-lockout.php',
+        'WP_Defender\\Model\\Setting\\Password_Protection' => __DIR__ . '/../..' . '/src/model/setting/password-protection.php',
+        'WP_Defender\\Model\\Setting\\Password_Reset' => __DIR__ . '/../..' . '/src/model/setting/password-reset.php',
+        'WP_Defender\\Model\\Setting\\Recaptcha' => __DIR__ . '/../..' . '/src/model/setting/recaptcha.php',
         'WP_Defender\\Model\\Setting\\Scan' => __DIR__ . '/../..' . '/src/model/setting/scan.php',
         'WP_Defender\\Model\\Setting\\Security_Headers' => __DIR__ . '/../..' . '/src/model/setting/security-headers.php',
         'WP_Defender\\Model\\Setting\\Security_Tweaks' => __DIR__ . '/../..' . '/src/model/setting/security-tweaks.php',
@@ -246,8 +258,9 @@ class ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832
         'WP_Defender\\Traits\\IO' => __DIR__ . '/../..' . '/src/traits/io.php',
         'WP_Defender\\Traits\\IP' => __DIR__ . '/../..' . '/src/traits/ip.php',
         'WP_Defender\\Traits\\Permission' => __DIR__ . '/../..' . '/src/traits/permission.php',
+        'WP_Defender\\Traits\\Plugin' => __DIR__ . '/../..' . '/src/traits/plugin.php',
+        'WP_Defender\\Traits\\Theme' => __DIR__ . '/../..' . '/src/traits/theme.php',
         'WP_Defender\\Traits\\User' => __DIR__ . '/../..' . '/src/traits/user.php',
-        'WP_Defender\\Traits\\WPMU' => __DIR__ . '/../..' . '/src/traits/wpmu.php',
         'WP_Defender\\Upgrader' => __DIR__ . '/../..' . '/src/upgrader.php',
         'qrstr' => __DIR__ . '/../..' . '/src/extra/phpqrcode/phpqrcode.php',
     );
@@ -255,9 +268,9 @@ class ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitb7218ee28daa5b8e2d069f8cac6df832::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInita012de35a31bdc8623746fbedf8d5ad3::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInita012de35a31bdc8623746fbedf8d5ad3::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInita012de35a31bdc8623746fbedf8d5ad3::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -1,11 +1,11 @@
 <?php
 // Don't load directly.
-use Tribe\Customizer\Controls\Heading;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	die( '-1' );
 }
 
+use Tribe\Customizer\Controls\Heading;
+use Tribe\Customizer\Controls\Separator;
 /**
  * The Events Calendar Customizer Section Class
  * Global Elements
@@ -32,7 +32,12 @@ final class Tribe__Events__Customizer__Global_Elements extends Tribe__Customizer
 	 * @return string
 	 */
 	public function get_css_template( $template ) {
-		$customizer = Tribe__Customizer::instance();
+		// Sanity check.
+		if ( tribe_events_views_v2_is_enabled() ) {
+			return $template;
+		}
+
+		$customizer = tribe( 'customizer' );
 
 		/**
 		 * Allows filtering the CSS template with full knowledge of the Global Elements section and the current Customizer instance.
@@ -129,7 +134,10 @@ final class Tribe__Events__Customizer__Global_Elements extends Tribe__Customizer
 		$description         = $views_v2_is_enabled ? '' : esc_html__( 'Options selected here will override what was selected in the "General Theme" section.', 'the-events-calendar' );
 
 		$this->defaults = [
-			'link_color' => '#141827',
+			'link_color'              => '#141827',
+			'event_title_color'       => '#141827',
+			'event_date_time_color'   => '#141827',
+			'background_color_choice' => 'transparent',
 		];
 
 		$this->arguments = [
@@ -144,12 +152,12 @@ final class Tribe__Events__Customizer__Global_Elements extends Tribe__Customizer
 	 * Create the Fields/Settings for this sections
 	 *
 	 * @param  WP_Customize_Section $section The WordPress section instance
-	 * @param  WP_Customize_Manager $manager [description]
+	 * @param  WP_Customize_Manager $manager WP_Customize_Manager instance.
 	 *
 	 * @return void
 	 */
 	public function register_settings( WP_Customize_Section $section, WP_Customize_Manager $manager ) {
-		$customizer = Tribe__Customizer::instance();
+		$customizer = tribe( 'customizer' );
 
 		// Add an heading that is a Control only in name: it does not, actually, control or save any setting.
 		$manager->add_control(
@@ -182,11 +190,24 @@ final class Tribe__Events__Customizer__Global_Elements extends Tribe__Customizer
 					'label'       => esc_html__( 'Links', 'the-events-calendar' ),
 					'description' => esc_html__( 'For displayed URLs', 'the-events-calendar' ),
 					'section'     => $section->id,
+					'priority'    => 8,
 				]
 			)
 		);
 
 		$customizer->add_setting_name( $customizer->get_setting_name( 'link_color', $section ) );
+
+		$manager->add_control(
+			new Separator(
+				$manager,
+				$customizer->get_setting_name( 'adjust_appearance_separator', $section ),
+				[
+					'label'    => esc_html__( 'Adjust Appearance', 'the-events-calendar' ),
+					'section'  => $section->id,
+					'priority' => 9,
+				]
+			)
+		);
 
 		// Add an heading that is a Control only in name: it does not, actually, control or save any setting.
 		$manager->add_control(
@@ -214,6 +235,32 @@ final class Tribe__Events__Customizer__Global_Elements extends Tribe__Customizer
 		);
 
 		$customizer->add_setting_name( $customizer->get_setting_name( 'accent_color', $section ) );
+
+		// Custom Map Pins are not supported with basic embeds.
+		if ( ! tribe_is_using_basic_gmaps_api() ) {
+
+			$manager->add_setting(
+				$customizer->get_setting_name( 'map_pin', $section ),
+				[
+					'default'           => $this->get_default( 'map_pin' ),
+					'type'              => 'option',
+					'sanitize_callback' => 'esc_url_raw',
+				]
+			);
+
+			$manager->add_control(
+				new WP_Customize_Image_Control(
+					$manager,
+					$customizer->get_setting_name( 'map_pin', $section ),
+					[
+						'default' => $this->get_default( 'button_color' ),
+						'label'   => esc_html__( 'Map Pin', 'the-events-calendar' ),
+						'section' => $section->id,
+						'priority' => 20,
+					]
+				)
+			);
+		}
 
 		// Old stuff for backwards compatibility.
 		if ( tribe_events_views_v2_is_enabled() ) {
@@ -266,37 +313,8 @@ final class Tribe__Events__Customizer__Global_Elements extends Tribe__Customizer
 			)
 		);
 
-		// Custom Map Pins are not supported with basic embeds.
-		if ( ! tribe_is_using_basic_gmaps_api() ) {
-
-			$manager->add_setting(
-				$customizer->get_setting_name( 'map_pin', $section ),
-				[
-					'default'           => $this->get_default( 'map_pin' ),
-					'type'              => 'option',
-					'sanitize_callback' => 'esc_url_raw',
-				]
-			);
-
-			$manager->add_control(
-				new WP_Customize_Image_Control(
-					$manager,
-					$customizer->get_setting_name( 'map_pin', $section ),
-					[
-						'default' => $this->get_default( 'button_color' ),
-						'label'   => esc_html__( 'Map Pin', 'the-events-calendar' ),
-						'section' => $section->id,
-						'priority' => 20,
-					]
-				)
-			);
-		}
-
 		// Introduced to make Selective Refresh have less code duplication
 		$customizer->add_setting_name( $customizer->get_setting_name( 'filterbar_color', $section ) );
 		$customizer->add_setting_name( $customizer->get_setting_name( 'button_color', $section ) );
-
-		// To add Live Edit Pins will require some JS refactor to be able to work
-		// $customizer->add_setting_name( $customizer->get_setting_name( 'map_pin', $section ) );
 	}
 }

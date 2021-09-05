@@ -1,6 +1,7 @@
 <?php
-//simple functions that can access globally
-use Calotes\Helper\Array_Cache;
+if ( ! defined( 'ABSPATH' ) ) {
+	die;
+}
 
 /**
  * @param $path
@@ -8,7 +9,7 @@ use Calotes\Helper\Array_Cache;
  * @return string
  */
 function defender_asset_url( $path ) {
-	$base_url = plugin_dir_url( dirname( __FILE__ ) );
+	$base_url = plugin_dir_url( __DIR__ );
 
 	return untrailingslashit( $base_url ) . $path;
 }
@@ -19,7 +20,7 @@ function defender_asset_url( $path ) {
  * @return string
  */
 function defender_path( $path ) {
-	$base_path = plugin_dir_path( dirname( __FILE__ ) );
+	$base_path = plugin_dir_path( __DIR__ );
 
 	return $base_path . $path;
 }
@@ -53,11 +54,14 @@ function defender_wp_config_path() {
 		return ABSPATH . 'wp-config.php';
 	}
 
-	if ( @file_exists( dirname( ABSPATH ) . '/wp-config.php' ) && ! @file_exists( dirname( ABSPATH ) . '/wp-settings.php' ) ) {
+	if (
+		@file_exists( dirname( ABSPATH ) . '/wp-config.php' )
+		&& ! @file_exists( dirname( ABSPATH ) . '/wp-settings.php' )
+	) {
 		return dirname( ABSPATH ) . '/wp-config.php';
 	}
 
-	if ( defined( 'WD_TEST' ) && constant( 'WD_TEST' ) == true ) {
+	if ( defined( 'WD_TEST' ) && WD_TEST ) {
 		return '/tmp/wordpress-tests-lib/wp-tests-config.php';
 	}
 }
@@ -90,50 +94,15 @@ function wd_central() {
 }
 
 /**
- * Delete every data & settings
- */
-function defender_nuke() {
-	Array_Cache::get( 'advanced_tools' )->remove_data();
-	Array_Cache::get( 'audit' )->remove_data();
-	Array_Cache::get( 'dashboard' )->remove_data();
-	Array_Cache::get( 'security_tweaks' )->remove_data();
-	Array_Cache::get( 'scan' )->remove_data();
-	Array_Cache::get( 'ip_lockout' )->remove_data();
-	Array_Cache::get( 'two_fa' )->remove_data();
-	Array_Cache::get( 'advanced_tools' )->remove_data();
-	Array_Cache::get( 'notification' )->remove_data();
-	Array_Cache::get( 'tutorial' )->remove_data();
-	Array_Cache::get( 'blocklist_monitor' )->remove_data();
-
-	Array_Cache::get( 'advanced_tools' )->remove_settings();
-	Array_Cache::get( 'audit' )->remove_settings();
-	Array_Cache::get( 'dashboard' )->remove_settings();
-	Array_Cache::get( 'security_tweaks' )->remove_settings();
-	Array_Cache::get( 'scan' )->remove_settings();
-	Array_Cache::get( 'ip_lockout' )->remove_settings();
-	Array_Cache::get( 'two_fa' )->remove_settings();
-	Array_Cache::get( 'advanced_tools' )->remove_settings();
-	Array_Cache::get( 'notification' )->remove_settings();
-	Array_Cache::get( 'tutorial' )->remove_settings();
-	Array_Cache::get( 'blocklist_monitor' )->remove_settings();
-
-	delete_site_option( 'wp_defender' );
-	delete_option( 'wp_defender' );
-	delete_option( 'wd_db_version' );
-	delete_site_option( 'wd_db_version' );
-	delete_site_option( 'wp_defender_shown_activator' );
-}
-
-/**
  * Get backward compatibility
  *
  * @return array
  */
 function defender_backward_compatibility() {
-	$wpmu_dev         = new \WP_Defender\Behavior\WPMUDEV();
-	$two_fa_settings  = new \WP_Defender\Model\Setting\Two_Fa();
-	$list             = wd_di()->get( \WP_Defender\Controller\Two_Factor::class )->dump_routes_and_nonces();		 		 	     									
-	$lost_url         = add_query_arg(
+	$wpmu_dev        = new \WP_Defender\Behavior\WPMUDEV();
+	$two_fa_settings = new \WP_Defender\Model\Setting\Two_Fa();
+	$list            = wd_di()->get( \WP_Defender\Controller\Two_Factor::class )->dump_routes_and_nonces();
+	$lost_url        = add_query_arg(
 		array(
 			'action'     => 'wp_defender/v1/hub/',
 			'_def_nonce' => $list['nonces']['send_backup_code'],
@@ -147,7 +116,7 @@ function defender_backward_compatibility() {
 		'plugin_url'       => defender_asset_url( '' ),
 		'two_fa_settings'  => $two_fa_settings,
 		'two_fa_component' => \WP_Defender\Component\Two_Fa::class,
-		'lost_url'         => $lost_url
+		'lost_url'         => $lost_url,
 	);
 }
 
@@ -264,5 +233,146 @@ if ( ! function_exists( 'defender_wp_check_php_version' ) ) {
 		}
 
 		return $response;
+	}
+}
+
+/**
+ * Get hostname
+ *
+ * @return string|null
+ */
+function defender_get_hostname() {
+	$host = parse_url( get_site_url(), PHP_URL_HOST );
+	$host = str_replace( 'www.', '', $host );
+	$host = explode( '.', $host );
+	if ( is_array( $host ) ) {
+		$host = array_shift( $host );
+	} else {
+		$host = null;
+	}
+
+	return $host;
+}
+
+if ( ! function_exists( 'sanitize_mask_url' ) ) {
+	/**
+	 * Sanitizes the mask login URL allowing uppercase letters,
+	 * Replacing whitespace and a few other characters with dashes and
+	 * Limits the output to alphanumeric characters, underscore (_) and dash (-).
+	 * Whitespace becomes a dash.
+	 *
+	 * @param string $title     The title to be sanitized.
+	 * @return string The sanitized title.
+	 */
+	function sanitize_mask_url( $title ) {
+		$title = strip_tags( $title );
+		// Preserve escaped octets.
+		$title = preg_replace( '|%([a-fA-F0-9][a-fA-F0-9])|', '---$1---', $title );
+		// Remove percent signs that are not part of an octet.
+		$title = str_replace( '%', '', $title );
+		// Restore octets.
+		$title = preg_replace( '|---([a-fA-F0-9][a-fA-F0-9])---|', '%$1', $title );
+
+		if ( seems_utf8( $title ) ) {
+			$title = utf8_uri_encode( $title, 200 );
+		}
+
+		// Kill entities.
+		$title = preg_replace( '/&.+?;/', '', $title );
+		$title = str_replace( '.', '-', $title );
+
+		$title = preg_replace( '/[^%a-zA-Z0-9 _-]/', '', $title );
+		$title = preg_replace( '/\s+/', '-', $title );
+		$title = preg_replace( '|-+|', '-', $title );
+
+		return $title;
+	}
+}
+
+/**
+ * Return the noreply email.
+ *
+ * An utility function which will return common noreply from address.
+ *
+ * @param string $filter_tag Tag name of the filter to override email address.
+ *
+ * @return string Noreply email.
+ */
+function defender_noreply_email( $filter_tag = '' ) {
+	$host = wp_parse_url( get_site_url(), PHP_URL_HOST );
+
+	if ( 'www.' === substr( $host, 0, 4 ) ) {
+		$host = substr( $host, 4 );
+	}
+
+	$no_reply_email = 'noreply@' . $host;
+
+	if ( strlen( $filter_tag ) > 0 ) {
+		$no_reply_email = apply_filters( $filter_tag, $no_reply_email );
+	}
+
+	return $no_reply_email;
+}
+
+/**
+ * Noreply email header.
+ *
+ * Generate noreply email header with HTML UTF-8 support.
+ *
+ * @param string $email Email.
+ *
+ * @return array Returns the email headers.
+ */
+function defender_noreply_html_header( $email ) {
+	$headers = array(
+		'From: Defender <' . $email . '>',
+		'Content-Type: text/html; charset=UTF-8',
+	);
+
+	return $headers;
+}
+
+/**
+ * Get data of the whitelabel feature from WPMUDEV Dashboard:
+ * hide_branding, hide_doc_link, footer_text, hero_image, change_footer.
+ *
+ * @since 2.5.5
+ * @return array
+ */
+function defender_white_label_status() {
+	/* translators: %s: heart icon */
+	$footer_text  = sprintf( __( 'Made with %s by WPMU DEV', 'wpdef' ), '<i class="sui-icon-heart"></i>' );
+	$custom_image = apply_filters( 'wpmudev_branding_hero_image', '' );
+	$whitelabled  = apply_filters( 'wpmudev_branding_hide_branding', false );
+
+	return array(
+		'hide_branding' => apply_filters( 'wpmudev_branding_hide_branding', false ),
+		'hide_doc_link' => apply_filters( 'wpmudev_branding_hide_doc_link', false ),
+		'footer_text'   => apply_filters( 'wpmudev_branding_footer_text', $footer_text ),
+		'hero_image'    => $custom_image,
+		'change_footer' => apply_filters( 'wpmudev_branding_change_footer', false ),
+		'is_unbranded'  => empty( $custom_image ) && $whitelabled,
+		'is_rebranded'  => ! empty( $custom_image ) && $whitelabled,
+	);
+}
+
+/**
+ * Indicate this is not fresh install.
+ *
+ * @since 2.5.5
+ * @return void
+ */
+function defender_no_fresh_install() {
+	if ( empty( get_site_option( 'wd_nofresh_install' ) ) ) {
+		update_site_option( 'wd_nofresh_install', true );
+	}
+}
+
+/**
+ * Polyfill for PHP version < 7.3
+ */
+if ( ! function_exists( 'array_key_first' ) ) {
+	function array_key_first( array $arr ) {
+		return array_keys( $arr )[0];
 	}
 }

@@ -11,6 +11,7 @@ use WPMUDEV\Snapshot4\Task;
 use WPMUDEV\Snapshot4\Model;
 use WPMUDEV\Snapshot4\Helper\Fs;
 use WPMUDEV\Snapshot4\Helper\Log;
+use WPMUDEV\Snapshot4\Helper\Settings;
 
 /**
  * Backup zipstream files task class
@@ -40,6 +41,9 @@ class LargeFiles extends Task\Backup\Zipstream {
 		// Enable output of HTTP headers.
 		$zipstream_options = new \ZipStream\Option\Archive();
 		$zipstream_options->setSendHttpHeaders( true );
+		if ( Settings::get_zipstream_flush_buffer() ) {
+			$zipstream_options->setFlushOutput(true);
+		}
 
 		$this->zipstream_file_chunk( $model, $zipstream_options );
 	}

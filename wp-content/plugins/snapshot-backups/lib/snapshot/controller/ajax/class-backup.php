@@ -7,6 +7,7 @@
 
 namespace WPMUDEV\Snapshot4\Controller\Ajax;
 
+use stdClass;
 use WPMUDEV\Snapshot4\Controller;
 use WPMUDEV\Snapshot4\Task;
 use WPMUDEV\Snapshot4\Model;
@@ -30,10 +31,13 @@ class Backup extends Controller\Ajax {
 		}
 
 		add_action( 'wp_ajax_snapshot-trigger_backup', array( $this, 'json_trigger_backup' ) );
+		add_action( 'wp_ajax_snapshot-update_backup', array( $this, 'json_update_backup' ) );
 		add_action( 'wp_ajax_snapshot-cancel_backup', array( $this, 'json_cancel_backup' ) );
 		add_action( 'wp_ajax_snapshot-update_backup_progress', array( $this, 'json_update_backup_progress' ) );
 		add_action( 'wp_ajax_snapshot-delete_backup', array( $this, 'json_delete_backup' ) );
-		add_action( 'wp_ajax_snapshot-get_backup_log', array( $this, 'json_get_backup_log' ) );
+		// add_action( 'wp_ajax_snapshot-get_backup_log', array( $this, 'json_get_backup_log' ) );
+		add_action( 'wp_ajax_snapshot-get_backup_log', array( $this, 'json_paginate_log' ) );
+		add_action( 'wp_ajax_snapshot-paginate_log', array( $this, 'json_paginate_log' ) );
 		add_action( 'wp_ajax_snapshot-get_log_list', array( $this, 'json_get_log_list' ) );
 		add_action( 'wp_ajax_snapshot-download_log', array( $this, 'json_download_log' ) );
 		add_action( 'wp_ajax_snapshot-check_wpmudev_password', array( $this, 'json_check_wpmudev_password' ) );
@@ -48,8 +52,9 @@ class Backup extends Controller\Ajax {
 
 		$data = array();
 
-		$data['backup_name'] = isset( $_POST['data']['backup_name'] ) ? $_POST['data']['backup_name'] : null; // phpcs:ignore
+		$data['backup_name']      = isset( $_POST['data']['backup_name'] ) ? trim( $_POST['data']['backup_name'] ) : null; // phpcs:ignore
 		$data['apply_exclusions'] = isset( $_POST['data']['apply_exclusions'] ) ? ( 'true' === $_POST['data']['apply_exclusions'] ) : null; // phpcs:ignore
+		$data['description']      = isset ( $_POST['data']['description'] ) ? trim( $_POST['data']['description'] ) : null;	// phpcs:ignore
 
 		$task = new Task\Request\Manual();
 
@@ -84,6 +89,69 @@ class Backup extends Controller\Ajax {
 		wp_send_json_success(
 			array(
 				'backup_running' => $result,
+			)
+		);
+	}
+
+	/**
+	 * Updates the backup.
+	 *
+	 * Updates the backup description/comment. And returns wp_send_json_success upon success
+	 * and wp_send_json_error upon failure to update.
+	 *
+	 * @since 4.3.5
+	 */
+	public function json_update_backup() {
+		$this->do_request_sanity_check( 'snapshot_update_backup_comment', self::TYPE_POST );
+
+		// Check for backup ID.
+		if ( ! isset( $_POST['backup_id'] ) || empty( $_POST['backup_id'] ) ) {
+			wp_send_json_error( array( 'status' => 'no_backup_id' ) );
+		}
+
+		$data = array();
+
+		$data['description'] = sanitize_textarea_field( $_POST['description'] );
+		$data['backup_id']   = sanitize_text_field( $_POST['backup_id'] );
+
+		$task = new Task\Backup\Update();
+
+		$validated_data = $task->validate_request_data( $data );
+		if ( is_wp_error( $validated_data ) ) {
+			wp_send_json_error( $validated_data );
+		}
+
+		$args          = $validated_data;
+		$args['model'] = new Model\Backup\Update();
+
+		$result = $task->apply( $args );
+
+		if ( $task->has_errors() ) {
+			$errors = array();
+
+			foreach ($task->get_errors() as $error ) {
+				$errors[] = $error;
+				Log::error( $error->get_error_message() );
+			}
+
+			wp_send_json_error(
+				array(
+					'errors' => $errors
+				)
+			);
+		}
+
+		Log::info( __( 'Communication with the service API, in order to edit backup comment, was successful.', 'snapshot' ) );
+
+		/**
+		 * @todo Append table row html along with the updated content.
+		 */
+		$nonce = wp_create_nonce( 'snapshot_list_backups' );
+		wp_send_json_success(
+			array(
+				'backup_id' => $data['backup_id'],
+				'nonce'     => $nonce,
+				'result'    => $result
 			)
 		);
 	}
@@ -174,6 +242,7 @@ class Backup extends Controller\Ajax {
 			'backup_running_status' => $model->get( 'backup_running_status' ),
 			'backup_failed'         => $model->get( 'backup_failed' ),
 			'export_text'           => $model->get( 'export_text' ),
+			'error_message_html'    => $model->get( 'error_message_html' ),
 		);
 
 		if ( 'log' === $expand ) {
@@ -224,15 +293,54 @@ class Backup extends Controller\Ajax {
 		$this->do_request_sanity_check( 'snapshot_get_backup_log', self::TYPE_GET );
 
 		$backup_id  = isset( $_GET['backup_id'] ) ? sanitize_key( $_GET['backup_id'] ) : null; // phpcs:ignore
-		$offset     = isset( $_GET['offset'] ) ? intval( $_GET['offset'] ) : 0; // phpcs:ignore
 
-		$log = Log::parse_log_file( $backup_id, $offset );
+		// $log = Log::parse_log_file( $backup_id, $offset );
+		$log = Log::parse_log_file_enhanced( $backup_id, 0, 1 );
 
 		wp_send_json_success(
 			array(
 				'log' => $log,
 			)
 		);
+	}
+
+	/**
+	 * AJAX Handler:: Paginate the log file.
+	 *
+	 * @since 4.4.0
+	 *
+	 * @return string
+	 */
+	public function json_paginate_log() {
+		$this->do_request_sanity_check( 'snapshot_get_backup_log', self::TYPE_GET );
+
+		$backup_id = isset( $_REQUEST['backup_id'] ) ? sanitize_key( $_REQUEST['backup_id'] ) : null; // phpcs:ignore
+    	$page      = filter_input( INPUT_GET, 'offset', FILTER_VALIDATE_INT );
+
+		if ( ! $page ) {
+			$page = 1;
+		}
+
+		if ( null === $backup_id || '' === $backup_id ) {
+			wp_send_json_error(
+				array(
+					'status'  => 'no_backup_id',
+					'message' => esc_html__( 'Couldn\'t load the backup file.', 'snapshot' )
+				)
+			);
+		}
+
+		$log = Log::parse_log_file_enhanced( $backup_id, 0, $page );
+		if ( empty( $log ) ) {
+			wp_send_json_error(
+				array(
+					'status'  => 'no_content',
+					'message' => esc_html__( 'Cannot read the file.', 'snapshot' )
+				)
+			);
+		}
+
+		wp_send_json_success( array( 'log' => $log ) );
 	}
 
 	/**
@@ -265,12 +373,13 @@ class Backup extends Controller\Ajax {
 			$template->render(
 				'pages/backups/log-row',
 				array(
-					'name'        => Helper\Datetime::format( $log['created_at'] ),
-					'log'         => array(),
-					'log_url'     => Log::get_log_url( $log['backup_id'] ),
-					'backup_id'   => $log['backup_id'],
-					'append_log'  => intval( $append_log ),
-					'backup_type' => $log['type'],
+					'name'           => Helper\Datetime::format( $log['created_at'] ),
+					'log'            => array(),
+					'log_url'        => Log::get_log_url( $log['backup_id'] ),
+					'backup_id'      => $log['backup_id'],
+					'append_log'     => intval( $append_log ),
+					'backup_type'    => $log['type'],
+					'tpd_exp_status' => $log['tpd_exp_status'],
 				)
 			);
 			$append_log = false;

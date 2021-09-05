@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<p style="color: #333333;font-family: 'Open Sans', Arial, sans-serif;font-size: 18px;font-weight: normal;line-height: 24px;margin: 0 0 10px;padding: 0;text-align: left"><?php printf( esc_html__( 'Hi %s,', 'wphb' ), esc_attr( $params['USER_NAME'] ) ); ?></p>
 
 						<?php
-						$data_time    = strtotime( get_date_from_gmt( date( 'Y-m-d H:i:s', $last_test->time ) ) );
+						$data_time    = strtotime( get_date_from_gmt( gmdate( 'Y-m-d H:i:s', $last_test->time ) ) );
 						$time_string  = esc_html( date_i18n( get_option( 'date_format' ), $data_time ) );
 						$time_string .= sprintf(
 							/* translators: %s - time in proper format */
@@ -36,7 +36,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 							esc_html( date_i18n( get_option( 'time_format' ), $data_time ) )
 						);
 						?>
-						<p style="color: #333333;font-family: 'Open Sans', Arial, sans-serif;font-size: 18px;font-weight: normal;line-height: 28px;margin: 0 0 30px;padding: 0;text-align: left;letter-spacing: -0.3px;"><?php esc_html_e( 'Here’s your latest Performance Test summary of', 'wphb' ); ?> <a class="brand" href="<?php echo esc_attr( $params['SITE_MANAGE_URL'] ); ?>" target="_blank" style="color: #17A8E3;font-family: 'Open Sans', Arial, sans-serif;font-weight: inherit;line-height: 30px;margin: 0;padding: 0;text-align: left;text-decoration: none"><?php echo esc_html( $params['SITE_URL'] ); ?></a> <?php printf( __( 'tested on %s.', 'wphb' ), $time_string ); ?></p>
+						<p style="color: #333333;font-family: 'Open Sans', Arial, sans-serif;font-size: 18px;font-weight: normal;line-height: 28px;margin: 0 0 30px;padding: 0;text-align: left;letter-spacing: -0.3px;">
+							<?php esc_html_e( 'Here’s your latest Performance Test summary of', 'wphb' ); ?>&nbsp;
+							<a class="brand" href="<?php echo esc_attr( $params['SITE_MANAGE_URL'] ); ?>" target="_blank" style="color: #17A8E3;font-family: 'Open Sans', Arial, sans-serif;font-weight: inherit;line-height: 30px;margin: 0;padding: 0;text-align: left;text-decoration: none">
+								<?php echo esc_html( $params['SITE_URL'] ); ?>
+							</a>&nbsp;
+							<?php
+							printf( /* translators: %s - tested on */
+								__( 'tested on %s.', 'wphb' ),
+								$time_string
+							);
+							?>
+						</p>
 
 						<p style="color: #333333;font-family: 'Open Sans', Arial, sans-serif;font-size: 25px;font-weight: 600;line-height: 34px;margin: 0 0 5px;padding: 0;text-align: left;">
 							<?php esc_html_e( 'Overall Score', 'wphb' ); ?>
@@ -59,13 +70,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<tr style="background-color: #F2F2F2">
 								<?php if ( 'both' === $params['DEVICE'] || 'desktop' === $params['DEVICE'] ) : ?>
 									<td style="border-radius: 4px 0 0 0;color: #333333;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-weight: 600;line-height: 27px; letter-spacing: -0.23px; text-align: center">
-										<img src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
+										<img alt="" src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
 										<span style="margin-left: 5px"><?php esc_html_e( 'Desktop', 'wphb' ); ?></span>
 									</td>
 								<?php endif; ?>
 								<?php if ( 'both' === $params['DEVICE'] || 'mobile' === $params['DEVICE'] ) : ?>
 									<td style="border-radius: 0 4px 0 0;color: #333333;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-weight: 600;line-height: 27px; letter-spacing: -0.23px; text-align: center">
-										<img src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
+										<img alt="" src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
 										<span style="margin-left: 5px"><?php esc_html_e( 'Mobile', 'wphb' ); ?></span>
 									</td>
 								<?php endif; ?>
@@ -140,13 +151,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 									</td>
 									<?php if ( 'both' === $params['DEVICE'] || 'desktop' === $params['DEVICE'] ) : ?>
 										<td style="padding-right: 20px;color: #333333;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-weight: 600;line-height: 27px; letter-spacing: -0.23px; text-align: right; width:100px">
-											<img src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
+											<img alt="" src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
 											<span style="margin-left: 5px; vertical-align: top;"><?php esc_html_e( 'Desktop', 'wphb' ); ?></span>
 										</td>
 									<?php endif; ?>
 									<?php if ( 'both' === $params['DEVICE'] || 'mobile' === $params['DEVICE'] ) : ?>
 										<td style="padding-right: 20px;border-radius: 0 4px 0 0;color: #333333;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-weight: 600;line-height: 27px; letter-spacing: -0.23px; text-align: right; width: 100px">
-											<img src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
+											<img alt="" src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
 											<span style="margin-left: 5px; vertical-align: top;"><?php esc_html_e( 'Mobile', 'wphb' ); ?></span>
 										</td>
 									<?php endif; ?>
@@ -195,13 +206,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 									</td>
 									<?php if ( 'both' === $params['DEVICE'] || 'desktop' === $params['DEVICE'] ) : ?>
 										<td style="padding-right: 20px;color: #333333;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-weight: 600;line-height: 27px; letter-spacing: -0.23px; text-align: right; width:100px">
-											<img src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
+											<img alt="" src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
 											<span style="margin-left: 5px; vertical-align: top;"><?php esc_html_e( 'Desktop', 'wphb' ); ?></span>
 										</td>
 									<?php endif; ?>
 									<?php if ( 'both' === $params['DEVICE'] || 'mobile' === $params['DEVICE'] ) : ?>
 										<td style="padding-right: 20px;border-radius: 0 4px 0 0;color: #333333;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-weight: 600;line-height: 27px; letter-spacing: -0.23px; text-align: right; width: 100px">
-											<img src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
+											<img alt="" src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
 											<span style="margin-left: 5px; vertical-align: top;"><?php esc_html_e( 'Mobile', 'wphb' ); ?></span>
 										</td>
 									<?php endif; ?>
@@ -330,13 +341,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 										</td>
 										<?php if ( 'both' === $params['DEVICE'] || 'desktop' === $params['DEVICE'] ) : ?>
 											<td style="padding-right: 20px;color: #333333;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-weight: 600;line-height: 27px; letter-spacing: -0.23px; text-align: right; width:100px">
-												<img src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
+												<img alt="" src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-desktop@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
 												<span style="margin-left: 5px; vertical-align: top;"><?php esc_html_e( 'Desktop', 'wphb' ); ?></span>
 											</td>
 										<?php endif; ?>
 										<?php if ( 'both' === $params['DEVICE'] || 'mobile' === $params['DEVICE'] ) : ?>
 											<td style="padding-right: 20px;border-radius: 0 4px 0 0;color: #333333;font-family: 'Open Sans', Arial, sans-serif;font-size: 12px;font-weight: 600;line-height: 27px; letter-spacing: -0.23px; text-align: right; width: 100px">
-												<img src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
+												<img alt="" src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-mobile@2x.png' ); ?> 2x" style="height: 16px;vertical-align: middle;">
 												<span style="margin-left: 5px; vertical-align: top;"><?php esc_html_e( 'Mobile', 'wphb' ); ?></span>
 											</td>
 										<?php endif; ?>

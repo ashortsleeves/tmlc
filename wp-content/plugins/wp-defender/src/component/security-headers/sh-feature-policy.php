@@ -47,7 +47,7 @@ class Sh_Feature_Policy extends Security_Header {
 
 	public function add_hooks() {
 		add_action( 'send_headers', array( $this, 'append_header' ) );
-		add_filter( 'defender_filtering_data_settings', array( $this, 'filtering_headers' ) );
+		add_filter( 'defender_filtering_data_settings', array( $this, 'filtering_headers' ) );		 		 	     									
 	}
 
 	public function filtering_headers( $data ) {

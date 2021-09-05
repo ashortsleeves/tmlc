@@ -106,7 +106,7 @@ class Dir extends Abstract_Module {
 			$current_page   = ! empty( $current_screen ) ? $current_screen->base : '';
 		}
 
-		if ( 'toplevel_page_smush' !== $current_page && 'toplevel_page_smush-network' !== $current_page ) {
+		if ( false === strpos( $current_page, 'page_smush-directory' ) ) {
 			return;
 		}
 
@@ -125,8 +125,6 @@ class Dir extends Abstract_Module {
 			$this->scanner->reset_scan();
 		}
 
-		// Add stats to stats box.
-		add_action( 'stats_ui_after_resize_savings', array( $this, 'directory_stats_ui' ), 10 );
 		// Check and show missing directory smush table error.
 		add_action( 'wp_smush_header_notices', array( $this, 'show_table_error' ) );
 
@@ -511,16 +509,32 @@ class Dir extends Abstract_Module {
 		// Verify nonce.
 		check_ajax_referer( 'smush_get_dir_list', 'list_nonce' );
 
-		// Get the root path for a main site or subsite.
-		$root = realpath( $this->get_root_path() );
+		$dir  = filter_input( INPUT_GET, 'dir', FILTER_SANITIZE_STRING );
+		$tree = $this->get_directory_tree( $dir );
 
-		$dir      = ( isset( $_GET['dir'] ) && ! is_array( $_GET['dir'] ) ) ? ltrim( sanitize_text_field( wp_unslash( $_GET['dir'] ) ), '/' ) : null; // Input var ok.
+		if ( ! is_array( $tree ) ) {
+			wp_send_json_error( __( 'Unauthorized', 'wp-smushit' ) );
+		}
+
+		wp_send_json( $tree );
+	}
+
+	/**
+	 * Gets the directory tree data for the given path.
+	 *
+	 * @since 3.8.3
+	 *
+	 * @param string $dir Directory path.
+	 * @return array|bool False on failure. Array with the data on success.
+	 */
+	private function get_directory_tree( $dir = null ) {
+		// Get the root path for a main site or subsite.
+		$root     = realpath( $this->get_root_path() );
 		$post_dir = strlen( $dir ) >= 1 ? path_join( $root, $dir ) : $root . $dir;
-		$post_dir = realpath( rawurldecode( $post_dir ) );
 
 		// If the final path doesn't contains the root path, bail out.
 		if ( ! $root || false === $post_dir || 0 !== strpos( $post_dir, $root ) ) {
-			wp_send_json_error( __( 'Unauthorized', 'wp-smushit' ) );
+			return false;
 		}
 
 		$supported_image = array(
@@ -570,9 +584,11 @@ class Dir extends Abstract_Module {
 					);
 				}
 
-				wp_send_json( $tree );
+				return $tree;
 			}
 		}
+
+		return array();
 	}
 
 	/**
@@ -592,9 +608,10 @@ class Dir extends Abstract_Module {
 			 * @see https://xnau.com/finding-the-wordpress-root-path-for-an-alternate-directory-structure/
 			 * @see https://app.asana.com/0/14491813218786/487682361460247/f
 			 */
-			$content_path = explode( '/', WP_CONTENT_DIR );
+			$content_path = explode( '/', wp_normalize_path( WP_CONTENT_DIR ) );
 			// Get root path and explod.
 			$root_path = explode( '/', get_home_path() );
+
 			// Find the length of the shortest one.
 			$end         = min( count( $content_path ), count( $root_path ) );
 			$i           = 0;
@@ -613,22 +630,57 @@ class Dir extends Abstract_Module {
 	}
 
 	/**
+	 * Checks whether the user-submitted paths are among our allowed ones.
+	 *
+	 * @since 3.8.3
+	 *
+	 * @param string $path_to_check User-submitted path.
+	 * @return bool
+	 */
+	private function validate_path( $path_to_check ) {
+		$is_valid = true;
+
+		// Verify that every directory in the path is allowed.
+		while ( $is_valid && dirname( $path_to_check ) !== $path_to_check ) {
+			$path_contents = $this->get_directory_tree( $path_to_check );
+
+			if ( empty( $path_contents ) ) {
+				return false;
+			}
+
+			$is_valid = false;
+			foreach ( $path_contents as $tree_data ) {
+				if ( false !== strpos( $tree_data['key'], $path_to_check ) && ! $tree_data['unselectable'] ) {
+					$is_valid = true;
+					break;
+				}
+			}
+
+			if ( ! $is_valid ) {
+				$path_to_check = dirname( $path_to_check );
+			} else {
+				// Valid path, break out of the loop.
+				break;
+			}
+		}
+
+		return $is_valid;
+	}
+
+	/**
 	 * Get the image list in a specified directory path.
 	 *
 	 * @since 2.8.1  Added support for selecting files.
 	 *
 	 * @param string|array $paths  Path where to look for images, or selected images.
 	 *
+	 * @throws \Exception Never, actually. Supposedly, when an invalid directory was selected.
 	 * @return array
 	 */
 	private function get_image_list( $paths = '' ) {
 		// Error with directory tree.
 		if ( ! is_array( $paths ) ) {
-			wp_send_json_error(
-				array(
-					'message' => __( 'There was a problem getting the selected directories', 'wp-smushit' ),
-				)
-			);
+			$this->send_error( __( 'There was a problem getting the selected directories', 'wp-smushit' ) );
 		}
 
 		$count     = 0;
@@ -639,10 +691,16 @@ class Dir extends Abstract_Module {
 		// Temporary increase the limit.
 		wp_raise_memory_limit( 'image' );
 
+		// Avoid checking already validated paths.
+		$validated_dirs = array();
+
 		// Iterate over all the selected items (can be either an image or directory).
-		foreach ( $paths as $path ) {
+		foreach ( $paths as $relative_path ) {
+
+			// Make the path absolute.
+			$path = trim( $this->get_root_path() . '/' . $relative_path );
+
 			// Prevent phar deserialization vulnerability.
-			$path = trim( $path );
 			if ( stripos( $path, 'phar://' ) !== false ) {
 				continue;
 			}
@@ -653,6 +711,7 @@ class Dir extends Abstract_Module {
 			 * @TODO: The is_dir() check fails directories with spaces.
 			 */
 			if ( ! is_dir( $path ) && ! $this->is_media_library_file( $path ) && ! strpos( $path, '.bak' ) ) {
+
 				if ( ! $this->is_image( $path ) ) {
 					continue;
 				}
@@ -660,6 +719,14 @@ class Dir extends Abstract_Module {
 				// Image already added. Skip.
 				if ( in_array( $path, $images, true ) ) {
 					continue;
+				}
+
+				// Skip if the parent directory isn't allowed.
+				if ( ! in_array( dirname( $relative_path ), $validated_dirs, true ) ) {
+					if ( ! $this->validate_path( dirname( $relative_path ) ) ) {
+						continue;
+					}
+					$validated_dirs[] = dirname( $relative_path );
 				}
 
 				$images[] = $path;
@@ -686,11 +753,15 @@ class Dir extends Abstract_Module {
 			$base_dir = realpath( rawurldecode( $path ) );
 
 			if ( ! $base_dir ) {
-				wp_send_json_error(
-					array(
-						'message' => __( 'Unauthorized', 'wp-smushit' ),
-					)
-				);
+				$this->send_error( __( 'Unauthorized', 'wp-smushit' ) );
+			}
+
+			// Skip if this directory isn't allowed.
+			if ( ! in_array( $relative_path, $validated_dirs, true ) ) {
+				if ( ! $this->validate_path( $relative_path ) ) {
+					continue;
+				}
+				$validated_dirs[] = $relative_path;
 			}
 
 			// Directory Iterator, Exclude . and ..
@@ -732,21 +803,15 @@ class Dir extends Abstract_Module {
 			}
 		}
 
-		// Update rest of the images.
-		if ( ! empty( $images ) && $count > 0 ) {
-			$this->store_images( $values, $images );
+		if ( empty( $images ) || 0 === $count ) {
+			return array();
 		}
 
-		// Remove scanned images from cache.
-		wp_cache_delete( 'wp_smush_scanned_images' );
+		// Update rest of the images.
+		$this->store_images( $values, $images );
 
 		// Get the image ids.
-		$images = $this->get_scanned_images();
-
-		// Store scanned images in cache.
-		wp_cache_add( 'wp_smush_scanned_images', $images );
-
-		return $images;
+		return $this->get_scanned_images();
 	}
 
 	/**
@@ -788,15 +853,14 @@ class Dir extends Abstract_Module {
 	}
 
 	/**
-	 * Sends a Ajax response if no images are found in selected directory.
+	 * Sends a Ajax response with a message to be shown in a floating warning notice.
 	 *
-	 * Not used to display any messages.
+	 * @param string $message The message for the notice.
 	 */
-	private function send_error() {
-		$message = sprintf( '<p>%s</p>', esc_html__( 'We could not find any images in the selected directory.', 'wp-smushit' ) );
+	private function send_error( $message ) {
 		wp_send_json_error(
 			array(
-				'message' => $message,
+				'message' => sprintf( '<p>%s</p>', esc_html( $message ) ),
 			)
 		);
 	}
@@ -807,7 +871,7 @@ class Dir extends Abstract_Module {
 	public function image_list() {
 		// Check For permission.
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( __( 'Unauthorized', 'wp-smushit' ) );
+			$this->send_error( __( 'Unauthorized', 'wp-smushit' ) );
 		}
 
 		// Verify nonce.
@@ -815,17 +879,22 @@ class Dir extends Abstract_Module {
 
 		// Check if directory path is set or not.
 		if ( empty( $_POST['smush_path'] ) ) { // Input var ok.
-			wp_send_json_error( __( 'Empty Directory Path', 'wp-smushit' ) );
+			$this->send_error( __( 'Empty Directory Path', 'wp-smushit' ) );
 		}
 
-		$smush_path = filter_input( INPUT_POST, 'smush_path', FILTER_SANITIZE_URL, FILTER_REQUIRE_ARRAY );
+		// FILTER_SANITIZE_URL is trimming the space if a folder contains space.
+		$smush_path = filter_input( INPUT_POST, 'smush_path', FILTER_SANITIZE_STRING, FILTER_REQUIRE_ARRAY );
 
-		// This will add the images to the database and get the file list.
-		$files = $this->get_image_list( $smush_path );
+		try {
+			// This will add the images to the database and get the file list.
+			$files = $this->get_image_list( $smush_path );
+		} catch ( \Exception $e ) {
+			$this->send_error( $e->getMessage() );
+		}
 
 		// If files array is empty, send a message.
 		if ( empty( $files ) ) {
-			$this->send_error();
+			$this->send_error( __( 'We could not find any images in the selected directory.', 'wp-smushit' ) );
 		}
 
 		// Send response.
@@ -930,7 +999,7 @@ class Dir extends Abstract_Module {
 		if ( false !== strpos( $path, $base_dir . '/sites' ) ) {
 			// If matches the current upload path contains one of the year sub folders of the media library.
 			$path_arr = explode( '/', str_replace( $base_dir.'/sites' . '/', '', $path ) );
-			if ( count( $path_arr ) >= 1
+			if ( is_array( $path_arr ) && count( $path_arr ) > 1
 			     && is_numeric( $path_arr[1] ) && $path_arr[1] > 1900 && $path_arr[1] < 2100 // Contains the year sub folder.
 			) {
 				$skip = true;
@@ -1145,7 +1214,7 @@ class Dir extends Abstract_Module {
 		$current_screen = get_current_screen();
 
 		// Only run on required pages.
-		if ( ! empty( $current_screen ) && ! in_array( $current_screen->id, Core::$pages, true ) ) {
+		if ( ! empty( $current_screen ) && false === strpos( $current_screen->id, 'page_smush' ) ) {
 			return;
 		}
 
@@ -1195,44 +1264,6 @@ class Dir extends Abstract_Module {
 		}
 
 		return $tabs;
-	}
-
-	/**
-	 * Set directory smush stats to stats box.
-	 *
-	 * @return void
-	 */
-	public function directory_stats_ui() {
-		$dir_smush_stats = get_option( 'dir_smush_stats' );
-		$human           = 0;
-		if ( ! empty( $dir_smush_stats ) && ! empty( $dir_smush_stats['dir_smush'] ) ) {
-			$human = ! empty( $dir_smush_stats['dir_smush']['bytes'] ) && $dir_smush_stats['dir_smush']['bytes'] > 0 ? $dir_smush_stats['dir_smush']['bytes'] : 0;
-		}
-		?>
-		<li class="smush-dir-savings">
-			<span class="sui-list-label"><?php esc_html_e( 'Directory Smush Savings', 'wp-smushit' ); ?>
-				<?php if ( $human <= 0 ) { ?>
-					<p class="wp-smush-stats-label-message sui-hidden-sm sui-hidden-md sui-hidden-lg">
-						<?php esc_html_e( "Smush images that aren't located in your uploads folder.", 'wp-smushit' ); ?>
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=smush&view=directory' ) ); ?>" class="wp-smush-dir-link"
-						title="<?php esc_attr_e( "Select a directory you'd like to Smush.", 'wp-smushit' ); ?>">
-							<?php esc_html_e( 'Choose directory', 'wp-smushit' ); ?>
-						</a>
-					</p>
-				<?php } ?>
-			</span>
-			<span class="wp-smush-stats sui-list-detail">
-				<i class="sui-icon-loader sui-loading" aria-hidden="true" title="<?php esc_attr_e( 'Updating Stats', 'wp-smushit' ); ?>"></i>
-				<span class="wp-smush-stats-human"></span>
-				<span class="wp-smush-stats-sep sui-hidden">/</span>
-				<span class="wp-smush-stats-percent"></span>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=smush&view=directory' ) ); ?>" class="wp-smush-dir-link sui-hidden-xs sui-hidden"
-				   title="<?php esc_attr_e( "Select a directory you'd like to Smush.", 'wp-smushit' ); ?>">
-					<?php esc_html_e( 'Choose directory', 'wp-smushit' ); ?>
-				</a>
-			</span>
-		</li>
-		<?php
 	}
 
 	/**

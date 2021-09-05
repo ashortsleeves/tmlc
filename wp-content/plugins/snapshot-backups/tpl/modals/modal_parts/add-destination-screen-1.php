@@ -18,7 +18,7 @@
 				/>
 			</figure>
 			<button class="sui-button-icon sui-button-float--right" data-modal-close>
-				<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+				<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 			</button>
 
 			<h3 class="sui-box-title sui-lg"><?php echo esc_html( 'Add destination' ); ?></h3>
@@ -67,7 +67,7 @@
 		<div class="sui-box-footer sui-content-right sui-flatten">
 			<button class="sui-button sui-button-icon-right snapshot-next-destination-screen" disabled data-modal-slide="snapshot-add-destination-dialog-slide-2-s3" data-modalslide="snapshot-add-destination-dialog-slide-2-s3" data-modal-slide-intro="next">
 				<?php esc_html_e( 'Next' ); ?>
-				<i class="sui-icon-arrow-right" aria-hidden="true"></i>
+				<span class="sui-icon-arrow-right" aria-hidden="true"></span>
 			</button>
 		</div>
 

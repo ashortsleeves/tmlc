@@ -6,6 +6,8 @@
  */
 
 use WPMUDEV\Snapshot4\Task;
+use WPMUDEV\Snapshot4\Helper\Settings;
+
 ?>
 <div class="sui-modal-slide sui-loaded" id="snapshot-add-destination-dialog-slide-3-gd" data-modal-size="md">
 	<div class="sui-box">
@@ -20,14 +22,14 @@ use WPMUDEV\Snapshot4\Task;
 			</figure>
 
 			<button class="sui-button-icon sui-button-float--right" data-modal-close>
-				<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+				<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 			</button>
 
 			<h3 class="sui-box-title sui-lg"><?php echo esc_html( __( 'Connect Google Drive', 'snapshot' ) ); ?></h3>
 			<span class="sui-description"><?php echo wp_kses_post( __( 'Create a Google Drive folder to store your backups in.', 'snapshot' ) ); ?></span>
 
 			<button class="sui-button-icon sui-button-float--left" data-modal-slide="snapshot-add-destination-dialog-slide-2-gd">
-				<i class="sui-icon-chevron-left sui-md" aria-hidden="true"></i>
+				<span class="sui-icon-chevron-left sui-md" aria-hidden="true"></span>
 				<span class="sui-screen-reader-text"><?php esc_html_e( 'Back' ); ?></span>
 			</button>
 
@@ -43,8 +45,12 @@ use WPMUDEV\Snapshot4\Task;
 
 						<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
 
-						<?php /* translators: %s - Link for support */ ?>
-						<p><?php echo wp_kses_post( sprintf( __( 'The testing results have failed. We were unable to access the directory. Please double-check your Directory ID and if you run into further issues, you can <a href="%s" target="_blank">contact our Support team</a> for help.', 'snapshot' ), Task\Backup\Fail::URL_CONTACT_SUPPORT ) ); ?></p>
+						<?php if ( Settings::get_branding_hide_doc_link() ) { ?>
+							<p><?php esc_html_e( 'The testing results have failed. We were unable to access the directory. Please double-check your Directory ID and if you run into further issues, you can contact support for help.', 'snapshot' ); ?></p>
+						<?php } else { ?>
+							<?php /* translators: %s - Link for support */ ?>
+							<p><?php echo wp_kses_post( sprintf( __( 'The testing results have failed. We were unable to access the directory. Please double-check your Directory ID and if you run into further issues, you can <a href="%s" target="_blank">contact our Support team</a> for help.', 'snapshot' ), Task\Backup\Fail::URL_CONTACT_SUPPORT ) ); ?></p>
+						<?php } ?>
 
 					</div>
 
@@ -60,8 +66,12 @@ use WPMUDEV\Snapshot4\Task;
 
 						<span class="sui-notice-icon sui-icon-info sui-md" aria-hidden="true"></span>
 
-						<?php /* translators: %s - Link for support */ ?>
-						<p><?php echo wp_kses_post( sprintf( __( 'You\'re trying to save a destination that already exists. If you want to create a new destination with the same credentials, please choose a different folder or create a new one. If you run into further issues, you can contact our <a href="%s" target="_blank">Support team</a> for help.', 'snapshot' ), 'https://premium.wpmudev.org/hub/support/#get-support' ) ); ?></p>
+						<?php if ( Settings::get_branding_hide_doc_link() ) { ?>
+							<p><?php esc_html_e( 'You\'re trying to save a destination that already exists. If you want to create a new destination with the same credentials, please choose a different directory. If you run into further issues, you can contact Support for help.', 'snapshot' ); ?></p>
+						<?php } else { ?>
+							<?php /* translators: %s - Link for support */ ?>
+							<p><?php echo wp_kses_post( sprintf( __( 'You\'re trying to save a destination that already exists. If you want to create a new destination with the same credentials, please choose a different folder or create a new one. If you run into further issues, you can contact our <a href="%s" target="_blank">Support team</a> for help.', 'snapshot' ), 'https://wpmudev.com/hub2/support#get-support' ) ); ?></p>
+						<?php } ?>
 
 					</div>
 
@@ -154,7 +164,7 @@ use WPMUDEV\Snapshot4\Task;
 		<div class="sui-box-footer sui-lg sui-content-separated">
 			<div class="sui-flex-child-right">
 				<button class="sui-button sui-button-ghost" data-modal-slide="snapshot-add-destination-dialog-slide-2-gd" >
-					<i class="sui-icon-arrow-left" aria-hidden="true"></i>
+					<span class="sui-icon-arrow-left" aria-hidden="true"></span>
 					<?php echo esc_html( 'Back' ); ?>
 				</button>
 			</div>
@@ -165,14 +175,14 @@ use WPMUDEV\Snapshot4\Task;
 						<?php echo esc_html( 'Test Connection' ); ?>
 					</span>
 					<span class="sui-button-text-onload">
-						<i class="sui-icon-loader sui-loading" aria-hidden="true"></i>
+						<span class="sui-icon-loader sui-loading" aria-hidden="true"></span>
 						<?php echo esc_html( 'Testing...' ); ?>
 					</span>
 				</button>
 
 				<button class="sui-button sui-button-icon-right snapshot-next-destination-screen" id="snapshot-submit-gd-connection-details" >
 				<?php echo esc_html( 'Next' ); ?>
-					<i class="sui-icon-arrow-right" aria-hidden="true"></i>
+					<span class="sui-icon-arrow-right" aria-hidden="true"></span>
 				</button>
 			</div>
 		</div>

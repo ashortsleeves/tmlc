@@ -2,7 +2,7 @@
 /**
  * WPMUDEV - Recommended Plugins Notice
  *
- * @author  WPMUDEV (https://premium.wpmudev.org)
+ * @author  WPMUDEV (https://wpmudev.com)
  * @license GPLv2
  */
 
@@ -299,7 +299,7 @@ if ( ! class_exists( 'WPMUDEV_Recommended_Plugins_Notice' ) ) {
 				),
 				array(
 					'name'         => 'Defender Security',
-					'desc'         => __( 'Create dynamic forms easily and quickly with our form builder.', 'wpmudev_recommended_plugins_notice' ),
+					'desc'         => __( 'Secure and protect your site from malicious hackers and bots.', 'wpmudev_recommended_plugins_notice' ),
 					'image'        => trailingslashit( plugin_dir_url( __FILE__ ) ) . '/assets/images/plugins-defender.png',
 					'free_slug'    => 'defender-security/wp-defender.php',
 					'pro_slug'     => 'wp-defender/wp-defender.php',

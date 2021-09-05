@@ -1,11 +1,11 @@
 /* global WPHB_Admin */
-/* global wphbUptimeStrings */
 /* global google */
 
 /**
  * Internal dependencies
  */
 import Fetcher from '../utils/fetcher';
+import { getLink } from '../utils/helpers';
 
 ( function ( $ ) {
 	WPHB_Admin.uptime = {
@@ -19,14 +19,13 @@ import Fetcher from '../utils/fetcher';
 		dateFormat: 'MMM d',
 		init() {
 			this.$spinner = $( '.spinner' );
-			this.strings = wphbUptimeStrings;
 			this.$dataRangeSelector = $( '#wphb-uptime-data-range' );
 			this.chartData = $( '#uptime-chart-json' ).val();
 			this.downtimeChartData = $( '#downtime-chart-json' ).val();
 			this.$disableUptime = $( '#wphb-disable-uptime' );
 			this.dataRange = this.getUrlParameter( 'data-range' );
 
-			this.$dataRangeSelector.change( function () {
+			this.$dataRangeSelector.on( 'change', function () {
 				window.location.href = $( this )
 					.find( ':selected' )
 					.data( 'url' );
@@ -50,7 +49,7 @@ import Fetcher from '../utils/fetcher';
 				} else {
 					// you have 3 seconds to change your mind
 					self.timer = setTimeout( function () {
-						location.href = self.strings.disableUptimeURL;
+						location.href = getLink( 'disableUptime' );
 					}, 3000 );
 				}
 			} );

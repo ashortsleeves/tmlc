@@ -18,27 +18,31 @@ class Post_Audit extends Audit_Event {
 		'wdf_scan',
 		'wd_iplockout_log',
 		'wd_ip_lockout',
-		'wdf_scan_item'
+		'wdf_scan_item',
 	);
 
 	/**
-	 * we will add a hook, for updated event, and cache that event cntent
+	 * we will add a hook, for updated event, and cache that event content
 	 * later we weill use the hook save post, to determine this is insert new post
 	 * or update
-	 * the cache will be array of variuos post, as we dont want data be excluded
+	 * the cache will be array of various post, as we dont want data be excluded
 	 * this way we can get more control
 	 */
 
 	public function __construct() {
-		add_action( 'post_updated', [ &$this, 'cache_post_updated' ], 10, 3 );
+		add_action( 'post_updated', array( &$this, 'cache_post_updated' ), 10, 3 );
 	}
 
 	public function cache_post_updated( $post_id, $after, $before ) {
-		Array_Cache::append( 'post_updated', [
-			'post_id' => $post_id,
-			'after'   => $after,
-			'before'  => $before
-		], 'audit' );
+		Array_Cache::append(
+			'post_updated',
+			array(
+				'post_id' => $post_id,
+				'after'   => $after,
+				'before'  => $before,
+			),
+			'audit'
+		);
 	}
 
 	/**
@@ -63,132 +67,173 @@ class Post_Audit extends Audit_Event {
 							'inherit',
 							'new',
 							'auto-draft',
-							'trash'
+							'trash',
 						),
 					),
 					array(
 						'{{post->post_type}}',
-						array_merge( array( 'revision' ), $this->excluded_posttype )
+						array_merge( array( 'revision' ), $this->excluded_posttype ),
 					),
 					array(
 						'{{new_status}}',
-						'{{old_status}}'
+						'{{old_status}}',
 					),
 					array(
 						'{{old_status}}',
 						array(
 							'trash',
-							'new'
-						)
+							'new',
+						),
 					),
 				),
 				'text'         => array(
 					array(
-						sprintf( __( "%s published %s \"%s\"", 'wpdef' ), '{{wp_user}}', '{{post_type_label}}', '{{post_title}}' ),
+						sprintf(
+						/* translators: */
+							__( '%1$s published %2$s "%3$s"', 'wpdef' ),
+							'{{wp_user}}',
+							'{{post_type_label}}',
+							'{{post_title}}'
+						),
 						'{{new_status}}',
 						'publish',
-						'=='
+						'==',
 					),
 					array(
-						sprintf( __( "%s pending %s \"%s\"", 'wpdef' ), '{{wp_user}}', '{{post_type_label}}', '{{post_title}}' ),
+						sprintf(
+						/* translators: */
+							__( '%1$s pending %2$s "%3$s"', 'wpdef' ),
+							'{{wp_user}}',
+							'{{post_type_label}}',
+							'{{post_title}}'
+						),
 						'{{new_status}}',
 						'pending',
-						'=='
+						'==',
 					),
 					array(
-						sprintf( __( "%s drafted %s \"%s\"", 'wpdef' ), '{{wp_user}}', '{{post_type_label}}', '{{post_title}}' ),
+						sprintf(
+						/* translators: */
+							__( '%1$s drafted %2$s "%3$s"', 'wpdef' ),
+							'{{wp_user}}',
+							'{{post_type_label}}',
+							'{{post_title}}'
+						),
 						'{{new_status}}',
 						'draft',
-						'=='
+						'==',
 					),
 					array(
-						sprintf( __( "%s changed %s \"%s\" status from %s to %s", 'wpdef' ), '{{wp_user}}', '{{post_type_label}}', '{{post_title}}', '{{old_status}}', '{{new_status}}' ),
+						sprintf(
+						/* translators: */
+							__( '%1$s changed %2$s "%3$s" status from %4$s to %5$s', 'wpdef' ),
+							'{{wp_user}}',
+							'{{post_type_label}}',
+							'{{post_title}}',
+							'{{old_status}}',
+							'{{new_status}}'
+						),
 						'{{new_status}}',
 						'{{new_status}}',
-						'=='
+						'==',
 					),
 				),
 				'program_args' => array(
 					'post_type_label' => array(
 						'callable'        => 'get_post_type_object',
 						'params'          => array(
-							'{{post->post_type}}'
+							'{{post->post_type}}',
 						),
-						'result_property' => 'labels->singular_name'
+						'result_property' => 'labels->singular_name',
 					),
 				),
 				'custom_args'  => array(
-					'post_title' => '{{post->post_title}}'
+					'post_title' => '{{post->post_title}}',
 				),
-				'context'      => '{{post_type_label}}'
+				'context'      => '{{post_type_label}}',
 			),
 			'delete_post'            => array(
 				'args'         => array( 'post_ID' ),
 				'event_type'   => 'content',
 				'action_type'  => self::ACTION_DELETED,
-				'text'         => sprintf( __( "%s deleted %s \"%s\"", 'wpdef' ), '{{wp_user}}', '{{post_type_label}}', '{{post_title}}' ),
+				'text'         => sprintf(
+				/* translators: */
+					__( '%1$s deleted %2$s "%3$s"', 'wpdef' ),
+					'{{wp_user}}',
+					'{{post_type_label}}',
+					'{{post_title}}'
+				),
 				'program_args' => array(
 					'post'            => array(
 						'callable' => 'get_post',
 						'params'   => array(
-							'{{post_ID}}'
+							'{{post_ID}}',
 						),
 					),
 					'post_type_label' => array(
 						'callable'        => 'get_post_type_object',
 						'params'          => array(
-							'{{post->post_type}}'
+							'{{post->post_type}}',
 						),
-						'result_property' => 'labels->singular_name'
+						'result_property' => 'labels->singular_name',
 					),
 					'post_title'      => array(
 						'callable'        => 'get_post',
 						'params'          => array(
-							'{{post_ID}}'
+							'{{post_ID}}',
 						),
-						'result_property' => 'post_title'
+						'result_property' => 'post_title',
 					),
 				),
 				'context'      => '{{post_type_label}}',
 				'false_when'   => array(
 					array(
 						'{{post->post_type}}',
-						array_merge( array(
-							'revision',
-							'attachment'
-						), $this->excluded_posttype )
+						array_merge(
+							array(
+								'revision',
+								'attachment',
+							),
+							$this->excluded_posttype
+						),
 					),
 					array(
 						'{{post_type_label}}',
-						''
-					)
+						'',
+					),
 				),
 			),
 			'untrashed_post'         => array(
 				'args'         => array( 'post_ID' ),
 				'action_type'  => self::ACTION_RESTORED,
 				'event_type'   => 'content',
-				'text'         => sprintf( __( "%s untrashed %s \"%s\"", 'wpdef' ), '{{wp_user}}', '{{post_type_label}}', '{{post_title}}' ),
+				'text'         => sprintf(
+				/* translators: */
+					__( '%1$s untrashed %2$s "%3$s"', 'wpdef' ),
+					'{{wp_user}}',
+					'{{post_type_label}}',
+					'{{post_title}}'
+				),
 				'program_args' => array(
 					'post'            => array(
 						'callable' => 'get_post',
 						'params'   => array(
-							'{{post_ID}}'
+							'{{post_ID}}',
 						),
 					),
 					'post_type_label' => array(
 						'callable'        => 'get_post_type_object',
 						'params'          => array(
-							'{{post->post_type}}'
+							'{{post->post_type}}',
 						),
-						'result_property' => 'labels->singular_name'
+						'result_property' => 'labels->singular_name',
 					),
 					'post_title'      => array(
 						'callable'        => 'get_post',
 						'params'          => array(
-							'{{post_ID}}'
+							'{{post_ID}}',
 						),
-						'result_property' => 'post_title'
+						'result_property' => 'post_title',
 					),
 				),
 				'context'      => '{{post_type_label}}',
@@ -197,27 +242,33 @@ class Post_Audit extends Audit_Event {
 				'args'         => array( 'post_ID' ),
 				'action_type'  => self::ACTION_TRASHED,
 				'event_type'   => 'content',
-				'text'         => sprintf( __( "%s trashed %s \"%s\"", 'wpdef' ), '{{wp_user}}', '{{post_type_label}}', '{{post_title}}' ),
+				'text'         => sprintf(
+				/* translators: */
+					__( '%1$s trashed %2$s "%3$s"', 'wpdef' ),
+					'{{wp_user}}',
+					'{{post_type_label}}',
+					'{{post_title}}'
+				),
 				'program_args' => array(
 					'post'            => array(
 						'callable' => 'get_post',
 						'params'   => array(
-							'{{post_ID}}'
+							'{{post_ID}}',
 						),
 					),
 					'post_type_label' => array(
 						'callable'        => 'get_post_type_object',
 						'params'          => array(
-							'{{post->post_type}}'
+							'{{post->post_type}}',
 						),
-						'result_property' => 'labels->singular_name'
+						'result_property' => 'labels->singular_name',
 					),
 					'post_title'      => array(
 						'callable'        => 'get_post',
 						'params'          => array(
-							'{{post_ID}}'
+							'{{post_ID}}',
 						),
-						'result_property' => 'post_title'
+						'result_property' => 'post_title',
 					),
 				),
 				'context'      => '{{post_type_label}}',
@@ -234,10 +285,14 @@ class Post_Audit extends Audit_Event {
 		$hookname = $args[0];
 		$post     = $args[1]['post'];
 
-		if ( in_array( $post->post_status, array(
+		if ( in_array(
+			$post->post_status,
+			array(
 				'trash',
 				'auto-draft',
-			), true ) || in_array( $post->post_type, array( 'revision' ), true )
+			),
+			true
+		) || in_array( $post->post_type, array( 'revision' ), true )
 		) {
 			//usually, wp wll append :trash to the post name, so this case we just return
 			return false;
@@ -254,7 +309,7 @@ class Post_Audit extends Audit_Event {
 
 		$is_updated  = $args[1]['is_updated'];
 		$post_before = null;
-		$cached      = Array_Cache::get( 'post_updated', 'audit', [] );
+		$cached      = Array_Cache::get( 'post_updated', 'audit', array() );
 		foreach ( $cached as $post_arr ) {
 			if ( $post->ID === $post_arr['post_id'] ) {
 				$post_before = $post_arr['before'];
@@ -262,7 +317,7 @@ class Post_Audit extends Audit_Event {
 			}
 		}
 
-		if ( $is_updated === true ) {
+		if ( true === $is_updated ) {
 			if ( ! is_null( $post_before ) ) {
 				$post_after  = $post->to_array();
 				$post_before = $post_before->to_array();
@@ -274,21 +329,33 @@ class Post_Audit extends Audit_Event {
 				unset( $post_before['post_modified_gmt'] );
 				unset( $post_before['post_status'] );
 				if ( serialize( $post_before ) != serialize( $post_after ) ) {
-					$text = sprintf( __( '%s updated %s "%s"', 'wpdef' ), $this->get_user_display( get_current_user_id() ), $post_type->labels->singular_name, $post_after['post_title'] );
+					$text = sprintf(
+					/* translators: */
+						__( '%1$s updated %2$s "%3$s"', 'wpdef' ),
+						$this->get_user_display( get_current_user_id() ),
+						$post_type->labels->singular_name,
+						$post_after['post_title']
+					);
 
 					return array(
 						$text,
-						$post_type->labels->singular_name
+						$post_type->labels->singular_name,
 					);
 				}
 			}
 		} else {
 			if ( is_null( $post_before ) ) {
-				$text = sprintf( __( '%s added new %s "%s"', 'wpdef' ), $this->get_user_display( get_current_user_id() ), $post_type->labels->singular_name, $post->post_title );
+				$text = sprintf(
+				/* translators: */
+					__( '%1$s added new %2$s "%3$s"', 'wpdef' ),
+					$this->get_user_display( get_current_user_id() ),
+					$post_type->labels->singular_name,
+					$post->post_title
+				);
 
 				return array(
 					$text,
-					$post_type->labels->singular_name
+					$post_type->labels->singular_name,
 				);
 			}
 		}

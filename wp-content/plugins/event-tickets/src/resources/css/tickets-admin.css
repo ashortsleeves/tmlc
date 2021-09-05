@@ -5,7 +5,7 @@
  * src/resources/postcss/ file. For more information, check out our engineering
  * docs on how we handle CSS in our engineering docs.
  *
- * @see: http://moderntribe.github.io/products-engineering/css/
+ * @see: https://the-events-calendar.github.io/products-engineering/docs/code-standards/css/
  */
 
 /*
@@ -29,87 +29,7 @@
  *
  * ----------------------------------------------------------------------------- */
 
-/* Variables */
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Borders - Radius
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Borders - Width
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Box Shadows
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Layers of z-index
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Colors - Typography
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Colors - Iconography
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Colors - UI
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Colors - Borders & Misc
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Forms - Colors
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Forms - Box Shadows
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Gutter - Default
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Gutter - Page
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Grid Width - Default
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Grid Width - Relative
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Opacities
-	 * ----------------------------------------------------------------------------- */
-}
-
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Spacers
-	 * ----------------------------------------------------------------------------- */
-}
+/* Variables - needed everywhere. */
 
 /* -----------------------------------------------------------------------------
  * SVG - Arrow Right
@@ -195,6 +115,8 @@
  * SVG - Messages
  * ----------------------------------------------------------------------------- */
 
+/* stylelint-disable-line block-no-empty */
+
 /* -----------------------------------------------------------------------------
  * SVG - Month
  * ----------------------------------------------------------------------------- */
@@ -202,6 +124,8 @@
 /* -----------------------------------------------------------------------------
  * SVG - No Map
  * ----------------------------------------------------------------------------- */
+
+/* stylelint-disable-line block-no-empty */
 
 /* -----------------------------------------------------------------------------
  * SVG - Paper Plane
@@ -243,29 +167,11 @@
  * SVG - Week
  * ----------------------------------------------------------------------------- */
 
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Transitions
-	 * ----------------------------------------------------------------------------- */
-}
+/* -----------------------------------------------------------------------------
+ * SVG - Cal Export
+ * ----------------------------------------------------------------------------- */
 
-:root {
-	/* -----------------------------------------------------------------------------
-	 * Font Stacks
-	 * ----------------------------------------------------------------------------- */ /* stylelint-disable-line value-keyword-case */
-
-	/* -----------------------------------------------------------------------------
-	 * Font Weights
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Font Sizing
-	 * ----------------------------------------------------------------------------- */
-
-	/* -----------------------------------------------------------------------------
-	 * Line Height
-	 * ----------------------------------------------------------------------------- */
-}
+/* stylelint-disable-line block-no-empty */
 
 /* Mixins */
 
@@ -350,6 +256,13 @@
  * ----------------------------------------------------------------------------- */
 
 /* -----------------------------------------------------------------------------
+ * Anchor - Event Title
+ *
+ * This mixin intentionally only affects the text and border _colors_
+ * to make sure they all follow the Customizer overrides.
+ * ----------------------------------------------------------------------------- */
+
+/* -----------------------------------------------------------------------------
  * Button - Global
  * ----------------------------------------------------------------------------- */
 
@@ -413,7 +326,7 @@
 	width: 100%;
 }
 
-.accordion-header::before {
+.accordion-header:before {
 		background-color: #000;
 		border-radius: 100%;
 		box-sizing: border-box;
@@ -433,7 +346,7 @@
 		padding-right: 1px;
 	}
 
-.accordion-header::after {
+.accordion-header:after {
 		content: '';
 		border-bottom: 1px solid #ddd;
 		position: absolute;
@@ -443,7 +356,7 @@
 		transform: translateY(-50%);
 	}
 
-.accordion-header.is-active::before {
+.accordion-header.is-active:before {
 			content: '\f460';
 			line-height: 15px;
 		}
@@ -487,7 +400,7 @@
 .tribe-common-c-loader.tribe-tickets-loader__tickets-block,
 	.tribe-common-c-loader.tribe-tickets-loader__modal {
 		align-items: center;
-		background: rgba(255,255,255, 0.6);
+		background: var(--tec-color-background-transparent);
 		display: flex;
 		height: 100%;
 		justify-content: center;
@@ -496,7 +409,7 @@
 		position: absolute;
 		top: 0;
 		width: 100%;
-		z-index: 100;
+		z-index: var(--tec-z-index-spinner-container);
 	}
 
 .tribe-common-c-loader.tribe-tickets-loader__modal {
@@ -507,7 +420,7 @@
 
 .event-tickets .tribe-common-c-loader {
 		align-items: center;
-		background: rgba(255,255,255, 0.6);
+		background: var(--tec-color-background-transparent);
 		display: flex;
 		height: 100%;
 		justify-content: center;
@@ -516,14 +429,14 @@
 		position: absolute;
 		top: 0;
 		width: 100%;
-		z-index: 100;
+		z-index: var(--tec-z-index-spinner-container);
 	}
 
 .tribe-common .tribe-tickets__notice {
-		padding: 16px;
-		background-color: #f7f6f6;
-		border-radius: 4px;
-		margin: 20px 0;
+		padding: var(--tec-spacer-3);
+		background-color: var(--tec-color-background-secondary);
+		border-radius: var(--tec-border-radius-default);
+		margin: var(--tec-spacer-4) 0;
 	}
 
 .tribe-common .tribe-tickets__notice > *:last-child {
@@ -545,7 +458,7 @@
 	*/
 
 .tribe-common .tribe-tickets__notice--error {
-		background-color: rgba(218,57,77, 0.08);
+		background-color: var(--tec-color-background-error);
 		display: none;
 		padding-left: 50px;
 	}
@@ -558,11 +471,11 @@
 			background-image: url( "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Cg fill='none' fill-rule='evenodd' transform='translate(1 1)'%3E%3Ccircle cx='8' cy='8' r='7.467' stroke='%23141827' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'/%3E%3Ccircle cx='8' cy='11.733' r='1.067' fill='%23141827' fill-rule='nonzero'/%3E%3Cpath stroke='%23141827' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M8 3.733v4.8' fill='%23141827'/%3E%3C/g%3E%3C/svg%3E" );
 			background-size: contain;
 			content: '';
-			height: 16px;
-			left: -32px;
+			height: var(--tec-spacer-3);
+			left: calc(var(--tec-spacer-7)*-1);
 			position: absolute;
 			top: 2px;
-			width: 16px;
+			width: var(--tec-spacer-3);
 		}
 
 /*
@@ -570,22 +483,22 @@
 	*/
 
 .tribe-common .tribe-tickets__notice--barred {
-		background-color: #fff;
-		border: 4px solid #e4e4e4;
+		background-color: var(--tec-color-background);
+		border: var(--tec-spacer-0) solid var(--tec-color-border-secondary);
 		border-bottom: 0;
 		border-radius: 0;
 		border-top: 0;
-		padding: 0 12px;
+		padding: 0 var(--tec-spacer-2);
 	}
 
 .tribe-common .tribe-tickets__notice--barred-left {
 		border-right: 0;
-		padding: 0 0 0 12px;
+		padding: 0 0 0 var(--tec-spacer-2);
 	}
 
 .tribe-common .tribe-tickets__notice--barred-right {
 		border-left: 0;
-		padding: 0 12px 0 0;
+		padding: 0 var(--tec-spacer-2) 0 0;
 	}
 
 /* -------------------------------------------------------------------------
@@ -606,12 +519,12 @@
 /* Defining our tooltipster theme. */
 
 .tooltipster-base.tribe-tickets-tooltip-theme {
-	background-color: #fff;
-	border: 1px solid #d5d5d5;
-	border-radius: 4px;
-	box-shadow: 0 2px 12px 0 rgba(0,0,0, 0.14);
+	background-color: var(--tec-color-background);
+	border: 1px solid var(--tec-color-border-default);
+	border-radius: var(--tec-border-radius-default);
+	box-shadow: var(--tec-box-shadow-tooltip);
 	height: auto !important;
-	padding: 24px;
+	padding: var(--tec-spacer-5);
 	max-width: 254px;
 }
 
@@ -624,7 +537,7 @@
 	}
 
 .tooltipster-base.tribe-tickets-tooltip-theme .tooltipster-box .tooltipster-content {
-			color: #141827;
+			color: var(--tec-color-text-primary);
 			overflow: inherit;
 			padding: 0;
 			word-break: break-word;
@@ -645,7 +558,7 @@
 	 * ----------------------------------------------------------------------------- */
 
 .tribe-common button.tribe-common-c-btn--small, .tribe-common input[type="button"].tribe-common-c-btn--small, .tribe-common input[type="submit"].tribe-common-c-btn--small, .tribe-common a.tribe-common-c-btn--small {
-			background-color: #334aff;
+			background-color: var(--tec-color-accent-primary);
 			padding: 11px 14px;
 			width: auto;
 		}
@@ -661,11 +574,11 @@
 	 * ----------------------------------------------------------------------------- */
 
 .tribe-common button.tribe-common-c-btn-link, .tribe-common input[type="button"].tribe-common-c-btn-link, .tribe-common input[type="submit"].tribe-common-c-btn-link, .tribe-common a.tribe-common-c-btn-link {
-			color: #141827;
-			font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-			font-size: 14px;
-			line-height: 1.62;
-			font-weight: 400;
+			color: var(--tec-color-text-primary);
+			font-family: var(--tec-font-family-sans-serif);
+			font-size: var(--tec-font-size-2);
+			line-height: var(--tec-line-height-3);
+			font-weight: var(--tec-font-weight-regular);
 			border: 0;
 			cursor: pointer;
 			display: inline-block;
@@ -676,7 +589,7 @@
 			background-color: transparent;
 			text-align: center;
 			text-decoration: underline;
-			transition: color 0.2s ease;
+			transition: var(--tec-transition-color);
 		}
 
 .tribe-common button.tribe-common-c-btn-link:hover,
@@ -693,7 +606,7 @@
 .tribe-common button.tribe-common-c-btn-link, .tribe-common input[type="button"].tribe-common-c-btn-link, .tribe-common input[type="submit"].tribe-common-c-btn-link, .tribe-common a.tribe-common-c-btn-link {
 
 			background-color: transparent;
-			color: #334aff;
+			color: var(--tec-color-accent-primary);
 			padding: 11px 20px;
 			width: 100%;
 }
@@ -706,15 +619,15 @@
 			.tribe-common input[type="submit"].tribe-common-c-btn-link:hover,
 			.tribe-common a.tribe-common-c-btn-link:focus,
 			.tribe-common a.tribe-common-c-btn-link:hover {
-				color: rgba(51,74,255, 0.8);
+				color: var(--tec-color-accent-primary-hover);
 			}
 
 .tribe-common button.tribe-common-c-btn-link:active, .tribe-common input[type="button"].tribe-common-c-btn-link:active, .tribe-common input[type="submit"].tribe-common-c-btn-link:active, .tribe-common a.tribe-common-c-btn-link:active {
-				color: rgba(51,74,255, 0.9);
+				color: var(--tec-color-accent-primary-active);
 			}
 
 .tribe-common button.tribe-common-c-btn-link:disabled, .tribe-common input[type="button"].tribe-common-c-btn-link:disabled, .tribe-common input[type="submit"].tribe-common-c-btn-link:disabled, .tribe-common a.tribe-common-c-btn-link:disabled {
-				color: rgba(51,74,255, 0.07);
+				color: var(--tec-color-accent-primary-background);
 			}
 
 .tribe-tickets-column-attendees-link {
@@ -789,7 +702,7 @@
 /* Specific goal of this rule is to prevent the number input busting the ticket form layout under Twenty Fifteen */
 
 .tribe-theme-twentyfifteen .tribe-events-tickets input[type='number'] {
-	padding: .375em;
+	padding: 0.375em;
 	width: 100%;
 }
 
@@ -809,7 +722,7 @@
 }
 
 .tribe-tickets-editor-blocker {
-	background: rgba(255, 255, 255, .7);
+	background: rgba(255, 255, 255, 0.7);
 	bottom: 0;
 	display: none;
 	left: 0;
@@ -838,8 +751,8 @@
 
 #event_tickets fieldset {
 		border: 0;
+		margin: 0 0 1em;
 		padding: 0;
-		margin: 0 0 1em 0;
 	}
 
 #event_tickets .ticket_form_left {
@@ -850,7 +763,7 @@
 		font-weight: normal;
 	}
 
-#event_tickets input[type="text"].ticket_form_right, #event_tickets input[type="email"].ticket_form_right, #event_tickets input[type="url"].ticket_form_right, #event_tickets input[type="password"].ticket_form_right, #event_tickets input[type="search"].ticket_form_right, #event_tickets input[type="number"].ticket_form_right, #event_tickets input[type="tel"].ticket_form_right, #event_tickets input[type="range"].ticket_form_right, #event_tickets input[type="date"].ticket_form_right, #event_tickets input[type="month"].ticket_form_right, #event_tickets input[type="week"].ticket_form_right, #event_tickets input[type="time"].ticket_form_right, #event_tickets input[type="datetime"].ticket_form_right, #event_tickets input[type="datetime-local"].ticket_form_right, #event_tickets input[type="color"].ticket_form_right, #event_tickets textarea.ticket_form_right, #event_tickets label.ticket_form_right {
+#event_tickets input[type='text'].ticket_form_right, #event_tickets input[type='email'].ticket_form_right, #event_tickets input[type='url'].ticket_form_right, #event_tickets input[type='password'].ticket_form_right, #event_tickets input[type='search'].ticket_form_right, #event_tickets input[type='number'].ticket_form_right, #event_tickets input[type='tel'].ticket_form_right, #event_tickets input[type='range'].ticket_form_right, #event_tickets input[type='date'].ticket_form_right, #event_tickets input[type='month'].ticket_form_right, #event_tickets input[type='week'].ticket_form_right, #event_tickets input[type='time'].ticket_form_right, #event_tickets input[type='datetime'].ticket_form_right, #event_tickets input[type='datetime-local'].ticket_form_right, #event_tickets input[type='color'].ticket_form_right, #event_tickets textarea.ticket_form_right, #event_tickets label.ticket_form_right {
 			display: block;
 		}
 
@@ -863,7 +776,7 @@
 /* Panels */
 
 .ticket_panel {
-	border: 1px solid #a3a3a3;
+	border: 1px solid var(--tec-color-border-secondary);
 	border-radius: 5px;
 	box-sizing: border-box;
 	opacity: 1;
@@ -885,12 +798,12 @@
 	}
 
 .ticket_panel #tribe-tickets-image {
-		margin-top: .5em;
+		margin-top: 0.5em;
 	}
 
 .ticket_panel.panel_base {
 		border: 0;
-		padding: .5em 0 0;
+		padding: 0.5em 0 0;
 	}
 
 .ticket_panel.panel_edit {
@@ -953,10 +866,10 @@
 	padding: 0;
 }
 
-.tribe-button-icon::before {
+.tribe-button-icon:before {
 		font-family: 'dashicons';
 		font-size: 1.25em;
-		left: -.25em;
+		left: -0.25em;
 		position: relative;
 		vertical-align: middle;
 	}
@@ -965,15 +878,15 @@
 		display: none;
 	}
 
-.tribe-button-icon.tribe-button-icon-plus::before {
+.tribe-button-icon.tribe-button-icon-plus:before {
 		content: '\f132';
 	}
 
-.tribe-button-icon.tribe-button-icon-edit::before {
+.tribe-button-icon.tribe-button-icon-edit:before {
 		content: '\f464';
 	}
 
-.tribe-button-icon.tribe-button-icon-settings::before {
+.tribe-button-icon.tribe-button-icon-settings:before {
 		content: '\f111';
 		top: -2px;
 	}
@@ -1002,7 +915,7 @@
 	}
 
 #tribe_tickets_image_preview_filename .filename {
-		margin-left: .5em;
+		margin-left: 0.5em;
 	}
 
 /* Styles for Initial View */
@@ -1024,10 +937,10 @@
 .ticket_table_intro #ticket_form_total_capacity .tooltip {
 		background-color: #efefef;
 		border-radius: 3px;
-		border: 1px solid #a3a3a3;
+		border: 1px solid var(--tec-color-border-secondary);
 		display: none;
-		margin-left: .5em;
-		padding: .5em;
+		margin-left: 0.5em;
+		padding: 0.5em;
 		position: absolute;
 		top: 50%;
 		transform: translateY(-50%);
@@ -1097,7 +1010,6 @@
 
 .input_block .tribe_stock_block.tribe-active {
 		padding-top: 1em;
-
 	}
 
 .input_block label.ticket_form_right {
@@ -1152,7 +1064,7 @@ h4.ticket_form_title {
 
 #ticket_form input[type=radio],
 #ticket_form input[type=checkbox] {
-	margin-right: .4em;
+	margin-right: 0.4em;
 }
 
 .tribe_soft_note,
@@ -1185,7 +1097,9 @@ p.description {
 /* Edit form styles */
 
 .ticket_bottom {
+	border-top: 1px solid #ddd;
 	margin-top: 1em;
+	padding-top: 18px;
 }
 
 .tribe_preview {
@@ -1199,10 +1113,10 @@ p.description {
 #ticket_form .tooltip_container .tooltip {
 		background-color: #efefef;
 		border-radius: 3px;
-		border: 1px solid #a3a3a3;
+		border: 1px solid var(--tec-color-border-secondary);
 		display: none;
-		margin-left: .5em;
-		padding: .5em;
+		margin-left: 0.5em;
+		padding: 0.5em;
 		position: absolute;
 		top: 50%;
 		transform: translateY(-50%);
@@ -1258,11 +1172,11 @@ p.description {
 }
 
 .ticket-editor-notice.info {
-		background-color: #EDF6FC;
+		background-color: #edf6fc;
 	}
 
 .ticket-editor-notice.info .dashicons {
-			color: #2A709D;
+			color: #2a709d;
 		}
 
 .ticket-editor-notice.tribe-dependent {
@@ -1279,6 +1193,10 @@ p.description {
 		height: 20px;
 		margin-right: 2px;
 	}
+
+.tribe_events_page_tickets-attendees .search-box .button {
+	text-transform: capitalize;
+}
 
 @media (min-width: 768px) {
 
@@ -1321,14 +1239,14 @@ p.description {
 }
 	}
 
-@media screen and ( max-width: 520px ) {
+@media screen and (max-width: 520px) {
 
 .ticket_table_intro #ticket_form_total_capacity {
 			width: 100%
 	}
 		}
 
-@media screen and ( max-width: 782px ) {
+@media screen and (max-width: 782px) {
 
 .ticket_table_intro #ticket_form_total_capacity .tooltip {
 				left: auto;
@@ -1351,7 +1269,6 @@ p.description {
 
 .input_block .tribe_stock_block.tribe-active {
 			padding-top: 5px
-
 	}
 
 #ticket_form .tooltip_container .tooltip {
@@ -1371,7 +1288,7 @@ p.description {
 }
 	}
 
-@media screen and ( max-width: 390px ) {
+@media screen and (max-width: 390px) {
 
 #ticket_form .tooltip_container {
 		display: none

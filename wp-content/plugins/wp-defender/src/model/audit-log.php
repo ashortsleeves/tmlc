@@ -68,7 +68,7 @@ class Audit_Log extends DB {
 	 */
 	public $ttl;
 
-	public $safe = [
+	public $safe = array(
 		'id',
 		'timestamp',
 		'event_type',
@@ -80,8 +80,8 @@ class Audit_Log extends DB {
 		'msg',
 		'blog_id',
 		'synced',
-		'ttl'
-	];
+		'ttl',
+	);
 
 	/**
 	 * Truncate the table, as this is mostly use for cache, when we fetch new data
@@ -89,8 +89,7 @@ class Audit_Log extends DB {
 	 */
 	public static function truncate() {
 		$orm = self::get_orm();
-		$orm->get_repository( self::class )
-		    ->truncate();
+		$orm->get_repository( self::class )->truncate();
 	}
 
 	/**
@@ -99,23 +98,25 @@ class Audit_Log extends DB {
 	 * @return self|null
 	 */
 	public static function get_last() {
-		$orm   = self::get_orm();
-		$model = $orm->get_repository( self::class )->where( 'synced', 'in', [ 0, 1 ] )->
-		order_by( 'id', 'desc' )->
-		first();
+		$orm = self::get_orm();
 
-		return $model;
+		return $orm->get_repository( self::class )
+			->where( 'synced', 'in', array( 0, 1 ) )
+			->order_by( 'id', 'desc' )
+			->first();
 	}
 
 	/**
-	 * Sometime we need the pre of last, for testting
+	 * Sometime we need the pre of last, for testing
 	 * @return self
 	 */
 	public static function get_pre_last() {
 		$orm   = self::get_orm();
-		$model = $orm->get_repository( self::class )->where( 'synced', 'in', [ 0, 1 ] )->
-		order_by( 'id', 'desc' )->
-		limit( '0,2' )->get();
+		$model = $orm->get_repository( self::class )
+			->where( 'synced', 'in', array( 0, 1 ) )
+			->order_by( 'id', 'desc' )
+			->limit( '0,2' )
+			->get();
 
 		return array_pop( $model );
 	}
@@ -124,10 +125,9 @@ class Audit_Log extends DB {
 	 * @return self[]
 	 */
 	public static function get_logs_need_flush() {
-		$orm    = self::get_orm();
-		$models = $orm->get_repository( self::class )->where( 'synced', 0 )->get();
+		$orm = self::get_orm();
 
-		return $models;
+		return $orm->get_repository( self::class )->where( 'synced', 0 )->limit( 50 )->get();
 	}
 
 	/**
@@ -142,15 +142,15 @@ class Audit_Log extends DB {
 	 *
 	 * @return array
 	 */
-	public static function query( $date_from, $date_to, $events = [], $user_id = '', $ip = '', $paged = 1 ) {
+	public static function query( $date_from, $date_to, $events = array(), $user_id = '', $ip = '', $paged = 1 ) {
 		$orm     = self::get_orm();
 		$builder = $orm->get_repository( self::class );
 		$builder->where( 'timestamp', '>=', $date_from )
-		        ->where( 'timestamp', '<=', $date_to );
+			->where( 'timestamp', '<=', $date_to );
 
 		if ( is_array( $events )
-		     && count( $events )
-		     && count( array_diff( $events, self::allowed_events() ) ) === 0 ) {
+			&& count( $events )
+			&& count( array_diff( $events, self::allowed_events() ) ) === 0 ) {
 			$builder->where( 'event_type', 'in', $events );
 		}
 
@@ -163,7 +163,7 @@ class Audit_Log extends DB {
 		}
 		$builder->order_by( 'timestamp', 'desc' );
 
-		if ( $paged !== false ) {
+		if ( false !== $paged ) {
 			//if paged == false, then it will be no paging
 			$per_page = 20;
 			$offset   = ( ( $paged - 1 ) * $per_page ) . ',' . $per_page;
@@ -171,6 +171,30 @@ class Audit_Log extends DB {
 		}
 
 		return $builder->get();
+	}
+
+	/**
+	 * Clean up the old logs depending on the storage settings
+	 *
+	 * @param $date_from - The start date we want to query, in timestamp format
+	 * @param $date_to - The date end for the query, in timestamp format
+	 * @param int|null $limit
+	 *
+	 * @return void
+	 */
+	public static function delete_old_logs( $date_from, $date_to, $limit = null ) {
+		$orm     = self::get_orm();
+		$builder = $orm->get_repository( self::class );
+		$builder->where( 'timestamp', '>=', $date_from )
+				->where( 'timestamp', '<=', $date_to );
+
+		if ( empty( $limit ) ) {
+			$builder->delete_all();
+		} else {
+			$builder->order_by( 'id' )
+					->limit( $limit )
+					->delete_by_limit();
+		}
 	}
 
 	/**
@@ -182,11 +206,11 @@ class Audit_Log extends DB {
 	 * @param string $user_id
 	 * @param string $ip
 	 */
-	public static function count( $date_from, $date_to, $events = [], $user_id = '', $ip = '' ) {
+	public static function count( $date_from, $date_to, $events = array(), $user_id = '', $ip = '' ) {
 		$orm     = self::get_orm();
 		$builder = $orm->get_repository( self::class );
 		$builder->where( 'timestamp', '>=', $date_from )
-		        ->where( 'timestamp', '<=', $date_to );
+				->where( 'timestamp', '<=', $date_to );
 		if ( count( $events ) && count( array_diff( $events, self::allowed_events() ) ) === 0 ) {
 			$builder->where( 'event_type', 'in', $events );
 		}
@@ -230,13 +254,13 @@ class Audit_Log extends DB {
 	 * @return array
 	 */
 	public static function allowed_events() {
-		return [
+		return array(
 			'user',
 			'system',
 			'comment',
 			'media',
 			'settings',
-			'content'
-		];
+			'content',
+		);
 	}
 }

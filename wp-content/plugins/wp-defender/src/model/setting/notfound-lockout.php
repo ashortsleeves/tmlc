@@ -3,84 +3,82 @@
 namespace WP_Defender\Model\Setting;
 
 /**
- * This
- *
  * @package WP_Defender\Model\Setting
  */
 class Notfound_Lockout extends \Calotes\Model\Setting {
 	protected $table = 'wd_notfound_lockout_settings';
 
 	/**
-	 * Activate this module
+	 * Activate this module.
 	 *
 	 * @var bool
 	 * @defender_property
 	 */
 	public $enabled = false;
 	/**
-	 * How many 404 error happen before we lock out the IP
+	 * How many 404 error happen before we lock out the IP.
 	 *
 	 * @var int
 	 * @defender_property
 	 */
 	public $attempt = 20;
 	/**
-	 * The time window we use for counting
+	 * The time window we use for counting.
 	 *
 	 * @var int
 	 * @defender_property
 	 */
 	public $timeframe = 300;
 	/**
-	 * How long we block them
+	 * How long we block them.
 	 *
 	 * @var int
 	 * @defender_property
 	 */
 	public $duration = 300;
 	/**
-	 * Duration unit
+	 * Duration unit.
 	 *
 	 * @var string
 	 * @defender_property
 	 */
 	public $duration_unit = 'seconds';
 	/**
-	 * How the lock gonna be, if we chose permanent, then their IP will be blacklisted
+	 * How the lock gonna be, if we chose permanent, then their IP will be blacklisted.
 	 *
 	 * @var string
 	 * @defender_property
 	 */
 	public $lockout_type = 'timeframe';
 	/**
-	 * Data allowed
+	 * Data allowed:
 	 *  - URL, as relative form /this-should-be-block, with or without dash would be fine
 	 *  - filetype extension, with dot before .sql|.exe
 	 *  - regex pattern, like \/.+\.html
 	 *
-	 *  This will lockout any IP if an attempt is triggered when visit the URL that in the list
+	 *  This will lockout any IP if an attempt is triggered when visit the URL that in the list.
 	 *
 	 * @var string
 	 * @defender_property
 	 */
 	public $blacklist = '';
 	/**
-	 * Refer to $blacklist, but we will ignore instead of blocking
+	 * Refer to $blacklist, but we will ignore instead of blocking.
 	 *
 	 * @var string
 	 * @defender_property
 	 */
 	public $whitelist = '';
 	/**
-	 * A message to display on frontend when an IP is locked out
+	 * A message to display on frontend when an IP is locked out.
 	 *
 	 * @var string
 	 * @defender_property
 	 */
-	public $lockout_message = "You have been locked out due to too many attempts to access a file that doesn't exist.";
+	public $lockout_message = '';
 
 	/**
-	 * Set to true for enabling the 404 tracking on logged in user
+	 * Set to true for enabling the 404 tracking on logged-in user.
 	 *
 	 * @var bool
 	 * @defender_property
@@ -88,7 +86,7 @@ class Notfound_Lockout extends \Calotes\Model\Setting {
 	public $detect_logged = false;
 
 	/**
-	 * Validation rules
+	 * Validation rules.
 	 *
 	 * @var array
 	 */
@@ -99,8 +97,13 @@ class Notfound_Lockout extends \Calotes\Model\Setting {
 		array( array( 'duration_unit' ), 'in', array( 'seconds', 'minutes', 'hours' ) ),
 	);
 
+	protected function before_load() {
+		$this->lockout_message = __( "You have been locked out due to too many attempts to access a file that doesn't exist.", 'wpdef' );
+		$this->whitelist       = ".css\n.js\n.map";
+	}
+
 	/**
-	 * Get list of blocklisted or allowlisted data
+	 * Get list of blocklisted or allowlisted data.
 	 *
 	 * @param  string  $type  blocklist|allowlist
 	 *
@@ -116,7 +119,7 @@ class Notfound_Lockout extends \Calotes\Model\Setting {
 	}
 
 	/**
-	 * Define labels for settings key
+	 * Define labels for settings key.
 	 *
 	 * @param  string|null $key
 	 *
@@ -140,12 +143,8 @@ class Notfound_Lockout extends \Calotes\Model\Setting {
 			'detect_404_lockout_message'       => __( '404 Detection - Lockout Message', 'wpdef' ),
 			//Todo new key: blacklist
 			'detect_404_blacklist'             => __( '404 Detection - Files & Folders Blocklist', 'wpdef' ),
-			//Deprecated key
-//			'detect_404_filetypes_blacklist'   => __( '404 Detection - Filetypes & Extensions Blocklist', 'wpdef' ),
 			//Todo new key: whitelist
 			'detect_404_whitelist'             => __( '404 Detection - Files & Folders Allowlist', 'wpdef' ),
-			//Deprecated key
-//			'detect_404_ignored_filetypes'     => __( '404 Detection - Filetypes & Extensions Allowlist', 'wpdef' ),
 			//Todo new key: detect_logged
 			'detect_404_logged'                => __( '404 Detection - Monitor logged in users', 'wpdef' ),
 		);

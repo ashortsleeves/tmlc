@@ -36,6 +36,15 @@ class Installer {
 		}
 
 		Modules\CDN::unschedule_cron();
+
+		if ( is_multisite() && is_network_admin() ) {
+			/**
+			 * Updating the option instead of removing it.
+			 *
+			 * @see https://incsub.atlassian.net/browse/SMUSH-350
+			 */
+			update_site_option( WP_SMUSH_PREFIX . 'networkwide', 1 );
+		}
 	}
 
 	/**
@@ -111,6 +120,23 @@ class Installer {
 				delete_site_option( WP_SMUSH_PREFIX . 'hide_blackfriday_modal' );
 			}
 
+			if ( version_compare( $version, '3.8.3', '<' ) ) {
+				// Delete this unused setting, leftover from old smush.
+				delete_option( WP_SMUSH_PREFIX . 'transparent_png' );
+			}
+
+			if ( version_compare( $version, '3.8.6', '<' ) ) {
+				// Add the flag to display the release highlights modal.
+				add_site_option( WP_SMUSH_PREFIX . 'show_upgrade_modal', true );
+			}
+
+			if ( version_compare( $version, '3.9.0', '<' ) ) {
+				// Hide the Local WebP wizard if Local WebP is enabled.
+				if ( Settings::get_instance()->get( 'webp_mod' ) ) {
+					add_site_option( WP_SMUSH_PREFIX . 'webp_hide_wizard', true );
+				}
+			}
+
 			// Create/upgrade directory smush table.
 			self::directory_smush_table();
 
@@ -148,6 +174,23 @@ class Installer {
 
 		// Create/upgrade directory smush table.
 		WP_Smush::get_instance()->core()->mod->dir->create_table();
+	}
+
+	/**
+	 * Check if table needs to be created and create if not exists.
+	 *
+	 * @since 3.8.6
+	 */
+	public static function maybe_create_table() {
+		if ( ! function_exists( 'get_current_screen' ) ) {
+			return;
+		}
+
+		if ( isset( get_current_screen()->id ) && false === strpos( get_current_screen()->id, 'page_smush' ) ) {
+			return;
+		}
+
+		self::directory_smush_table();
 	}
 
 	/**

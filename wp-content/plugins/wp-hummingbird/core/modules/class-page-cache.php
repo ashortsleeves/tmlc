@@ -91,9 +91,11 @@ class Page_Cache extends Module {
 		$this->check_plugin_compatibility();
 		$this->check_minification_queue();
 
+		add_action( 'admin_init', array( $this, 'maybe_update_advanced_cache' ) );
+
 		add_action( 'init', array( $this, 'init_preloader' ) );
 		// Preload page cache on post/page update.
-		add_action( 'wphb_clear_cache_url', array( new Preload(), 'preload_page_on_purge' ) );
+		add_action( 'wphb_page_cache_preload_page', array( new Preload(), 'preload_page_on_purge' ) );
 
 		/**
 		 * Trigger a cache clear.
@@ -154,7 +156,8 @@ class Page_Cache extends Module {
 	 *
 	 * @since 1.9.0
 	 *
-	 * @used-by \Hummingbird\Admin\Pages\Caching::page_caching_disabled_metabox()
+	 * @used-by \Hummingbird\Admin\Pages\Caching::trigger_load_action()
+	 * @used-by \Hummingbird\Core\Api\Hub::action_enable()
 	 */
 	public function enable() {
 		$this->toggle_service( true, true );
@@ -165,7 +168,8 @@ class Page_Cache extends Module {
 	 *
 	 * @since 1.9.0
 	 *
-	 * @used-by \Hummingbird\Admin\Pages\Caching::page_caching_metabox()
+	 * @used-by \Hummingbird\Admin\Pages\Caching::trigger_load_action()
+	 * @used-by \Hummingbird\Core\Api\Hub::action_disable()
 	 */
 	public function disable() {
 		$this->toggle_service( false, true );
@@ -180,6 +184,7 @@ class Page_Cache extends Module {
 	 * check_minification_queue()
 	 * init_filesystem()
 	 * init_preloader()
+	 * maybe_update_advanced_cache()
 	 ***************************/
 
 	/**
@@ -244,7 +249,7 @@ class Page_Cache extends Module {
 		if ( get_transient( 'wphb-processing' ) ) {
 			$this->error = new WP_Error(
 				'min-queue-present',
-				__( 'Page caching halted while minification queue is being processed. This can take a few minutes..', 'wphb' )
+				__( 'Page caching halted while minification queue is being processed. This can take a few minutes...', 'wphb' )
 			);
 		}
 	}
@@ -308,6 +313,44 @@ class Page_Cache extends Module {
 		}
 
 		new Preload();
+	}
+
+	/**
+	 * Make sure advanced-cache.php file is always up to date in between updates.
+	 *
+	 * @since 2.7.1
+	 */
+	public function maybe_update_advanced_cache() {
+		// No advanced-cache.php, probably cache is disabled - exit.
+		if ( ! file_exists( WP_CONTENT_DIR . '/advanced-cache.php' ) ) {
+			return;
+		}
+
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			return;
+		}
+
+		// Can't find original, won't be able to replace - exit.
+		if ( ! file_exists( dirname( plugin_dir_path( __FILE__ ) ) . '/advanced-cache.php' ) ) {
+			return;
+		}
+
+		// Files are identical - exit.
+		if ( filesize( WP_CONTENT_DIR . '/advanced-cache.php' ) === filesize( dirname( plugin_dir_path( __FILE__ ) ) . '/advanced-cache.php' ) ) {
+			return;
+		}
+
+		// Check if this is an advanced-cache.php file from Hummingbird.
+		$adv_cache_content = file_get_contents( WP_CONTENT_DIR . '/advanced-cache.php' );
+		if ( false === strpos( $adv_cache_content, 'WPHB_ADVANCED_CACHE' ) ) {
+			// File is not from Hummingbird - exit.
+			return;
+		}
+
+		unlink( WP_CONTENT_DIR . '/advanced-cache.php' );
+
+		// Create the file.
+		$this->init_filesystem();
 	}
 
 	/**
@@ -387,9 +430,9 @@ class Page_Cache extends Module {
 		// Cache Headers.
 		$wphb_cache_config->cache_headers = isset( $settings['settings']['cache_headers'] ) ? (bool) $settings['settings']['cache_headers'] : false;
 
-		$wphb_cache_config->exclude_url     = $settings['exclude']['url_strings'];
-		$wphb_cache_config->exclude_agents  = $settings['exclude']['user_agents'];
-		$wphb_cache_config->exclude_cookies = isset( $settings['exclude']['cookies'] ) ? $settings['exclude']['cookies'] : array();
+		$wphb_cache_config->exclude_url     = isset( $settings['exclude']['url_strings'] ) && is_array( $settings['exclude']['url_strings'] ) ? $settings['exclude']['url_strings'] : array();
+		$wphb_cache_config->exclude_agents  = isset( $settings['exclude']['user_agents'] ) && is_array( $settings['exclude']['user_agents'] ) ? $settings['exclude']['user_agents'] : array();
+		$wphb_cache_config->exclude_cookies = isset( $settings['exclude']['cookies'] ) && is_array( $settings['exclude']['cookies'] ) ? $settings['exclude']['cookies'] : array();
 	}
 
 	/**
@@ -619,7 +662,7 @@ class Page_Cache extends Module {
 
 		foreach ( (array) $_COOKIE as $key => $value ) { // Input var ok.
 			// Check password protected post, comment author, logged in user.
-			if ( preg_match( '/^wp-postpass_|^comment_author_|^wordpress_logged_in_/', $key ) ) {
+			if ( preg_match( '/^wp-postpass_|^comment_author_|^wordpress_logged_in_|^wphb_cache_/', $key ) ) {
 				self::log_msg( 'Found cookie: ' . $key );
 				$cookie_value .= $_COOKIE[ $key ] . ','; // Input var ok.
 			}
@@ -1074,6 +1117,13 @@ class Page_Cache extends Module {
 	public function cache_request( $buffer ) {
 		global $wphb_cache_file, $wphb_cache_config, $wphb_meta_file;
 
+		// We need this to be able to counter generating pages right after clearing AO settings, queue initiated on page load.
+		if ( get_transient( 'wphb-processing' ) ) {
+			// Exit early.
+			self::log_msg( 'Page not cached. Asset optimization processing in progress. Sending buffer to user.' );
+			return $buffer;
+		}
+
 		$cache_page = true;
 		$is_404     = false;
 
@@ -1178,12 +1228,6 @@ class Page_Cache extends Module {
 		$headers = self::get_page_headers_cached();
 
 		$headers_default = array(
-			/**
-			 * Vary: Accept-Encoding only with Content-Encoding: gzip
-			 * Do we want to Vary: Cookie?
-			 * https://www.fastly.com/blog/best-practices-using-vary-header/
-			 */
-			'Vary'          => 'Vary: Accept-Encoding, Cookie',
 			'Content-Type'  => 'Content-Type: text/html; charset=UTF-8',
 			'Cache-Control' => 'Cache-Control: max-age=3600, must-revalidate',
 		);
@@ -1271,20 +1315,25 @@ class Page_Cache extends Module {
 	 * @used-by Page_Cache::purge_post_cache()
 	 * @used-by Page_Cache::post_edit()
 	 * @used-by Page_Cache::post_status_change()
-	 * @param   string $directory  Directory to remove.
+	 *
+	 * @param string $directory  Directory to remove.
+	 * @param bool   $single     Make sure we only clear out a single directory for posts that are set as a site homepage.
 	 *
 	 * @return bool
 	 */
-	public function clear_cache( $directory = '' ) {
+	public function clear_cache( $directory = '', $single = false ) {
 		global $wphb_fs;
+
+		if ( ! $wphb_fs ) {
+			$wphb_fs = Filesystem::instance();
+		}
+
+		$skip_subdirs = true;
 
 		$directory_origin = $directory;
 
 		// Remove notice for clearing page cache.
 		delete_option( 'wphb-notice-cache-cleaned-show' );
-
-		// Clear integrations cache.
-		do_action( 'wphb_clear_cache_url', $directory );
 
 		/**
 		 * Function is_network_admin() does not work in ajax, so this is a hack.
@@ -1300,6 +1349,7 @@ class Page_Cache extends Module {
 		if ( is_multisite() && ! $is_network_admin && ! $directory ) {
 			$current_blog = get_site( get_current_blog_id() );
 			$directory    = $current_blog->path;
+			$skip_subdirs = false; // We are clearing all cache.
 		}
 
 		// Purge whole cache directory.
@@ -1311,18 +1361,37 @@ class Page_Cache extends Module {
 			$status = $wphb_fs->purge();
 
 			$options = $this->get_options();
-			if ( isset( $options['preload'] ) && $options['preload'] ) {
+
+			if ( isset( $options['preload'] ) && $options['preload'] && isset( $options['preload_type'] ) && isset( $options['preload_type']['home_page'] ) && $options['preload_type']['home_page'] ) {
 				$preload = new Preload();
 				$preload->preload_home_page();
 			}
 
 			do_action( 'wphb_cache_directory_cleared' );
 
+			// Clear integrations cache.
+			do_action( 'wphb_clear_cache_url' );
+
 			return $status;
 		}
 
 		// Purge specific folder.
-		$http_host = isset( $_SERVER['HTTP_HOST'] ) ? htmlentities( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : ''; // Input var ok.
+		$http_host = '';
+		if ( isset( $_SERVER['HTTP_HOST'] ) ) {
+			$http_host = htmlentities( wp_unslash( $_SERVER['HTTP_HOST'] ) ); // Input var ok.
+		} elseif ( function_exists( 'get_option' ) ) {
+			$http_host = preg_replace( '/https?:\/\//', '', get_option( 'siteurl' ) );
+		}
+
+		/**
+		 * Filter the HTTP_HOST value.
+		 *
+		 * @param string $http_host  Current HTTP host value.
+		 *
+		 * @since 2.7.3
+		 */
+		$http_host = apply_filters( 'wphb_page_cache_http_host', $http_host );
+
 
 		$cache_dir = $http_host . $directory;
 		$full_path = $wphb_fs->cache_dir . $cache_dir;
@@ -1346,14 +1415,16 @@ class Page_Cache extends Module {
 		// Decrease cached pages count by 1.
 		$count = Settings::get_setting( 'pages_cached', 'page_cache' );
 
-		if ( $wphb_fs->purge( 'cache/' . $http_host . '/mobile' . $directory ) ) {
+		if ( $wphb_fs->purge( 'cache/' . $http_host . '/mobile' . $directory, false, $skip_subdirs ) ) {
 			self::log_msg( 'Mobile cache has been cleared.' );
 			Settings::update_setting( 'pages_cached', --$count, 'page_cache' );
 		}
 
-		$status = $wphb_fs->purge( 'cache/' . $cache_dir );
+		$status = $wphb_fs->purge( 'cache/' . $cache_dir, false, $skip_subdirs );
 		if ( $status ) {
 			Settings::update_setting( 'pages_cached', --$count, 'page_cache' );
+			// Clear integrations cache.
+			do_action( 'wphb_clear_cache_url', $directory_origin );
 		}
 
 		do_action( 'wphb_page_cache_cleared', $directory_origin );
@@ -1380,8 +1451,13 @@ class Page_Cache extends Module {
 			$permalink = preg_replace( '/__trashed(-?)(\d*)\/$/', '/', $permalink );
 		}
 
-		$this->clear_cache( $permalink );
+		// When we have a static page as a home directory, we need to make sure that we do not clear all the other subfolders.
+		$force_single_clear = '/' === $permalink;
+
+		$this->clear_cache( $permalink, $force_single_clear );
+		do_action( 'wphb_cloudflare_apo_clear_cache', $post_id );
 		self::log_msg( 'Cache has been purged for post id: ' . $post_id );
+		do_action( 'wphb_page_cache_preload_page', $permalink );
 
 		// Clear categories and tags pages if cached.
 		$meta_array = array(
@@ -1535,6 +1611,9 @@ class Page_Cache extends Module {
 				if ( time() - filemtime( $wphb_cache_file ) >= $wphb_cache_config->clear_interval['interval'] * HOUR_IN_SECONDS ) {
 					self::log_msg( 'Cache file found, but cache interval is defined and cache is expired. Removing file.' );
 					unlink( $wphb_cache_file );
+					if ( file_exists( $wphb_meta_file ) ) {
+						unlink( $wphb_meta_file );
+					}
 					return;
 				}
 			}
@@ -1577,7 +1656,7 @@ class Page_Cache extends Module {
 
 		$is_cached = file_exists( $wphb_cache_file );
 
-		if ( $wphb_cache_config->cache_headers ) {
+		if ( $is_cached && $wphb_cache_config->cache_headers ) {
 			$is_cached = file_exists( $wphb_meta_file );
 		}
 
@@ -1685,11 +1764,11 @@ class Page_Cache extends Module {
 		// Clear all cache files and return.
 		if ( $wphb_cache_config->clear_on_update ) {
 			$this->clear_cache();
+		} else {
+			// Delete category and tag cache.
+			// Delete page cache.
+			$this->purge_post_cache( $post_id );
 		}
-
-		// Delete category and tag cache.
-		// Delete page cache.
-		$this->purge_post_cache( $post_id );
 	}
 
 	/**
@@ -1801,7 +1880,9 @@ class Page_Cache extends Module {
 		$options = parent::get_options();
 
 		if ( is_multisite() ) {
-			if ( $network && is_network_admin() ) {
+			// We need to use this define for calls from Hub.
+			$is_network_admin = defined( 'WPHB_IS_NETWORK_ADMIN' ) && WPHB_IS_NETWORK_ADMIN;
+			if ( $network && ( is_network_admin() || $is_network_admin ) ) {
 				// Updating for the whole network.
 				$options['enabled']    = $value;
 				$options['cache_blog'] = $value;
@@ -1878,8 +1959,14 @@ class Page_Cache extends Module {
 			return false;
 		}
 
+		// Additional check for ajax (is_network_admin() does not work in ajax calls).
+		$network_admin = is_network_admin();
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX && isset( $_SERVER['HTTP_REFERER'] ) && preg_match( '#^' . network_admin_url() . '#i', wp_unslash( $_SERVER['HTTP_REFERER'] ) ) ) { // Input var ok.
+			$network_admin = true;
+		}
+
 		// If blog admins can't control cache settings, use global settings.
-		if ( is_multisite() && ! is_network_admin() && 'blog-admins' === $options['enabled'] ) {
+		if ( is_multisite() && ! $network_admin && 'blog-admins' === $options['enabled'] ) {
 			$current = $options['cache_blog'];
 		} else {
 			$current = $options['enabled'];

@@ -20,9 +20,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$branded_image = apply_filters( 'wpmudev_branding_hero_image', '' );
 ?>
 
-<div class="sui-summary-image-space" aria-hidden="true" style="background-image: url( '<?php echo esc_url( apply_filters( 'wpmudev_branding_hero_image', '' ) ); ?>' )"></div>
+<?php if ( $branded_image ) : ?>
+	<div class="sui-summary-image-space" aria-hidden="true" style="background-image: url('<?php echo esc_url( $branded_image ); ?>')"></div>
+<?php else : ?>
+	<div class="sui-summary-image-space" aria-hidden="true"></div>
+<?php endif; ?>
 <div class="sui-summary-segment">
 	<div class="sui-summary-details">
 		<?php if ( $pc_active ) : ?>
@@ -33,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<span class="sui-summary-sub">
 			<?php esc_html_e( 'Cache files', 'wphb' ); ?>
 			<span class="sui-tooltip sui-tooltip-constrained" data-tooltip="<?php esc_attr_e( 'Pages are cached when someone first visits them. This number is the total count of static files being cached (not pages) and can be larger than the total number of physical pages you have.', 'wphb' ); ?>">
-				<i class="sui-icon-info" aria-hidden="true"></i>
+				<span class="sui-icon-info" aria-hidden="true"></span>
 			</span>
 		</span>
 
@@ -55,7 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			echo esc_html( $preload_status );
 			?>
 			<span class="sui-tooltip sui-tooltip-constrained" data-tooltip="<?php echo esc_attr( $preload_tooltip ); ?>">
-				<i class="<?php echo esc_attr( $preload_icon ); ?>>" aria-hidden="true" style="<?php echo $preload_running ? 'top:0' : ''; ?>"></i>
+				<span class="<?php echo esc_attr( $preload_icon ); ?>>" aria-hidden="true" style="<?php echo $preload_running ? 'top:0' : ''; ?>"></span>
 			</span>
 		</span>
 		<span class="sui-summary-sub">
@@ -84,7 +89,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php if ( 0 < $issues ) : ?>
 					<span class="sui-tag sui-tag-warning"><?php echo absint( $issues ); ?></span>
 				<?php else : ?>
-					<i class="sui-icon-check-tick sui-lg sui-success" aria-hidden="true"></i>
+					<span class="sui-icon-check-tick sui-lg sui-success" aria-hidden="true"></span>
 				<?php endif; ?>
 			</span>
 		</li>
@@ -92,7 +97,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<span class="sui-list-label"><?php esc_html_e( 'Gravatar Caching', 'wphb' ); ?></span>
 			<span class="sui-list-detail">
 				<?php if ( $gravatar ) : ?>
-					<i class="sui-icon-check-tick sui-lg sui-success" aria-hidden="true"></i>
+					<span class="sui-icon-check-tick sui-lg sui-success" aria-hidden="true"></span>
 				<?php else : ?>
 					<div class="sui-tag sui-tag-disabled"><?php esc_html_e( 'Inactive', 'wphb' ); ?></div>
 				<?php endif; ?>

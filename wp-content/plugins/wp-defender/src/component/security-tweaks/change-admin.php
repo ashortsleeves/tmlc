@@ -185,10 +185,12 @@ class Change_Admin extends Component {
 			'title'            => __( 'Change default admin user account', 'wpdef' ),
 			'errorReason'      => __( 'You have a user account with the admin username.', 'wpdef' ),
 			'successReason'    => __( 'You don\'t have a user account sporting the admin username, great!', 'wpdef' ),
-			'misc'             => [],
+			'misc'             => array(
+				'host' => defender_get_hostname(),
+			),
 			'bulk_description' => __( 'Using the default admin username is widely considered bad practice and opens you up to the easitest form of entry to your website. We will create new admin username for you.',
 				'wpdef' ),
-			'bulk_title'       => __( 'Admin User', 'wpdef' )
+			'bulk_title'       => __( 'Admin User', 'wpdef' ),
 		];
 	}
 }

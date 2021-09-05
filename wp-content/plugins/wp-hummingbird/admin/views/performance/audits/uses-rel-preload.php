@@ -73,7 +73,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<h4><?php esc_html_e( 'How to fix', 'wphb' ); ?></h4>
 	<p><?php esc_html_e( 'Use the example statement to instruct your browser to download key resources as early as possible.', 'wphb' ); ?></p>
-	<?php $code = '<span style="color:#3B78E7 !important">&lt;link</span> <span style="color:#8D00B1 !important">rel=</span>"preload" <span style="color:#8D00B1 !important">href=</span>“late-discovered-styles.css" <span style="color:#8D00B1 !important">as=</span>"style"<span style="color:#3B78E7 !important">&gt;</span>'; ?>
+	<?php $code = '<span style="color:#3B78E7 !important">&lt;link</span> <span style="color:#8D00B1 !important">rel=</span>"preload" <span style="color:#8D00B1 !important">href=</span>"late-discovered-styles.css" <span style="color:#8D00B1 !important">as=</span>"style"<span style="color:#3B78E7 !important">&gt;</span>'; ?>
 	<pre class="sui-code-snippet sui-no-copy" style="color:#1ABC9C"><?php echo wp_kses_post( $code ); ?></pre>
 	<p>
 		<?php

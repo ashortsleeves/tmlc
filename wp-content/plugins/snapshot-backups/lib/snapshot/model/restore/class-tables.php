@@ -13,6 +13,7 @@ use WPMUDEV\Snapshot4\Helper\Codec;
 use WPMUDEV\Snapshot4\Helper\Lock;
 use WPMUDEV\Snapshot4\Helper\Log;
 use WPMUDEV\Snapshot4\Helper\Replacer;
+use WPMUDEV\Snapshot4\Helper\Db;
 
 /**
  * Table restore tasks model class
@@ -154,7 +155,7 @@ class Tables extends Model {
 		// Force the insert ID to empty value.
 		$wpdb->insert_id = false;
 
-		if ( (bool) preg_match( '/^create table/i', $statement ) ) {
+		if ( (bool) preg_match( '/^(create table|create or replace)/i', $statement ) ) {
 			$this->import_statement_create( $statement );
 
 			$this->add( 'create_statement', true );
@@ -384,6 +385,7 @@ class Tables extends Model {
 			// Resolve table dependencies and options tables.
 			$dependencies = array();
 			$options      = array();
+			$views        = array();
 			$matcher      = '(' . join( '|', $tables ) . ')';
 			foreach ( $tables as $tidx => $table ) {
 
@@ -396,7 +398,16 @@ class Tables extends Model {
 					continue;
 				}
 
-				$statements = $this->get_statements( $table, 1, 1 );
+				// For tables: statements = [DROP, CREATE].
+				// For views:  statements = [CREATE OR REPLACE].
+				$statements = $this->get_statements( $table, 0, 2 );
+				if ( preg_match( '/create or replace/i', $statements[0] ) ) {
+					$views[] = $table;
+					unset( $tables[ $tidx ] );
+					continue;
+				}
+				array_shift( $statements );
+
 				if ( empty( $statements ) ) {
 					continue;
 				}
@@ -418,6 +429,10 @@ class Tables extends Model {
 				foreach ( $options as $options_like_table ) {
 					$tables[] = $options_like_table;
 				}
+			}
+
+			foreach ( $views as $view ) {
+				$tables[] = $view;
 			}
 
 			return $tables;
@@ -622,7 +637,14 @@ class Tables extends Model {
 				$this->get( 'backup_id' )
 			);
 
-			$status = $this->query_ignore( "DROP TABLE {$dest_tmp_table}" );
+			$db_name    = Db::get_db_name();
+			$table_type = $wpdb->get_var( $wpdb->prepare( 'SELECT table_type FROM information_schema.tables WHERE table_schema = %s AND table_name = %s', $db_name, $dest_tmp_table ) ); // db call ok; no-cache ok.
+
+			if ( 'VIEW' === $table_type ) {
+				$status = $this->query_ignore( "DROP VIEW {$dest_tmp_table}" );
+			} else {
+				$status = $this->query_ignore( "DROP TABLE {$dest_tmp_table}" );
+			}
 			if ( false === $status ) {
 				Log::warning(
 					sprintf(

@@ -752,7 +752,11 @@ abstract class Tribe__Repository
 	 */
 	public function order_by( $order_by, $order = 'DESC' ) {
 		$this->query_args['orderby'] = $order_by;
-		$this->query_args['order']   = $order;
+
+		// Based on `WP_Query->parse_orderby` we should ignore the global order passed, and use the value on for each item in array.
+		if ( ! is_array( $order_by ) ) {
+			$this->query_args['order'] = $order;
+		}
 
 		return $this;
 	}
@@ -1790,7 +1794,9 @@ abstract class Tribe__Repository
 				$args = [ 'p' => $value ];
 				break;
 			case 'search':
-				$args = [ 's' => $value ];
+				if ( '' !== $value ) {
+					$args = [ 's' => $value ];
+				}
 				break;
 			case 'post_status':
 				$this->query_args['post_status'] = (array) $value;

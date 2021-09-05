@@ -8,7 +8,7 @@
  */
 
 import Fetcher from '../utils/fetcher';
-import { __, getLink } from '../utils/helpers';
+import { getString, getLink } from '../utils/helpers';
 import Row from '../minification/Row';
 import RowsCollection from '../minification/RowsCollection';
 import MinifyScanner from '../scanners/MinifyScanner';
@@ -32,7 +32,7 @@ import MinifyScanner from '../scanners/MinifyScanner';
 			);
 
 			// Check files button.
-			$( '#check-files' ).click( function ( e ) {
+			$( '#check-files' ).on( 'click', function ( e ) {
 				e.preventDefault();
 				$( document ).trigger( 'check-files' );
 			} );
@@ -41,12 +41,6 @@ import MinifyScanner from '../scanners/MinifyScanner';
 				window.SUI.openModal( 'check-files-modal', 'wpbody-content' );
 				$( this ).attr( 'disabled', true );
 				self.scanner.start();
-			} );
-
-			// Cancel scan button.
-			$( 'body' ).on( 'click', '#cancel-minification-check', ( e ) => {
-				e.preventDefault();
-				this.scanner.cancel();
 			} );
 
 			// Track changes done to minification files.
@@ -79,15 +73,47 @@ import MinifyScanner from '../scanners/MinifyScanner';
 				const changed = $( '.wphb-minification-files' ).find(
 					'input.changed'
 				);
-				const bulkUpdateButton = $(
-					'.sui-actions-left > #bulk-update'
+
+				$( '.sui-actions-left > #bulk-update' ).toggleClass(
+					'button-notice disabled',
+					0 === changed.length
+				);
+			} );
+
+			/**
+			 * Open up bulk update modal. Make sure we hide elements not applicable to
+			 * the selection.
+			 */
+			$( '#bulk-update' ).on( 'click', function ( e ) {
+				e.preventDefault();
+
+				const css = $(
+					'input[data-type="CSS"].wphb-minification-file-selector:checked'
+				);
+				const js = $(
+					'input[data-type="JS"].wphb-minification-file-selector:checked'
 				);
 
-				if ( changed.length === 0 ) {
-					bulkUpdateButton.addClass( 'button-notice disabled' );
-				} else {
-					bulkUpdateButton.removeClass( 'button-notice disabled' );
-				}
+				$(
+					'#bulk-update-modal label[for="filter-inline"]'
+				).toggleClass( 'sui-hidden', 0 === css.length );
+
+				$( '#bulk-update-modal label[for="filter-defer"]' ).toggleClass(
+					'sui-hidden',
+					0 === js.length
+				);
+
+				$( '#bulk-update-modal label[for="filter-async"]' ).toggleClass(
+					'sui-hidden',
+					0 === js.length
+				);
+
+				window.SUI.openModal(
+					'bulk-update-modal',
+					this,
+					'bulk-update-cancel',
+					true
+				);
 			} );
 
 			// Filter action button on Asset Optimization page
@@ -100,7 +126,7 @@ import MinifyScanner from '../scanners/MinifyScanner';
 			$( '.wphb-discard' ).on( 'click', function ( e ) {
 				e.preventDefault();
 
-				if ( confirm( __( 'discardAlert' ) ) ) {
+				if ( confirm( getString( 'discardAlert' ) ) ) {
 					location.reload();
 				}
 				return false;
@@ -113,7 +139,7 @@ import MinifyScanner from '../scanners/MinifyScanner';
 
 			// CDN checkbox update status
 			const checkboxes = $( 'input[type=checkbox][name=use_cdn]' );
-			checkboxes.change( function () {
+			checkboxes.on( 'change', function () {
 				$( '#cdn_file_exclude' ).toggleClass( 'sui-hidden' );
 				const cdnValue = $( this ).is( ':checked' );
 
@@ -128,6 +154,63 @@ import MinifyScanner from '../scanners/MinifyScanner';
 				} );
 			} );
 
+			/**
+			 * Improve tooltip handling.
+			 *
+			 * @since 3.0.0
+			 */
+			const aoButtons = $(
+				'.wphb-minification-advanced-group > :input.toggle-checkbox'
+			);
+			aoButtons.on( 'change', function () {
+				const label = $(
+					"label[for='" + $( this ).attr( 'id' ) + "']"
+				);
+
+				let str;
+
+				// Minify.
+				if ( $( this ).hasClass( 'toggle-minify' ) ) {
+					str = getString( this.checked.toString() + 'Minify' );
+					label.attr( 'data-tooltip', str );
+				}
+				// Combine.
+				if ( $( this ).hasClass( 'toggle-combine' ) ) {
+					str = getString( this.checked.toString() + 'Combine' );
+					label.attr( 'data-tooltip', str );
+				}
+				// Footer.
+				if ( $( this ).hasClass( 'toggle-position-footer' ) ) {
+					str = getString( this.checked.toString() + 'Footer' );
+					label.attr( 'data-tooltip', str );
+				}
+				// Inline.
+				if ( $( this ).hasClass( 'toggle-inline' ) ) {
+					str = getString( this.checked.toString() + 'Inline' );
+					label.attr( 'data-tooltip', str );
+				}
+				// Defer.
+				if ( $( this ).hasClass( 'toggle-defer' ) ) {
+					str = getString( this.checked.toString() + 'Defer' );
+					label.attr( 'data-tooltip', str );
+				}
+				// Font optimization.
+				if ( $( this ).hasClass( 'toggle-font-optimize' ) ) {
+					str = getString( this.checked.toString() + 'Font' );
+					label.attr( 'data-tooltip', str );
+				}
+				// Preload.
+				if ( $( this ).hasClass( 'toggle-preload' ) ) {
+					str = getString( this.checked.toString() + 'Preload' );
+					label.attr( 'data-tooltip', str );
+				}
+				// Async.
+				if ( $( this ).hasClass( 'toggle-async' ) ) {
+					str = getString( this.checked.toString() + 'Async' );
+					label.attr( 'data-tooltip', str );
+				}
+			} );
+
 			// Exclude file buttons.
 			const excludeButtons = $(
 				'.wphb-minification-exclude > :input.toggle-checkbox'
@@ -140,17 +223,17 @@ import MinifyScanner from '../scanners/MinifyScanner';
 				);
 				if ( label.hasClass( 'fileIncluded' ) ) {
 					label
-						.find( 'i' )
+						.find( 'span' )
 						.removeClass( 'sui-icon-eye-hide' )
 						.addClass( 'sui-icon-eye' );
-					label.attr( 'data-tooltip', wphb.strings.includeFile );
+					label.attr( 'data-tooltip', getString( 'includeFile' ) );
 					label.removeClass( 'fileIncluded' );
 				} else {
 					label
-						.find( 'i' )
+						.find( 'span' )
 						.removeClass( 'sui-icon-eye' )
 						.addClass( 'sui-icon-eye-hide' );
-					label.attr( 'data-tooltip', wphb.strings.excludeFile );
+					label.attr( 'data-tooltip', getString( 'excludeFile' ) );
 					label.addClass( 'fileIncluded' );
 				}
 			} );
@@ -174,8 +257,8 @@ import MinifyScanner from '../scanners/MinifyScanner';
 						.addClass(
 							'wphb-row-status-queued sui-tooltip-constrained'
 						)
-						.attr( 'data-tooltip', wphb.strings.queuedTooltip )
-						.find( 'i' )
+						.attr( 'data-tooltip', getString( 'queuedTooltip' ) )
+						.find( 'span' )
 						.attr( 'class', 'sui-icon-loader sui-loading' );
 
 					Fetcher.minification.resetAsset(
@@ -184,17 +267,20 @@ import MinifyScanner from '../scanners/MinifyScanner';
 				}
 			);
 
-			$( 'input[type=checkbox][name=debug_log]' ).change( function () {
-				const enabled = $( this ).is( ':checked' );
-				Fetcher.minification.toggleLog( enabled ).then( () => {
-					WPHB_Admin.notices.show();
-					if ( enabled ) {
-						$( '.wphb-logging-box' ).show();
-					} else {
-						$( '.wphb-logging-box' ).hide();
-					}
-				} );
-			} );
+			$( 'input[type=checkbox][name=debug_log]' ).on(
+				'change',
+				function () {
+					const enabled = $( this ).is( ':checked' );
+					Fetcher.minification.toggleLog( enabled ).then( () => {
+						WPHB_Admin.notices.show();
+						if ( enabled ) {
+							$( '.wphb-logging-box' ).show();
+						} else {
+							$( '.wphb-logging-box' ).hide();
+						}
+					} );
+				}
+			);
 
 			/**
 			 * Save critical css file
@@ -299,20 +385,12 @@ import MinifyScanner from '../scanners/MinifyScanner';
 							WPHB_Admin.notices.show();
 						} else {
 							WPHB_Admin.notices.show(
-								wphb.strings.errorSettingsUpdate,
+								getString( 'errorSettingsUpdate' ),
 								'error'
 							);
 						}
 					} );
 			} );
-
-			/**
-			 * Register exclude CDN select and submit settings.
-			 *
-			 * @since 2.4.0
-			 */
-			const excludeCDN = $( '#cdn_exclude' );
-			excludeCDN.SUIselect2();
 
 			$( '#wphb-ao-settings-update' ).on( 'click', function ( e ) {
 				e.preventDefault();
@@ -367,23 +445,11 @@ import MinifyScanner from '../scanners/MinifyScanner';
 						.getElementById( 'wphb-ao-' + this.value + '-label' )
 						.classList.remove( 'active' );
 
-					if ( 'auto' === current && 'manual' === this.value ) {
-						window.SUI.openModal(
-							'wphb-advanced-minification-modal',
-							'wphb-switch-to-advanced',
-							'wphb-switch-to-advanced',
-							false
-						);
-						return;
-					}
-
 					if ( 'manual' === current && 'auto' === this.value ) {
 						if ( true === wphb.minification.get.showSwitchModal ) {
 							window.SUI.openModal(
 								'wphb-basic-minification-modal',
-								'wphb-switch-to-basic',
-								'wphb-switch-to-basic',
-								false
+								'wphb-switch-to-basic'
 							);
 						} else {
 							WPHB_Admin.minification.switchView( 'basic' );
@@ -391,39 +457,6 @@ import MinifyScanner from '../scanners/MinifyScanner';
 					}
 				} );
 			}
-
-			// Toggle Speedy settings on/off.
-			const inputSpeedy = document.getElementById( 'wphb-speedy-toggle' );
-			if ( inputSpeedy ) {
-				inputSpeedy.addEventListener( 'change', ( el ) => {
-					const elEnable = el.target.checked ? 'basic' : 'speedy';
-					const elDisable = el.target.checked ? 'speedy' : 'basic';
-
-					this.toggleAutoViewBox( elEnable, elDisable );
-
-					document.getElementById(
-						'wphb-basic-toggle'
-					).checked = ! el.target.checked;
-				} );
-			}
-
-			const inputBasic = document.getElementById( 'wphb-basic-toggle' );
-			if ( inputBasic ) {
-				inputBasic.addEventListener( 'change', ( el ) => {
-					const elEnable = el.target.checked ? 'speedy' : 'basic';
-					const elDisable = el.target.checked ? 'basic' : 'speedy';
-
-					this.toggleAutoViewBox( elEnable, elDisable );
-
-					document.getElementById(
-						'wphb-speedy-toggle'
-					).checked = ! el.target.checked;
-				} );
-			}
-
-			// Initialize multi select fields.
-			$( '#wphb-ao-speedy-exclude' ).SUIselect2();
-			$( '#wphb-ao-basic-exclude' ).SUIselect2();
 
 			// How does it work? stuff.
 			const expandButtonManual = document.getElementById(
@@ -531,12 +564,15 @@ import MinifyScanner from '../scanners/MinifyScanner';
 					_row = new WPHB_Admin.minification.Row(
 						$( row ),
 						$( row ).data( 'filter' ),
-						$( row ).data( 'filter-secondary' )
+						$( row ).data( 'filter-secondary' ),
+						$( row ).data( 'filter-type' )
 					);
 				} else {
 					_row = new WPHB_Admin.minification.Row(
 						$( row ),
-						$( row ).data( 'filter' )
+						$( row ).data( 'filter' ),
+						false,
+						$( row ).data( 'filter-type' )
 					);
 				}
 				self.rowsCollection.push( _row );
@@ -545,34 +581,56 @@ import MinifyScanner from '../scanners/MinifyScanner';
 			// Filter search box
 			const filterInput = $( '#wphb-s' );
 			// Prevent enter submitting form to rescan files.
-			filterInput.keydown( function ( e ) {
+			filterInput.on( 'keydown', function ( e ) {
 				if ( 13 === e.keyCode ) {
 					event.preventDefault();
 					return false;
 				}
 			} );
-			filterInput.keyup( function () {
+			filterInput.on( 'keyup', function () {
 				self.rowsCollection.addFilter( $( this ).val(), 'primary' );
 				self.rowsCollection.applyFilters();
 			} );
 
 			// Filter dropdown
-			$( '#wphb-secondary-filter' ).change( function () {
+			$( '#wphb-secondary-filter' ).on( 'change', function () {
 				self.rowsCollection.addFilter( $( this ).val(), 'secondary' );
 				self.rowsCollection.applyFilters();
 			} );
 
-			// Refresh rows on any filter change
-			$( '.filter-toggles' ).change( function () {
-				const element = $( this );
-				const what = element.data( 'toggles' );
-				const value = element.prop( 'checked' );
-				const visibleItems = self.rowsCollection.getVisibleItems();
-
-				for ( const i in visibleItems ) {
-					visibleItems[ i ].change( what, value );
+			// Files filter.
+			$( '[name="asset_optimization_filter"]' ).on(
+				'change',
+				function () {
+					self.rowsCollection.addFilter( $( this ).val(), 'type' );
+					self.rowsCollection.applyFilters();
 				}
-			} );
+			);
+
+			// Clear filters button.
+			const clFilters = document.getElementById( 'wphb-clear-filters' );
+			if ( clFilters ) {
+				clFilters.addEventListener( 'click', function ( e ) {
+					e.preventDefault();
+
+					// There is probably an easier way to do via SUI.
+					$( '#wphb-filter-all' ).prop( 'checked', true );
+					$( '.wphb-minification-filter .sui-tab-item' ).removeClass(
+						'active'
+					);
+					$( '#wphb-filter-all-label' ).addClass( 'active' );
+
+					// Reset select.
+					$( '#wphb-secondary-filter' )
+						.val( null )
+						.trigger( 'change' );
+
+					// Reset input.
+					filterInput.val( '' );
+
+					self.rowsCollection.clearFilters();
+				} );
+			}
 
 			// Files selectors
 			const filesList = $( 'input.wphb-minification-file-selector' );
@@ -600,7 +658,7 @@ import MinifyScanner from '../scanners/MinifyScanner';
 			 * @type {*|jQuery|HTMLElement}
 			 */
 			const selectAll = $( '.wphb-minification-bulk-file-selector' );
-			selectAll.click( function () {
+			selectAll.on( 'click', function () {
 				const $this = $( this );
 				const items = self.rowsCollection.getItemsByDataType(
 					$this.attr( 'data-type' )
@@ -628,8 +686,6 @@ import MinifyScanner from '../scanners/MinifyScanner';
 			 * Catch window resize and revert styles for responsive dive
 			 * 1/4 of a second should be enough to trigger during device
 			 * rotations (from portrait to landscape mode)
-			 *
-			 * @type {debounced}
 			 */
 			const minificationResizeRows = _.debounce( function () {
 				if ( window.innerWidth >= 783 ) {
@@ -655,22 +711,19 @@ import MinifyScanner from '../scanners/MinifyScanner';
 		 * Called from switch view modal.
 		 *
 		 * @param {string}  mode
-		 * @param {boolean} clear    Clear settings or not.
-		 * @param {boolean} refresh  Refresh page.
 		 */
-		switchView( mode, clear = false, refresh = true ) {
+		switchView( mode ) {
 			let hide = false;
-			if ( 'basic' === mode ) {
-				const trackBox = document.getElementById( 'hide-this-modal' );
-				if ( trackBox && true === trackBox.checked ) {
-					hide = true;
-				}
+			const trackBox = document.getElementById(
+				'hide-' + mode + '-modal'
+			);
+
+			if ( trackBox && true === trackBox.checked ) {
+				hide = true;
 			}
 
-			Fetcher.minification.toggleView( mode, clear, hide ).then( () => {
-				if ( refresh ) {
-					window.location.href = getLink( 'minification' );
-				}
+			Fetcher.minification.toggleView( mode, hide ).then( () => {
+				window.location.href = getLink( 'minification' );
 			} );
 		},
 
@@ -697,7 +750,7 @@ import MinifyScanner from '../scanners/MinifyScanner';
 		 * @since 2.6.0
 		 *
 		 * @param {string} id  Select ID.
-		 * @return {{styles: [], scripts: []}}  Styles & scripts array.
+		 * @return {{styles: *[], scripts: *[]}}  Styles & scripts array.
 		 */
 		getMultiSelectValues( id ) {
 			const selected = $( '#' + id ).find( ':selected' );
@@ -709,100 +762,6 @@ import MinifyScanner from '../scanners/MinifyScanner';
 			}
 
 			return data;
-		},
-
-		/**
-		 * Reset auto asset optimization settings.
-		 *
-		 * @since 2.6.0
-		 *
-		 * @param {Object} e  Sender.
-		 */
-		resetAutoSettings( e ) {
-			// Enable loader animation.
-			e.classList.add( 'sui-button-onload-text' );
-			e.setAttribute( 'disabled', 'disabled' );
-
-			Fetcher.common.call( 'wphb_ao_reset_settings' ).then( () => {
-				// Disable loader animation.
-				e.classList.remove( 'sui-button-onload-text' );
-				e.removeAttribute( 'disabled' );
-				WPHB_Admin.notices.show( wphb.strings.successReset );
-			} );
-		},
-
-		/**
-		 * Save auto asset optimization settings.
-		 *
-		 * @since 2.6.0
-		 *
-		 * @param {Object} e  Sender.
-		 */
-		saveAutoSettings( e ) {
-			// Enable loader animation.
-			e.classList.add( 'sui-button-onload-text' );
-			e.setAttribute( 'disabled', 'disabled' );
-
-			const type = document.querySelector(
-				'input[name="wphb-auto-toggle"]:checked'
-			).dataset.type;
-			const css = document.getElementById( 'wphb-ao-' + type + '-css' );
-			const js = document.getElementById( 'wphb-ao-' + type + '-js' );
-
-			const data = this.getMultiSelectValues(
-				'wphb-ao-' + type + '-exclude'
-			);
-
-			Fetcher.minification
-				.saveSettings( {
-					type: type ? type : 'speedy',
-					styles: css ? css.checked : false,
-					scripts: js ? js.checked : false,
-					data: JSON.stringify( data ),
-				} )
-				.then( () => {
-					// Disable loader animation.
-					e.classList.remove( 'sui-button-onload-text' );
-					e.removeAttribute( 'disabled' );
-
-					WPHB_Admin.notices.show(
-						wphb.strings[ type + 'Saved' ],
-						'success',
-						false
-					);
-
-					// Allow opening a "how-to" modal from the notice.
-					const noticeLink = document.getElementById(
-						'wphb-basic-hdiw-link'
-					);
-					if ( noticeLink ) {
-						noticeLink.addEventListener( 'click', () => {
-							window.SUI.closeNotice( 'wphb-ajax-update-notice' );
-							window.SUI.openModal(
-								'automatic-ao-hdiw-modal-content',
-								'automatic-ao-hdiw-modal-expand'
-							);
-						} );
-					}
-				} );
-		},
-
-		/**
-		 * Toggle the auto config boxes (speedy, basic).
-		 *
-		 * @since 2.6.0
-		 *
-		 * @param {string} show  Accepts: speedy, basic.
-		 * @param {string} hide  Accepts: speedy, basic.
-		 */
-		toggleAutoViewBox( show, hide ) {
-			document
-				.getElementById( 'wphb-' + show + '-ao-box' )
-				.classList.add( 'wphb-close-section' );
-
-			document
-				.getElementById( 'wphb-' + hide + '-ao-box' )
-				.classList.remove( 'wphb-close-section' );
 		},
 
 		/**
@@ -825,6 +784,39 @@ import MinifyScanner from '../scanners/MinifyScanner';
 			Fetcher.common.call( 'wphb_ao_do_upgrade' ).then( () => {
 				window.location.href = getLink( 'minification' );
 			} );
+		},
+
+		/**
+		 * Process actions from bulk update modal.
+		 */
+		processBulkUpdateSelections() {
+			const selectedFiles = this.rowsCollection.getSelectedItems();
+
+			const actions = [
+				'minify',
+				'combine',
+				'position-footer',
+				'defer',
+				'inline',
+				'preload',
+				'async',
+			];
+
+			actions.forEach( ( action ) => {
+				const sel = '#bulk-update-modal input#filter-' + action;
+				const val = $( sel ).prop( 'checked' );
+
+				for ( const i in selectedFiles ) {
+					if ( selectedFiles.hasOwnProperty( i ) ) {
+						selectedFiles[ i ].change( action, val );
+					}
+				}
+
+				$( sel ).prop( 'checked', false );
+			} );
+
+			// Enable the Publish Changes button.
+			$( 'input[type=submit]' ).removeClass( 'disabled' );
 		},
 	}; // End WPHB_Admin.minification
 

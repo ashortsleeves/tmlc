@@ -5,87 +5,6 @@
 @import "../common/variables";
 @import "../common/mixins";
 
-/* Asset Optimization - Assets (Auto) */
-.wpmud .box-minification-assets-auto {
-    .wphb-minification-files {
-        margin-left: -30px;
-        margin-right: -30px;
-        padding: 30px;
-
-        .sui-box { box-shadow: 0 2px 7px 0 rgba(0,0,0,0.05) }
-
-        .sui-box.wphb-close-section {
-            box-shadow: none;
-            border: 1px solid #DDDDDD;
-            background-color: #F8F8F8;
-
-            .sui-box-header { border-bottom: 0 }
-
-            .wphb-ao-type-icon { background-color: #AAAAAA; }
-            .wphb-ao-type-title strong { color: #888888; }
-        }
-
-        .sui-box .sui-box-header { padding: 30px; }
-    }
-
-    .wphb-ao-type-icon {
-        width: 31px;
-        height: 30px;
-        background-color: #17A8E3;
-        border-radius: 5px;
-        margin: -7px 10px 0 0;
-    }
-
-    .sui-icon-hummingbird,
-    .sui-icon-speed-optimize {
-        padding: 1px 8px;
-        &:before { color: #fff !important }
-    }
-
-    .wphb-ao-type-title {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-
-        strong {
-            font-size: 14px;
-            line-height: 19px
-        }
-
-        small {
-            color: #AAAAAA;
-            flex-basis: 100%;
-            margin: 0;
-        }
-    }
-}
-
-/* Asset Optimization - Assets (Auto) - Configuration */
-.wpmud .box-minification-assets-auto-config {
-    .sui-box-body {
-        .sui-tabs {
-            margin-top: 30px !important;
-            &:not(.sui-side-tabs).sui-tabs-flushed>.sui-tabs-menu {
-                border-top-width: 1px;
-            }
-        }
-
-        // Overwrite upsell notice colors.
-        .sui-upsell-row .sui-upsell-notice p {
-            border-left-color: #AAAAAA;
-            &:first-of-type:before { color: #888888; }
-        }
-
-        .sui-table th {
-            height: 30px;
-            &:nth-child(2) { width: 15% }
-            &:last-child { width: 60% }
-        }
-
-        .sui-table tbody tr { background-color: rgba(242,242,242,0.5) }
-    }
-}
-
 .wrap-wphb-minification {
     /**
      * Summary metabox
@@ -97,10 +16,6 @@
             left: 0;
             height: 0;
             margin: 0;
-        }
-
-        .sui-summary-segment {
-            overflow: visible !important;
         }
 
         .sui-list-detail { display: flex; }
@@ -128,19 +43,6 @@
         height: 400px;
         max-width: 100%;
         margin-bottom: 0;
-    }
-
-    /* Modal window */
-    .sui-modal .checkbox-group {
-        justify-content: flex-start;
-        width: 100%;
-        height: 52px;
-
-        input[type="checkbox"] + label {
-            padding: 10px 10px;
-            width: 70px;
-            height: 50px;
-        }
     }
 
     /**
@@ -322,7 +224,7 @@
             margin-left: 5px;
 
             & > span:not(.toggle),
-            & > i {
+            & > [class*="sui-icon-"] {
                 color: #888888;
                 padding: 0;
                 font-size: 16px;
@@ -346,11 +248,11 @@
 
         input[type="checkbox"]:checked:not(:disabled) + label {
             & > span:not(.toggle),
-            & > i {
+            & > [class*="sui-icon-"]:not(.sui-icon-eye-hide) {
                 color: #17A8E3;
             }
 
-            & > span[class*="sui-icon-"] {
+            & > [class*="sui-icon-"]:not(.sui-icon-eye-hide) {
                 &:before {
                     color: #17A8E3;
                 }
@@ -362,7 +264,7 @@
             border-color: #F8F8F8;
 
             & > span:not(.toggle):before,
-            & > i {
+            & > [class*="sui-icon-"] {
                 color: #DDD;
             }
         }
@@ -371,7 +273,7 @@
     /* Exclude file checkbox overrides */
     .wphb-minification-exclude {
         margin-left: 10px;
-        i {
+        [class*="sui-icon-"] {
             &:before {
                 font-size: 14px;
                 line-height: 40px;
@@ -384,7 +286,7 @@
             &:hover {
                 background-color: #FFE5E9;
 
-                i {
+                [class*="sui-icon-"] {
                     &:before {
                         color: #FF6D6D;
                     }
@@ -435,6 +337,10 @@
         -webkit-box-pack: justify;
         -ms-flex-pack: justify;
         justify-content: space-between;
+
+        & .sui-tooltip:after {
+            z-index: 101; // Prevents sticky box from overflowing the tooltip.
+        }
     }
 
     .sui-box-sticky,
@@ -456,6 +362,13 @@
 
     .wphb-minification-files-advanced .wphb-border-row:last-child {
         border-bottom: 0;
+    }
+
+    .wphb-minification-files .sui-box-sticky {
+        box-shadow: none;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        border-bottom: 1px solid #E6E6E6;
     }
 
     .sui-box-sticky {
@@ -498,7 +411,6 @@
         background-color: #F8F8F8;
         margin: 0 30px 30px;
     }
-
     .sui-box-sticky {
         background-color: #FFFFFF;
         border-radius: 4px;
@@ -562,7 +474,16 @@
                 font-size: 13px;
                 line-height: 13px;
             }
-            a {
+            .wphb-minification-font-url {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: inline-block;
+                width: auto;
+                max-width: 700px;
+                @include bp(desktop-very-large) { width: 550px; }
+                @include bp(desktop-wide) { width: 380px; }
+            }
+            a:not(.wphb-minification-font-url) {
                 max-width: 200px;
                 overflow: hidden;
                 display: inline-flex;
@@ -606,7 +527,7 @@
             left: -9px;
             animation: pop 0.3s linear 1;
             z-index: 1;
-            i {
+            span {
                 position: absolute;
                 height: 12px;
                 width: 12px;
@@ -618,26 +539,26 @@
                 }
             }
             &.wphb-row-status-already-compressed {
-                i:before {
+                span:before {
                     color: $color--warning;
                 }
             }
             &.wphb-row-status-other {
-                i:before {
+                span:before {
                     color: #AAAAAA;
                 }
             }
             &.wphb-row-status-queued {
                 top: 24px;
                 z-index: 0;
-                i:before {
+                span:before {
                     color: #AAAAAA;
                 }
             }
             &.wphb-row-status-success {
                 top: 24px;
                 z-index: 0;
-                i:before {
+                span:before {
                     color: $color--success;
                 }
             }
@@ -673,37 +594,23 @@
 
     /* Filter */
     .wphb-minification-filter {
-        background-color: #FFFFFF;
-        padding: 0 30px;
-        margin: 10px 30px;
+        margin: -30px 30px 30px;
 
         @include bp(phone) {
-            margin: 0 0 20px;
+            margin: -20px 0 20px;
             border-radius: 0;
-            padding: 0 10px;
         }
     }
 
-    .wphb-minification-filter > div {
+    .wphb-minification-filter > div.sui-row {
         height: 78px;
         display: flex;
         align-items: center;
         align-content: center;
-    }
 
-    /* Overwrite for wpmudev styles */
-    .wphb-minification-filter > div > input {
-        margin: 0 10px !important;
-        width: 40% !important;
-        background-color: #F8F8F8 !important;
-    }
-
-    .wphb-minification-filter > div .wphb-block-title {
-        color: #333333;
-        font: 500 13px/30px $font;
-        text-transform: none;
-        margin-right: 21px;
-        margin-left: 0;
+        @include bp(phone) {
+            display: block;
+        }
     }
 
     /* Disabled/hidden row start */
@@ -718,8 +625,8 @@
             border-color: #F5F5F5;
 
             & > span:not(.toggle):before,
-            & > i {
-                color: #DDD;
+            & > [class*="sui-icon-"] {
+                color: #DDD !important;
             }
         }
     }
@@ -733,6 +640,7 @@
         box-shadow: none;
     }
 
+    .wphb-border-row.disabled .wphb-filename-extension-font,
     .wphb-border-row.disabled .wphb-filename-extension-other,
     .wphb-border-row.disabled .wphb-filename-extension-css,
     .wphb-border-row.disabled .wphb-filename-extension-javascript,
@@ -789,7 +697,7 @@
 
     // Responsive
     @include bp(desktop-large) {
-        .wphb-minification-files-advanced .wphb-minification-file-info {
+        .wphb-minification-files-advanced .wphb-minification-file-info:not(.wphb-minification-font-info) {
             width: 185px;
             > a {
                 max-width: 100px;
@@ -803,7 +711,7 @@
             margin-right: -5px !important;
         }
 
-        .wphb-minification-files-advanced .wphb-minification-file-info {
+        .wphb-minification-files-advanced .wphb-minification-file-info:not(.wphb-minification-font-info) {
             width: 130px;
             > a {
                 max-width: 180px;
@@ -846,13 +754,13 @@
             overflow: hidden;
         }
 
-        .wphb-minification-file-info {
+        .wphb-minification-file-info:not(.wphb-minification-font-info) {
             width: 55%;
             min-width: 200px;
-        }
 
-        .wphb-minification-file-info > a {
-            max-width: 200px;
+            > a {
+                max-width: 200px;
+            }
         }
 
         .wphb-minification-files-advanced .wphb-minification-row-details {

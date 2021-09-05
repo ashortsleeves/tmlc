@@ -4,6 +4,7 @@ namespace WP_Defender\Behavior\Scan;
 
 use Calotes\Base\File;
 use Calotes\Component\Behavior;
+use WP_Defender\Model\Setting\Scan;
 
 /**
  * We will gather core files & content files, for using in core integrity
@@ -24,7 +25,10 @@ class Gather_Fact extends Behavior {
 		$model       = $this->owner->scan;
 		$need_to_run = empty( $model->task_checkpoint ) ? 'get_core_files' : 'get_content_files';
 		if ( 'get_core_files' === $need_to_run ) {
-			$this->get_core_files();
+			$settings = new Scan();
+			if ( $settings->integrity_check && $settings->check_core ) {
+				$this->get_core_files();
+			}
 			$model->calculate_percent( 50, 1 );
 		} else {
 			$this->get_content_files();
@@ -50,27 +54,43 @@ class Gather_Fact extends Behavior {
 			//this mean we are on windows
 			$abs_path = str_replace( '/', DIRECTORY_SEPARATOR, $abs_path );
 		}
-		$core = new \Calotes\Base\File( ABSPATH, true, false, [
-			'dir' => [
-				$abs_path . 'wp-admin',
-				$abs_path . WPINC
-			]
-		], [], true, true );
+		$core = new \Calotes\Base\File(
+			ABSPATH,
+			true,
+			false,
+			array(
+				'dir' => array(
+					$abs_path . 'wp-admin',
+					$abs_path . WPINC,
+				),
+			),
+			array(),
+			true,
+			true
+		);
 
-		$outside = new File( $abs_path, true, true, [], [
-			'dir'      => [
-				$abs_path . 'wp-content',
-				$abs_path . 'wp-admin',
-				$abs_path . 'wp-includes'
-			],
-			'filename' => [
-				'wp-config.php'
-			]
-		], false, true );
+		$outside = new File(
+			$abs_path,
+			true,
+			true,
+			array(),
+			array(
+				'dir'      => array(
+					$abs_path . 'wp-content',
+					$abs_path . 'wp-admin',
+					$abs_path . 'wp-includes',
+				),
+				'filename' => array(
+					'wp-config.php',
+				),
+			),
+			false,
+			true
+		);
 
 		$files = array_merge( $core->get_dir_tree(), $outside->get_dir_tree() );
 		$files = array_filter( $files );
-		$this->log( sprintf( 'Core: %s', count( $files ) ), 'malware_scan' );
+//		$this->log( sprintf( 'Core: %s', count( $files ) ), 'malware_scan' );
 		update_site_option( self::CACHE_CORE, $files );
 
 		return $files;
@@ -86,16 +106,25 @@ class Gather_Fact extends Behavior {
 		if ( is_array( $cache ) ) {
 			return $cache;
 		}
-		$content = new File( WP_CONTENT_DIR, true, false, [
-			'ext' => [
-				'php',
-			]
-		], [], true, true, $this->owner->settings->filesize );
+		$content = new File(
+			WP_CONTENT_DIR,
+			true,
+			false,
+			array(
+				'ext' => array(
+					'php',
+				),
+			),
+			array(),
+			true,
+			true,
+			$this->owner->settings->filesize
+		);
 
 		$files   = $content->get_dir_tree();
 		$files   = array_filter( $files );
-		$files[] = ABSPATH . 'wp-config.php';
-		$this->log( sprintf( 'Content: %s', count( $files ) ), 'malware_scan' );
+		$files[] = defender_wp_config_path();
+//		$this->log( sprintf( 'Content: %s', count( $files ) ), 'malware_scan' );
 		update_site_option( self::CACHE_CONTENT, $files );
 	}
 }

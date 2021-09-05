@@ -1,2 +1,0 @@
-<?php
-// file index.php

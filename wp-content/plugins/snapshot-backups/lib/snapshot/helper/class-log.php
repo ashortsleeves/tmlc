@@ -226,6 +226,112 @@ class Log {
 	}
 
 	/**
+	 * Enhanced parse log file
+	 *
+	 * It helps to parse log file along with load-more pagination for larger logs.
+	 *
+	 * @since 4.3.5
+	 *
+	 * @param string  $backup_id Backup id.
+	 * @param integer $position  Offset where the reading starts on log file.
+	 * @param integer $page      Page number for the log to load.
+	 *
+	 * @return array
+	 */
+	public static function parse_log_file_enhanced( $backup_id, $position = 0, $page = 1  ) {
+		$contents = self::get_contents( $backup_id, $position );
+		$result   = array();
+
+		if ( empty( trim( $contents ) ) ) {
+			return $result;
+		}
+
+		$size              = $position + strlen( $contents );
+		$exploded_contents = array_reverse( explode( "\n\n", $contents ) );
+		$total_lines       = count( $exploded_contents );
+		$lines_to_load     = ( $total_lines <= 100 ) ? $total_lines : 100;
+
+		// Prepares the pagination variables depending on the number of log entries.
+		if ( $total_lines > 100 ) {
+			$pages = ceil( $total_lines / $lines_to_load );
+			if ( $page <= 0 || $page > $pages ) {
+				return $result;
+			}
+
+			$offset        = ( $page === 1 ? $page : $page - 1 ) * $lines_to_load;
+			$start         = $page === 1 ? $page : $offset + 1;
+			$stop_line     = $page === 1 ? $lines_to_load : ( ( $offset + $lines_to_load ) < $total_lines ? $offset + $lines_to_load : $total_lines );
+			$upper_bound   = $total_lines > $stop_line ? $stop_line : $total_lines;
+		} else {
+			$start = 1;
+        	$upper_bound = $total_lines;
+		}
+
+		$result['size'] = $size;
+
+		$items = array();
+		for ( $i = $start - 1; $i < $upper_bound; $i++ ) {
+			$lines = trim( $exploded_contents[$i] );
+
+			if ( '' === $lines ) {
+				$total_lines--;
+				continue;
+			}
+
+			// If we exceed the upper bound in the log file, break
+			if ( $total_lines > 100 && $i > $upper_bound ) {
+				break;
+			}
+
+			$lines     = explode( "\n", $lines );
+			$last_line = end( $lines );
+			$context   = json_decode( $last_line, true );
+
+			if ( $context ) {
+				array_pop( $lines );
+			}
+
+			$level     = null;
+			$timestamp = 0;
+
+			$matches = array();
+			if ( preg_match( '/^([0-9 \-:\+]+) \[(.+)\] (.+)/u', $lines[0], $matches ) ) {
+				$level = $matches[2];
+				$dt    = \DateTime::createFromFormat( 'Y-m-d H:i:s P', $matches[1] );
+				$timestamp = $dt->getTimestamp();
+				$lines[0]  = "[$level]" . ' ' . $dt->format( 'Y-m-d H:i:s' ) . ' ' . $matches[3];
+			}
+
+			if ( ! in_array( $level, array( 'error', 'info', 'warning' ) ) ) {
+				$level = 'default';
+			}
+
+			if ( $timestamp ) {
+				$items[] = array(
+					'message'   => implode( "\n", $lines ),
+					'level'     => $level,
+					'timestamp' => $timestamp,
+				);
+			}
+		}
+
+		if ( $total_lines > 100 && $page !== $pages ) {
+			// Include pagination options to display the "Load More" button.
+			$result['pages']        = $pages;
+			$result['current_page'] = $page;
+			$result['next_page']    = ( $page + 1 > $pages ) ? $pages : $page + 1;
+		} else {
+			$result['pages'] = false;
+		}
+
+		if ( ! empty( $items ) ) {
+			$result['items'] = $items;
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Parse log file
 	 *
 	 * @param string $backup_id Backup id.

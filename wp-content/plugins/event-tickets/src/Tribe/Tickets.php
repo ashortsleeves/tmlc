@@ -1,5 +1,7 @@
 <?php
 
+use Tribe__Utils__Array as Arr;
+
 if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 	/**
 	 * Class with the API definition and common functionality for Tribe Tickets. Providers for this functionality need
@@ -266,6 +268,15 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 		public $attendee_ticket_sent = '_tribe_attendee_ticket_sent';
 
 		/**
+		 * Logs the attendee notification email activity.
+		 *
+		 * @var array
+		 *
+		 * @since 5.1.0
+		 */
+		public $attendee_activity_log = '_tribe_attendee_activity_log';
+
+		/**
 		 * Meta key that if this attendee wants to show on the attendee list
 		 *
 		 * @var string
@@ -298,6 +309,24 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 		 * @var string
 		 */
 		public $security_code = '_tribe_tickets_security_code';
+
+		/**
+		 * Meta key that holds the price paid for the ticket.
+		 *
+		 * @since 5.1.0
+		 *
+		 * @var string
+		 */
+		public $price_paid = '_paid_price';
+
+		/**
+		 * Meta key that holds the price currency symbol used during payment.
+		 *
+		 * @since 5.1.0
+		 *
+		 * @var string
+		 */
+		public $price_currency = '_price_currency_symbol';
 
 		/**
 		 * The provider used for Attendees and Tickets ORM.
@@ -410,6 +439,7 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 				$args = $this->get_tickets_query_args();
 			}
 
+			// @todo Switch this into a Ticket ORM request in the future.
 			$cache = new Tribe__Cache();
 			$cache_key = $cache->make_key( $args );
 			$query = $cache->get( $cache_key );
@@ -643,7 +673,21 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 		 * @param int $ticket_id ID of ticket post
 		 * @return mixed
 		 */
-		public function delete_ticket( $post_id, $ticket_id ) {}
+		public function delete_ticket( $post_id, $ticket_id ) {
+
+			/**
+			 * Trigger action when any attendee is deleted.
+			 *
+			 * @since 5.1.5
+			 *
+			 * @param int $post_id Post or Event ID.
+			 * @param int $ticket_id Attendee ID.
+			 */
+			do_action( 'event_tickets_attendee_ticket_deleted', $post_id, $ticket_id );
+
+			$this->clear_ticket_cache_for_post( $post_id );
+			$this->clear_attendees_cache( $post_id );
+		}
 
 		/**
 		 * Saves a ticket.
@@ -657,6 +701,8 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 		 * @return int|false The updated/created ticket post ID or false if no ticket ID.
 		 */
 		public function save_ticket( $post_id, $ticket, $raw_data = [] ) {
+			$this->clear_ticket_cache_for_post( $post_id );
+
 			return false;
 		}
 
@@ -677,6 +723,41 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 			}
 
 			return ! empty( $this->get_tickets_ids( $post_id ) );
+		}
+
+		/**
+		 * Clear the ticket cache for a specific post ID.
+		 *
+		 * @since 5.1.0
+		 *
+		 * @param int $post_id The post ID.
+		 */
+		public function clear_ticket_cache_for_post( $post_id ) {
+			/** @var Tribe__Cache $cache */
+			$cache = tribe( 'cache' );
+
+			$class = __CLASS__;
+
+			$methods = [
+				'get_tickets',
+			];
+
+			foreach ( $methods as $method ) {
+				$key = $class . '::' . $method . '-' . $this->orm_provider . '-' . $post_id;
+
+				unset( $cache[ $key ] );
+			}
+
+			$static_methods = [
+				'get_all_event_tickets',
+				'get_event_attendees_count',
+			];
+
+			foreach ( $static_methods as $method ) {
+				$key = $class . '::' . $method . '-' . $post_id;
+
+				unset( $cache[ $key ] );
+			}
 		}
 
 		/**
@@ -803,7 +884,7 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 		 *
 		 * @return array List of attendees.
 		 */
-		protected function get_attendees_by_order_id( $order_id ) {
+		public function get_attendees_by_order_id( $order_id ) {
 			$ticket_id = null;
 
 			// Support an optional second argument while not causing warnings from other ticket provider classes.
@@ -1047,6 +1128,7 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 
 			// Ensure ticket prices and event costs are linked
 			add_filter( 'tribe_events_event_costs', [ $this, 'get_ticket_prices' ], 10, 2 );
+			add_filter( 'tribe_get_event_meta', [ $this, 'exclude_past_tickets_from_cost_range' ], 10, 4 );
 
 			add_action( 'event_tickets_checkin', [ $this, 'purge_attendees_transient' ] );
 			add_action( 'event_tickets_uncheckin', [ $this, 'purge_attendees_transient' ] );
@@ -1515,7 +1597,7 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 			$cache = tribe( 'cache' );
 			$key   = __METHOD__ . '-' . $post_id;
 
-			if ( isset( $cache[ $key ] ) ) {
+			if ( empty( $args ) && isset( $cache[ $key ] ) ) {
 				return $cache[ $key ];
 			}
 
@@ -1534,7 +1616,9 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 
 			$found = $repository->found();
 
-			$cache[ $key ] = $found;
+			if ( empty( $args ) ) {
+				$cache[ $key ] = $found;
+			}
 
 			return $found;
 		}
@@ -2152,16 +2236,15 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 		 * @param array $args      {
 		 *      The list of arguments to use for sending ticket emails.
 		 *
-		 *      @type string       $subject              The email subject.
-		 *      @type string       $content              The email content.
-		 *      @type string       $from_name            The name to send tickets from.
-		 *      @type string       $from_email           The email to send tickets from.
-		 *      @type array|string $headers              The list of headers to send.
-		 *      @type array        $attachments          The list of attachments to send.
-		 *      @type string       $provider             The provider slug (rsvp, tpp, woo, edd).
-		 *      @type int          $post_id              The post/event ID to send the emails for.
-		 *      @type string|int   $order_id             The order ID to send the emails for.
-		 *      @type string|int   $ticket_sent_meta_key The meta key to use for marking an attendee ticket as sent.
+		 *      @type string       $subject     The email subject.
+		 *      @type string       $content     The email content.
+		 *      @type string       $from_name   The name to send tickets from.
+		 *      @type string       $from_email  The email to send tickets from.
+		 *      @type array|string $headers     The list of headers to send.
+		 *      @type array        $attachments The list of attachments to send.
+		 *      @type string       $provider    The provider slug (rsvp, tpp, woo, edd).
+		 *      @type int          $post_id     The post/event ID to send the emails for.
+		 *      @type string|int   $order_id    The order ID to send the emails for.
 		 * }
 		 *
 		 * @return int The number of emails sent successfully.
@@ -2171,6 +2254,16 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 
 			// Collect the unique emails for attendees.
 			foreach ( $attendees as $attendee ) {
+				// If the attendee data is not provided, get it from the provider.
+				if ( ! is_array( $attendee ) ) {
+					$attendee = $this->get_attendee( $attendee );
+				}
+
+				// If invalid attendee is set, skip it.
+				if ( ! $attendee ) {
+					continue;
+				}
+
 				if ( ! isset( $unique_attendees[ $attendee['holder_email'] ] ) ) {
 					$unique_attendees[ $attendee['holder_email'] ] = [];
 				}
@@ -2208,16 +2301,15 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 		 * @param array  $args    {
 		 *      The list of arguments to use for sending ticket emails.
 		 *
-		 *      @type string       $subject              The email subject.
-		 *      @type string       $content              The email content.
-		 *      @type string       $from_name            The name to send tickets from.
-		 *      @type string       $from_email           The email to send tickets from.
-		 *      @type array|string $headers              The list of headers to send.
-		 *      @type array        $attachments          The list of attachments to send.
-		 *      @type string       $provider             The provider slug (rsvp, tpp, woo, edd).
-		 *      @type int          $post_id              The post/event ID to send the emails for.
-		 *      @type string|int   $order_id             The order ID to send the emails for.
-		 *      @type string|int   $ticket_sent_meta_key The meta key to use for marking an attendee ticket as sent.
+		 *      @type string       $subject     The email subject.
+		 *      @type string       $content     The email content.
+		 *      @type string       $from_name   The name to send tickets from.
+		 *      @type string       $from_email  The email to send tickets from.
+		 *      @type array|string $headers     The list of headers to send.
+		 *      @type array        $attachments The list of attachments to send.
+		 *      @type string       $provider    The provider slug (rsvp, tpp, woo, edd).
+		 *      @type int          $post_id     The post/event ID to send the emails for.
+		 *      @type string|int   $order_id    The order ID to send the emails for.
 		 * }
 		 *
 		 * @return bool Whether email was sent to attendees.
@@ -2229,33 +2321,31 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 			}
 
 			$defaults = [
-				'subject'              => '',
-				'content'              => '',
-				'from_name'            => '',
-				'from_email'           => '',
-				'headers'              => [],
-				'attachments'          => [],
-				'provider'             => 'ticket',
-				'post_id'              => 0,
-				'order_id'             => '',
-				'ticket_sent_meta_key' => '',
-				'send_callback'        => 'wp_mail',
+				'subject'       => '',
+				'content'       => '',
+				'from_name'     => '',
+				'from_email'    => '',
+				'headers'       => [],
+				'attachments'   => [],
+				'provider'      => 'ticket',
+				'post_id'       => 0,
+				'order_id'      => '',
+				'send_callback' => 'wp_mail',
 			];
 
 			// Set up the default arguments.
 			$args = array_merge( $defaults, $args );
 
-			$subject              = trim( (string) $args['subject'] );
-			$content              = trim( (string) $args['content'] );
-			$from_name            = trim( (string) $args['from_name'] );
-			$from_email           = trim( (string) $args['from_email'] );
-			$headers              = $args['headers'];
-			$attachments          = $args['attachments'];
-			$provider             = $args['provider'];
-			$post_id              = $args['post_id'];
-			$order_id             = $args['order_id'];
-			$ticket_sent_meta_key = $args['ticket_sent_meta_key'];
-			$send_callback        = $args['send_callback'];
+			$subject       = trim( (string) $args['subject'] );
+			$content       = trim( (string) $args['content'] );
+			$from_name     = trim( (string) $args['from_name'] );
+			$from_email    = trim( (string) $args['from_email'] );
+			$headers       = $args['headers'];
+			$attachments   = $args['attachments'];
+			$provider      = $args['provider'];
+			$post_id       = $args['post_id'];
+			$order_id      = $args['order_id'];
+			$send_callback = $args['send_callback'];
 
 			// If invalid send callback, do not send the email.
 			if ( ! is_callable( $send_callback ) ) {
@@ -2302,7 +2392,7 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 
 				$headers[] = sprintf(
 					'From: %1$s <%2$s>',
-					filter_var( $from_name, FILTER_SANITIZE_STRING ),
+					stripcslashes( $from_name ),
 					$from_email
 				);
 
@@ -2490,14 +2580,69 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 			$sent = $send_callback( $to, $subject, $content, $headers, $attachments );
 
 			// Handle marking the attendee ticket email as being sent.
-			if ( $sent && ! empty( $ticket_sent_meta_key ) ) {
+			if ( $sent ) {
 				// Mark attendee ticket email as being sent for each attendee ticket.
 				foreach ( $tickets as $attendee ) {
-					update_post_meta( $attendee['attendee_id'], $ticket_sent_meta_key, '1' );
+					$this->update_ticket_sent_counter( $attendee['attendee_id'] );
+
+					$this->update_attendee_activity_log(
+						$attendee['attendee_id'],
+						[
+							'type'  => 'email',
+							'name'  => $attendee['holder_name'],
+							'email' => $attendee['holder_email'],
+						]
+					);
 				}
 			}
 
 			return $sent;
+		}
+
+		/**
+		 * Update the email sent counter for attendee by increasing it +1.
+		 *
+		 * @since 5.1.0
+		 *
+		 * @param int $attendee_id The attendee ID.
+		 */
+		public function update_ticket_sent_counter( $attendee_id ) {
+			$prev_val = (int) get_post_meta( $attendee_id, $this->attendee_ticket_sent, true );
+
+			update_post_meta( $attendee_id, $this->attendee_ticket_sent, $prev_val + 1 );
+		}
+
+		/**
+		 * Update the attendee activity log data.
+		 *
+		 * @param int   $attendee_id Attendee ID.
+		 * @param array $data Data that needs to be logged.
+		 *
+		 * @since 5.1.0
+		 */
+		public function update_attendee_activity_log( $attendee_id, $data = [] ) {
+
+			$activity = get_post_meta( $attendee_id, $this->attendee_activity_log, true );
+
+			if ( ! is_array( $activity ) ) {
+				$activity = [];
+			}
+
+			/**
+			 * Filter the activity log data for attendee.
+			 *
+			 * @since 5.1.0
+			 *
+			 * @param array $data Activity data.
+			 * @param int   $attendee_id Attendee ID.
+			 */
+			$data = apply_filters( 'tribe_tickets_attendee_activity_log_data', $data, $attendee_id );
+
+			$data['time'] = time();
+
+			$activity[] = $data;
+
+			update_post_meta( $attendee_id, $this->attendee_activity_log, $activity );
 		}
 
 		/**
@@ -2537,14 +2682,78 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 					continue;
 				}
 
-
-				// An empty price property can be ignored (but do add if the price is explicitly set to zero)
-				elseif ( isset( $ticket->price ) && is_numeric( $ticket->price ) ) {
+				// An empty price property can be ignored (but do add if the price is explicitly set to zero).
+				if ( isset( $ticket->price ) && is_numeric( $ticket->price ) ) {
 					$prices[] = $ticket->price;
 				}
 			}
 
 			return $prices;
+		}
+
+		/**
+		 * Filter past tickets from showing up in cost range.
+		 *
+		 * @since 5.1.5
+		 *
+		 * @param array  $costs List of ticket costs.
+		 * @param int    $post_id Target Event's ID.
+		 * @param string $meta Meta key name.
+		 * @param bool   $single determines if the requested meta should be a single item or an array of items.
+		 *
+		 * @return array The list of ticket costs with past tickets excluded possibly.
+		 */
+		public function exclude_past_tickets_from_cost_range( $costs, $post_id, $meta, $single ) {
+
+			if ( '_EventCost' != $meta || $single || empty( $costs )  ) {
+				return $costs;
+			}
+
+			/**
+			 * Allow filtering of whether to exclude past tickets in the event cost range.
+			 *
+			 * @since 5.1.4
+			 *
+			 * @param bool  $exclude_past_tickets Whether to exclude past tickets in the event cost range.
+			 * @param array $costs                Which costs are going to be displayed.
+			 * @param int   $post_id              Which Event/Post we are dealign with.
+			 */
+			$exclude_past_tickets = apply_filters( 'event_tickets_exclude_past_tickets_from_cost_range', false, $costs, $post_id );
+
+			if ( ! $exclude_past_tickets ) {
+				return $costs;
+			}
+
+			$tickets = self::get_all_event_tickets( $post_id );
+
+			$wp_timezone = Tribe__Timezones::wp_timezone_string();
+
+			if ( Tribe__Timezones::is_utc_offset( $wp_timezone ) ) {
+				$wp_timezone = Tribe__Timezones::generate_timezone_string_from_utc_offset( $wp_timezone );
+			}
+
+			$timezone = new DateTimeZone( $wp_timezone );
+
+			foreach ( $tickets as $ticket ) {
+
+				$now        = Tribe__Date_Utils::build_date_object( 'now', $timezone );
+				$start_date = Tribe__Date_Utils::build_date_object( $ticket->start_date . ' ' . $ticket->start_time, $timezone );
+				$end_date   = Tribe__Date_Utils::build_date_object( $ticket->end_date . ' ' . $ticket->end_time, $timezone );
+
+				// If the ticket has not yet become available for sale or has already ended.
+				if ( $now < $start_date || $end_date < $now ) {
+					// Try to find the ticket price in the list of costs.
+					$key = array_search( $ticket->price, $costs );
+
+					// Remove the value from the list of costs if we found it.
+					if ( false !== $key ) {
+						unset( $costs[ $key ] );
+					}
+					continue;
+				}
+			}
+
+			return $costs;
 		}
 
 		/**
@@ -3206,7 +3415,7 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 		 * @param array       $raw_data
 		 * @param string      $save_type
 		 */
-		protected function update_capacity( $ticket, $data, $save_type ) {
+		public function update_capacity( $ticket, $data, $save_type ) {
 			if ( empty( $data ) ) {
 				return;
 			}
@@ -3294,6 +3503,35 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 		}
 
 		/**
+		 * Clears the ticket cache for a given ticket ID.
+		 *
+		 * @since 5.1.0
+		 *
+		 * @param int|object $ticket_id The ticket ID.
+		 */
+		public function clear_ticket_cache( $ticket_id ) {
+			if ( is_object( $ticket_id ) ) {
+				$ticket_id = $ticket_id->ID;
+			}
+
+			$methods = [
+				'Tribe__Tickets__Ticket_Object::is_in_stock',
+				'Tribe__Tickets__Ticket_Object::inventory',
+				'Tribe__Tickets__Ticket_Object::available',
+				'Tribe__Tickets__Ticket_Object::capacity',
+			];
+
+			/** @var Tribe__Cache $cache */
+			$cache = tribe( 'cache' );
+
+			foreach ( $methods as $method ) {
+				$key = $method . '-' . $ticket_id;
+
+				unset( $cache[ $key ] );
+			}
+		}
+
+		/**
 		 * Returns the action tag that should be used to print the front-end ticket form.
 		 *
 		 * This value is set in the Events > Settings > Tickets tab and is distinct between RSVP
@@ -3349,7 +3587,7 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 			$ticket                   = new Tribe__Tickets__Ticket_Object();
 			$ticket->ID               = isset( $data['ticket_id'] ) ? absint( $data['ticket_id'] ) : null;
 			$ticket->name             = isset( $data['ticket_name'] ) ? esc_html( $data['ticket_name'] ) : null;
-			$ticket->description      = isset( $data['ticket_description'] ) ? sanitize_textarea_field( $data['ticket_description'] ) : '';
+			$ticket->description      = isset( $data['ticket_description'] ) ? wp_kses_post( $data['ticket_description'] ) : '';
 			$ticket->price            = ! empty( $data['ticket_price'] ) ? filter_var( trim( $data['ticket_price'] ), FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION | FILTER_FLAG_ALLOW_THOUSAND ) : 0;
 			$ticket->show_description = isset( $data['ticket_show_description'] ) ? 'yes' : 'no';
 			$ticket->provider_class   = $this->class_name;
@@ -3428,6 +3666,8 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 
 			$version->update( $ticket->ID );
 
+			$this->clear_ticket_cache_for_post( $post_id );
+
 			return $save_ticket;
 		}
 
@@ -3454,6 +3694,51 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 			}
 
 			return $provider->class_name;
+		}
+
+		/**
+		 * Given a post ID, get the active providers used for RSVP(s)/ticket(s).
+		 *
+		 * @see get_ticket_provider_instance()
+		 *
+		 * @since 5.1.1
+		 *
+		 * @param int  $post_id          The post ID of the post/event to which RSVP(s)/ticket(s) are attached.
+		 * @param bool $return_instances Whether to return instances, otherwise it will return class name strings.
+		 *
+		 * @return string[]|self[] Instances or names of provider classes for RSVP(s)/ticket(s) attached to the post/event.
+		 */
+		public static function get_active_providers_for_post( $post_id, $return_instances = false ) {
+			$all_active_modules = array_keys( self::modules() );
+
+			$active_providers = [];
+
+			// Determine which providers have tickets for this event.
+			foreach ( $all_active_modules as $module ) {
+				$provider = self::get_ticket_provider_instance( $module );
+
+				// Skip this provider if the instance couldn't be set up.
+				if ( ! $provider ) {
+					continue;
+				}
+
+				// Get the tickets for this event on this provider, if any.
+				$tickets_orm = tribe_tickets( $provider->orm_provider );
+				$tickets_orm->by( 'event', $post_id );
+
+				if ( 0 < $tickets_orm->found() ) {
+					$provider_class = $provider->class_name;
+
+					// Check whether to return the provider class names.
+					if ( ! $return_instances ) {
+						$provider = $provider_class;
+					}
+
+					$active_providers[ $provider_class ] = $provider;
+				}
+			}
+
+			return $active_providers;
 		}
 
 		/**
@@ -3740,6 +4025,167 @@ if ( ! class_exists( 'Tribe__Tickets__Tickets' ) ) {
 		 */
 		public function generate_security_code( $attendee_id ) {
 			return substr( md5( wp_rand() . '_' . $attendee_id ), 0, 10 );
+		}
+
+		/**
+		 * Create an attendee for the Commerce provider from a ticket.
+		 *
+		 * @since 5.1.0
+		 *
+		 * @param Tribe__Tickets__Ticket_Object|int $ticket        Ticket object or ID to create the attendee for.
+		 * @param array                             $attendee_data Attendee data to create from.
+		 *
+		 * @return WP_Post|false The new post object or false if unsuccessful.
+		 */
+		public function create_attendee( $ticket, $attendee_data ) {
+			// Get the ticket object from the ID.
+			if ( is_numeric( $ticket ) ) {
+				$ticket = $this->get_ticket( 0, (int) $ticket );
+			}
+
+			// If the ticket is not valid, stop creating the attendee.
+			if ( ! $ticket instanceof Tribe__Tickets__Ticket_Object ) {
+				return false;
+			}
+
+			/** @var Tribe__Tickets__Attendee_Repository $orm */
+			$orm = tribe_attendees( $this->orm_provider );
+
+			try {
+				return $orm->create_attendee_for_ticket( $ticket, $attendee_data );
+			} catch ( Tribe__Repository__Usage_Error $e ) {
+				do_action( 'tribe_log', 'error', __CLASS__, [ 'message' => $e->getMessage() ] );
+				return false;
+			}
+		}
+
+		/**
+		 * Update an attendee for the Commerce provider.
+		 *
+		 * @since 5.1.0
+		 *
+		 * @param array|int $attendee      The attendee data or ID for the attendee to update.
+		 * @param array     $attendee_data The attendee data to update to.
+		 *
+		 * @return WP_Post|false The updated post object or false if unsuccessful.
+		 */
+		public function update_attendee( $attendee, $attendee_data ) {
+			if ( is_numeric( $attendee ) ) {
+				$attendee_id = (int) $attendee;
+			} elseif ( is_array( $attendee ) && isset( $attendee['attendee_id'] ) ) {
+				$attendee_id = (int) $attendee['attendee_id'];
+			} else {
+				return false;
+			}
+
+			// Set the attendee ID to be updated.
+			$attendee_data['attendee_id'] = $attendee_id;
+
+			/** @var Tribe__Tickets__Attendee_Repository $orm */
+			$orm = tribe_attendees( $this->orm_provider );
+
+			try {
+				$attendee = $orm->update_attendee( $attendee_data );
+			} catch ( Tribe__Repository__Usage_Error $e ) {
+				do_action( 'tribe_log', 'error', __CLASS__, [ 'message' => $e->getMessage() ] );
+				return false;
+			}
+
+			return $attendee;
+		}
+
+		/**
+		 * Maybe lookup or create an attendee user from an email.
+		 *
+		 * @since 5.1.0
+		 *
+		 * @param string $email The email to maybe set up the user from.
+		 * @param array  $args  The arguments used from this attendee.
+		 *
+		 * @return int|null The user ID or null if not set up.
+		 */
+		public function maybe_setup_attendee_user_from_email( $email, $args = [] ) {
+			if ( empty( $email ) || ! is_email( $email ) ) {
+				return null;
+			}
+
+			$lookup_user_from_email = Arr::get( $args, 'use_existing_user', true );
+			$create_user_from_email = Arr::get( $args, 'create_user', false );
+			$send_new_user_info     = Arr::get( $args, 'send_email', false );
+
+			/**
+			 * Allow filtering whether to enable user lookups by Attendee Email.
+			 *
+			 * @since 5.1.0
+			 *
+			 * @param bool  $lookup_user_from_email Whether to lookup the User using the Attendee Email if User ID is not set.
+			 * @param array $args                   The arguments being set for this attendee.
+			 */
+			$lookup_user_from_email = (bool) apply_filters( 'tribe_tickets_attendee_lookup_user_from_email', $lookup_user_from_email, $args );
+
+			if ( $lookup_user_from_email ) {
+				// Check if user exists.
+				$user = get_user_by( 'email', $email );
+
+				if ( $user ) {
+					return $user->ID;
+				}
+			}
+
+			/**
+			 * Allow filtering whether to enable creating users using the Attendee Email.
+			 *
+			 * @since 5.1.0
+			 *
+			 * @param bool  $create_user_from_email Whether to create the User using the Attendee Email if User ID is not set.
+			 * @param array $args                   The arguments being set for this attendee.
+			 */
+			$create_user_from_email = (bool) apply_filters( 'tribe_tickets_attendee_create_user_from_email', $create_user_from_email, $args );
+
+			// Do not create the user from the email.
+			if ( ! $create_user_from_email ) {
+				return null;
+			}
+
+			// Create the user using the attendee email.
+			$created = wp_create_user( $email, wp_generate_password( 12, false ), $email );
+
+			// The user was not created successfully.
+			if ( ! $created || is_wp_error( $created ) ) {
+				return null;
+			}
+
+			// Set user details.
+			$user_details = [
+				'display_name' => Arr::get( $args, 'display_name', null ),
+				'first_name'   => Arr::get( $args, 'first_name', null ),
+				'last_name'    => Arr::get( $args, 'last_name', null ),
+			];
+
+			$user_details = array_filter( $user_details );
+
+			// Save user details if we have any.
+			if ( ! empty( $user_details ) ){
+				$user_details['ID'] = $created;
+
+				wp_update_user( $user_details );
+			}
+
+			/**
+			 * Allow filtering whether to send the new user information email to the new user.
+			 *
+			 * @since 5.1.0
+			 *
+			 * @param bool  $send_new_user_info Whether to send the new user information email to the new user.
+			 * @param array $args               The arguments being set for this attendee.
+			 */
+			$send_new_user_info = (bool) apply_filters( 'tribe_tickets_attendee_create_user_from_email_send_new_user_info', $send_new_user_info, $args );
+
+			if ( $send_new_user_info ) {
+				wp_send_new_user_notifications( $created, 'user' );
+			}
+
+			return $created;
 		}
 
 		/**

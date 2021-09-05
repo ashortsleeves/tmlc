@@ -176,10 +176,9 @@ class Filelist extends Task {
 	public function get_file_info( $item ) {
 		$file          = array();
 		$file['mtime'] = filemtime( $item );
-		$file['md5']   = md5_file( $item );
 		$file['size']  = filesize( $item );
 
-		if ( empty( $file['mtime'] ) && empty( $file['md5'] ) && empty( $file['size'] ) ) {
+		if ( empty( $file['mtime'] ) && empty( $file['size'] ) ) {
 			return false;
 		}
 

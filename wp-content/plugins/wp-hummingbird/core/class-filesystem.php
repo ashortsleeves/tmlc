@@ -186,11 +186,12 @@ class Filesystem {
 	 * @since  1.7.2
 	 *
 	 * @access private
-	 * @param string $path  Path to delete.
+	 * @param string $path                 Path to delete.
+	 * @param bool   $skip_subdirectories  Skip subdirectories.
 	 *
 	 * @return bool
 	 */
-	private function native_dir_delete( $path ) {
+	private function native_dir_delete( $path, $skip_subdirectories = false ) {
 		if ( is_wp_error( $this->status ) ) {
 			return false;
 		}
@@ -203,16 +204,20 @@ class Filesystem {
 				continue;
 			}
 
-			$full = $path . '/' . $file;
-			if ( is_dir( $full ) ) {
+			$full = trailingslashit( $path ) . $file;
+			if ( is_dir( $full ) && ! $skip_subdirectories ) {
 				$this->native_dir_delete( $full );
-			} else {
+			} elseif ( ! is_dir( $full ) ) {
 				@unlink( $full );
 			}
 		}
 
 		closedir( $dir );
-		@rmdir( $path );
+
+		// Remove empty directories or if allowed.
+		if ( 2 === count( scandir( $path ) ) || ! $skip_subdirectories ) {
+			@rmdir( $path );
+		}
 
 		return true;
 	}
@@ -294,13 +299,15 @@ class Filesystem {
 	 * @since  1.6.0
 	 * @since  1.7.2  Added if $this->fs_api check.
 	 * @since  1.9    Added $ao_module. If set to true will use the $dir path without $this->basedir
+	 * @since  2.7.3  Added $skip_subdirectories. @see https://incsub.atlassian.net/browse/HUM-497
 	 *
-	 * @param  string $dir        Directory in wp-content/wphb-cache/ to purge file from.
-	 * @param  bool   $ao_module  Asset Optimization module.
+	 * @param  string $dir                  Directory in wp-content/wphb-cache/ to purge file from.
+	 * @param  bool   $ao_module            Asset Optimization module.
+	 * @param  bool   $skip_subdirectories  Skip subdirectories.
 	 *
 	 * @return bool
 	 */
-	public function purge( $dir = 'cache', $ao_module = false ) {
+	public function purge( $dir = 'cache', $ao_module = false, $skip_subdirectories = false ) {
 		if ( is_wp_error( $this->status ) ) {
 			return false;
 		}
@@ -326,24 +333,29 @@ class Filesystem {
 			/**
 			 * WP_Filesystem global.
 			 *
-			 * @var WP_Filesystem_Base $wp_filesystem
+			 * @type WP_Filesystem_Base $wp_filesystem
 			 */
 			global $wp_filesystem;
 
 			// Delete all content inside the directory.
 			foreach ( $wp_filesystem->dirlist( $path ) as $asset ) {
+				// Skip subdirectories.
+				if ( $skip_subdirectories && isset( $asset['type'] ) && 'd' === $asset['type'] ) {
+					continue;
+				}
+
 				if ( ! $wp_filesystem->delete( $path . $asset['name'], true, $asset['type'] ) ) {
 					return false;
 				}
 			}
 
-			// Delete the directory itself.
-			if ( ! $wp_filesystem->delete( $path ) ) {
+			// Delete the directory itself if empty, or we can remove the dir.
+			if ( ( empty( $wp_filesystem->dirlist( $path ) ) || ! $skip_subdirectories ) && ! $wp_filesystem->delete( $path ) ) {
 				return false;
 			}
 		} else {
 			// Use direct filesystem php functions.
-			if ( ! $this->native_dir_delete( $path ) ) {
+			if ( ! $this->native_dir_delete( $path, $skip_subdirectories ) ) {
 				return false;
 			}
 		}
@@ -369,7 +381,7 @@ class Filesystem {
 			/**
 			 * WP_Filesystem global.
 			 *
-			 * @var WP_Filesystem_Base $wp_filesystem
+			 * @type WP_Filesystem_Base $wp_filesystem
 			 */
 			global $wp_filesystem;
 
@@ -414,7 +426,7 @@ class Filesystem {
 			/**
 			 * WP_Filesystem global.
 			 *
-			 * @var WP_Filesystem_Base $wp_filesystem
+			 * @type WP_Filesystem_Base $wp_filesystem
 			 */
 			global $wp_filesystem;
 			return $wp_filesystem->exists( $path . $file );
@@ -463,7 +475,7 @@ class Filesystem {
 			/**
 			 * WP_Filesystem global.
 			 *
-			 * @var WP_Filesystem_Base $wp_filesystem
+			 * @type WP_Filesystem_Base $wp_filesystem
 			 */
 			global $wp_filesystem;
 

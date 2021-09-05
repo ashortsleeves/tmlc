@@ -32,13 +32,6 @@ class Central extends Component {
 	public function __construct() {
 		add_action( 'wp_ajax_' . self::ACTION, [ &$this, 'routing' ] );
 		add_action( 'wp_ajax_nopriv_' . self::ACTION, [ &$this, 'routing' ] );
-		//add_action( 'shutdown', [ &$this, 'dump_debug' ] );
-	}
-
-	public function dump_debug() {
-		echo '<pre>';
-		var_dump( wd_di() );
-		echo '</pre>';
 	}
 
 	/**
@@ -51,12 +44,18 @@ class Central extends Component {
 		if ( empty( $route ) || empty( $nonce ) ) {
 			exit;
 		}
+
+		$this->check_opcache();
+
 		$route = wp_unslash( $route );
+
+		// Nonce is not valid.
 		if ( ! wp_verify_nonce( $nonce, $route ) ) {
-			//this should not here
-			wp_send_json_error( [
-				'message' => 'invalid'
-			] );
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid API request.', 'wpdef' ),
+				)
+			);
 		}
 
 		$key = sprintf( 'controller.%s', $route );
@@ -159,4 +158,40 @@ class Central extends Component {
 			$this->log( $e->getMessage(), 'internal' );
 		}
 	}
+
+	/**
+	 * Check OPcache is enabled or not.
+	 *
+	 * @return void
+	 */
+	private function check_opcache() {
+		if ( $this->is_opcache_save_comments_disabled() ) {
+			wp_send_json_error(
+				array(
+					'message' => sprintf( __( '%s is disabled. Please contact your hosting provider to enable it.', 'wpdef' ), '<strong>OPcache Save Comments</strong>' ),
+				)
+			);
+		}
+	}
+
+	/**
+	 * Check OPcache is enabled or not.
+	 *
+	 * @return bool
+	 */
+	public function is_opcache_save_comments_disabled() {
+		// If OPcache is disabled.
+		if ( ini_get( 'opcache.enable' ) !== '1' ) {
+			return false;
+		}
+
+		// If OPcache is enabled and save comments disabled.
+		if ( ini_get( 'opcache.save_comments' ) !== '1' ) {
+			return true;
+		}
+
+		// Any other case.
+		return false;
+	}
+
 }

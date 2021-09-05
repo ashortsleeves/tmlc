@@ -62,24 +62,17 @@ $metrics = WPMUDEV_Dashboard::$site->get_metrics_on_analytics();
 
 				<div class="wpmudui-analytics-chart">
 					<div class="wpmudui-analytics-chart-empty">
-						<p class="wpmudui-analytics-chart-title"><?php esc_html_e( "No data recorded for this metric", 'wpmudev' ); ?></p>
-						<p><?php esc_html_e( "Analytics data is updated every 24 hours and does not include the current day's activity. Check back later to view these stats.", 'wpmudev' ); ?></p>
+						<p class="wpmudui-analytics-chart-title"><?php esc_html_e( 'We haven’t collected enough data of your website yet.', 'wpmudev' ); ?></p>
+						<p><?php esc_html_e( 'You will start viewing the performance statistics of your website shortly. So feel free to check back soon', 'wpmudev' ); ?></p>
 					</div>
 					<canvas id="wpmudui-analytics-graph"></canvas>
 				</div>
 
 				<div class="wpmudui-chart-options">
 
-					<button data-type="visits" class="wpmudui-none wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-					        data-tooltip="<?php esc_attr_e( 'If a visitor comes to your website for the first time or if they visit a page more than 30 minutes after their last page view, this will be recorded as a new visit.', 'wpmudev' ); ?>">
-						<span class="wpmudui-chart-option-title"><?php esc_html_e( 'Visits', 'wpmudev' ); ?></span>
-						<span class="wpmudui-chart-option-value">-</span>
-						<span class="wpmudui-chart-option-trend">0%</span>
-					</button>
-
 					<button data-type="pageviews" class="wpmudui-none wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-					        data-tooltip="<?php esc_attr_e( 'Total number of pages viewed.', 'wpmudev' ); ?>">
-						<span class="wpmudui-chart-option-title"><?php esc_html_e( 'Pageviews', 'wpmudev' ); ?></span>
+					        data-tooltip="<?php esc_attr_e( 'Total number of pages viewed. Repeated views of a single page are counted.', 'wpmudev' ); ?>">
+						<span class="wpmudui-chart-option-title"><?php esc_html_e( 'Page Views', 'wpmudev' ); ?></span>
 						<span class="wpmudui-chart-option-value">-</span>
 						<span class="wpmudui-chart-option-trend">0%</span>
 					</button>
@@ -99,7 +92,7 @@ $metrics = WPMUDEV_Dashboard::$site->get_metrics_on_analytics();
 					</button>
 
 					<button data-type="bounce_rate" class="wpmudui-none wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-					        data-tooltip="<?php esc_attr_e( 'The percentage of visits that only had a single pageview. This means, that the visitor left the website directly from the entrance page.', 'wpmudev' ); ?>">
+					        data-tooltip="<?php esc_attr_e( 'Single-page sessions. The percentage of visitors who left the website after their first page.', 'wpmudev' ); ?>">
 						<span class="wpmudui-chart-option-title"><?php esc_attr_e( 'Bounce Rate', 'wpmudev' ); ?></span>
 						<span class="wpmudui-chart-option-value">-</span>
 						<span class="wpmudui-chart-option-trend">0%</span>
@@ -112,9 +105,9 @@ $metrics = WPMUDEV_Dashboard::$site->get_metrics_on_analytics();
 						<span class="wpmudui-chart-option-trend">0%</span>
 					</button>
 
-					<button data-type="gen_time" class="wpmudui-none wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-					        data-tooltip="<?php esc_attr_e( 'The average time it took to generate a page. Includes server generation time + visitors time to download the page from the server.', 'wpmudev' ); ?>">
-						<span class="wpmudui-chart-option-title"><?php esc_html_e( 'Gen. Time', 'wpmudev' ); ?></span>
+					<button data-type="visits" class="wpmudui-none wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
+					        data-tooltip="<?php esc_attr_e( 'The number of time visitors entered your site through this page, from any source (e.g. search, direct, referral, etc.).', 'wpmudev' ); ?>">
+						<span class="wpmudui-chart-option-title"><?php esc_html_e( 'Entrances', 'wpmudev' ); ?></span>
 						<span class="wpmudui-chart-option-value">-</span>
 						<span class="wpmudui-chart-option-trend">0%</span>
 					</button>
@@ -138,22 +131,22 @@ $metrics = WPMUDEV_Dashboard::$site->get_metrics_on_analytics();
 					<label class="wpmudui-label" for="wpmudui-analytics-posts-type"><?php esc_html_e( 'data for', 'wpmudev' ); ?></label>
 					<select id="wpmudui-analytics-posts-type" class="wpmudui-select wpmudui-analytics-column-filter">
 						<?php if ( in_array( 'pageviews', $metrics, true ) ) : ?>
-							<option value="pageviews"><?php esc_html_e( 'Pageviews', 'wpmudev' ); ?></option>
+							<option value="pageviews"><?php esc_html_e( 'Page Views', 'wpmudev' ); ?></option>
 						<?php endif; ?>
 						<?php if ( in_array( 'unique_pageviews', $metrics, true ) ) : ?>
-							<option value="unique_pageviews" selected><?php esc_html_e( 'Unique Pageviews', 'wpmudev' ); ?></option>
+							<option value="unique_pageviews" selected><?php esc_html_e( 'Unique Page Views', 'wpmudev' ); ?></option>
+						<?php endif; ?>
+						<?php if ( in_array( 'page_time', $metrics, true ) ) : ?>
+							<option value="page_time"><?php esc_html_e( 'Visit Time', 'wpmudev' ); ?></option>
+						<?php endif; ?>
+						<?php if ( in_array( 'visits', $metrics, true ) ) : ?>
+							<option value="visits"><?php esc_html_e( 'Entrances', 'wpmudev' ); ?></option>
 						<?php endif; ?>
 						<?php if ( in_array( 'bounce_rate', $metrics, true ) ) : ?>
 							<option value="bounce_rate"><?php esc_html_e( 'Bounce Rate', 'wpmudev' ); ?></option>
 						<?php endif; ?>
 						<?php if ( in_array( 'exit_rate', $metrics, true ) ) : ?>
 							<option value="exit_rate"><?php esc_html_e( 'Exit Rate', 'wpmudev' ); ?></option>
-						<?php endif; ?>
-						<?php if ( in_array( 'page_time', $metrics, true ) ) : ?>
-							<option value="page_time"><?php esc_html_e( 'Time on Page', 'wpmudev' ); ?></option>
-						<?php endif; ?>
-						<?php if ( in_array( 'gen_time', $metrics, true ) ) : ?>
-							<option value="gen_time"><?php esc_html_e( 'Generation Time', 'wpmudev' ); ?></option>
 						<?php endif; ?>
 					</select>
 				</div>
@@ -166,17 +159,17 @@ $metrics = WPMUDEV_Dashboard::$site->get_metrics_on_analytics();
 							<tr>
 								<th><?php esc_html_e( 'Page/Post title', 'wpmudev' ); ?></th>
 								<th class="wpmudui-table-views data-pageviews wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The number of times this page was visited.', 'wpmudev' ); ?>"><?php esc_html_e( 'Pageviews', 'wpmudev' ); ?></th>
+								    data-tooltip="<?php esc_attr_e( 'Total number of pages viewed. Repeated views of a single page are counted.', 'wpmudev' ); ?>"><?php esc_html_e( 'Page Views', 'wpmudev' ); ?></th>
 								<th class="wpmudui-table-views data-unique_pageviews wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The number of visits that included this page. If a page was viewed multiple times during one visit, it is only counted once.', 'wpmudev' ); ?>"><?php esc_html_e( 'Unique Pageviews', 'wpmudev' ); ?></th>
+								    data-tooltip="<?php esc_attr_e( 'The number of visits that included this page. If a page was viewed multiple times during one visit, it is only counted once.', 'wpmudev' ); ?>"><?php esc_html_e( 'Unique Page Views', 'wpmudev' ); ?></th>
+								<th class="wpmudui-table-views data-page_time wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
+								    data-tooltip="<?php esc_attr_e( 'The average amount of time visitors spent on a page.', 'wpmudev' ); ?>"><?php esc_html_e( 'Visit Time', 'wpmudev' ); ?></th>
+								<th class="wpmudui-table-views data-visits wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
+								    data-tooltip="<?php esc_attr_e( 'The number of time visitors entered your site through this page, from any source (e.g. search, direct, referral, etc.).', 'wpmudev' ); ?>"><?php esc_html_e( 'Entrances', 'wpmudev' ); ?></th>
 								<th class="wpmudui-table-views data-bounce_rate wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The percentage of visits that only had a single pageview. This means, that the visitor left the website directly from the entrance page.', 'wpmudev' ); ?>"><?php esc_html_e( 'Bounce Rate', 'wpmudev' ); ?></th>
+								    data-tooltip="<?php esc_attr_e( 'Single-page sessions. The percentage of visitors who left the website after their first page.', 'wpmudev' ); ?>"><?php esc_html_e( 'Bounce Rate', 'wpmudev' ); ?></th>
 								<th class="wpmudui-table-views data-exit_rate wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
 								    data-tooltip="<?php esc_attr_e( 'Number of exits divided by page views. Indicates percentage of exits from a specified page or average across your site.', 'wpmudev' ); ?>"><?php esc_html_e( 'Exit Rate', 'wpmudev' ); ?></th>
-								<th class="wpmudui-table-views data-page_time wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The average amount of time visitors spent on a page.', 'wpmudev' ); ?>"><?php esc_html_e( 'Time on Page', 'wpmudev' ); ?></th>
-								<th class="wpmudui-table-views data-gen_time wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The average time it took to generate a page. Includes server generation time + visitors time to download the page from the server.', 'wpmudev' ); ?>"><?php esc_html_e( 'Gen. Time', 'wpmudev' ); ?></th>
 							</tr>
 						</thead>
 
@@ -191,17 +184,17 @@ $metrics = WPMUDEV_Dashboard::$site->get_metrics_on_analytics();
 								<?php if ( isset( $site_page['unique_pageviews'] ) ) : ?>
 									<td class="wpmudui-table-views data-unique_pageviews" data-sort="<?php echo esc_attr( $site_page['unique_pageviews']['sort'] ); ?>"><?php echo esc_html( $site_page['unique_pageviews']['value'] ); ?></td>
 								<?php endif; ?>
+								<?php if ( isset( $site_page['page_time'] ) ) : ?>
+									<td class="wpmudui-table-views data-page_time" data-sort="<?php echo esc_attr( $site_page['page_time']['sort'] ); ?>"><?php echo esc_html( $site_page['page_time']['value'] ); ?></td>
+								<?php endif; ?>
+								<?php if ( isset( $site_page['visits'] ) ) : ?>
+									<td class="wpmudui-table-views data-visits" data-sort="<?php echo esc_attr( $site_page['visits']['sort'] ); ?>"><?php echo esc_html( $site_page['visits']['value'] ); ?></td>
+								<?php endif; ?>
 								<?php if ( isset( $site_page['bounce_rate']) ) : ?>
 									<td class="wpmudui-table-views data-bounce_rate" data-sort="<?php echo esc_attr( $site_page['bounce_rate']['sort'] ); ?>"><?php echo esc_html( $site_page['bounce_rate']['value'] ); ?></td>
 								<?php endif; ?>
 								<?php if ( isset( $site_page['exit_rate'] ) ) : ?>
 									<td class="wpmudui-table-views data-exit_rate" data-sort="<?php echo esc_attr( $site_page['exit_rate']['sort'] ); ?>"><?php echo esc_html( $site_page['exit_rate']['value'] ); ?></td>
-								<?php endif; ?>
-								<?php if ( isset( $site_page['page_time'] ) ) : ?>
-									<td class="wpmudui-table-views data-page_time" data-sort="<?php echo esc_attr( $site_page['page_time']['sort'] ); ?>"><?php echo esc_html( $site_page['page_time']['value'] ); ?></td>
-								<?php endif; ?>
-								<?php if ( isset( $site_page['gen_time'] ) ) : ?>
-									<td class="wpmudui-table-views data-gen_time" data-sort="<?php echo esc_attr( $site_page['gen_time']['sort'] ); ?>"><?php echo esc_html( $site_page['gen_time']['value'] ); ?></td>
 								<?php endif; ?>
 							</tr>
 						<?php } ?>
@@ -256,22 +249,22 @@ $metrics = WPMUDEV_Dashboard::$site->get_metrics_on_analytics();
 						<label class="wpmudui-label" for="wpmudui-analytics-sites-type"><?php esc_html_e( 'data for', 'wpmudev' ); ?></label>
 						<select id="wpmudui-analytics-authors-type" class="wpmudui-select wpmudui-analytics-column-filter">
 							<?php if ( in_array( 'pageviews', $metrics, true ) ) : ?>
-								<option value="pageviews"><?php esc_html_e( 'Pageviews', 'wpmudev' ); ?></option>
+								<option value="pageviews"><?php esc_html_e( 'Page Views', 'wpmudev' ); ?></option>
 							<?php endif; ?>
 							<?php if ( in_array( 'unique_pageviews', $metrics, true ) ) : ?>
-								<option value="unique_pageviews" selected><?php esc_html_e( 'Unique Pageviews', 'wpmudev' ); ?></option>
+								<option value="unique_pageviews" selected><?php esc_html_e( 'Unique Page Views', 'wpmudev' ); ?></option>
+							<?php endif; ?>
+							<?php if ( in_array( 'page_time', $metrics, true ) ) : ?>
+								<option value="page_time"><?php esc_html_e( 'Visit Time', 'wpmudev' ); ?></option>
+							<?php endif; ?>
+							<?php if ( in_array( 'visits', $metrics, true ) ) : ?>
+								<option value="visits"><?php esc_html_e( 'Entrances', 'wpmudev' ); ?></option>
 							<?php endif; ?>
 							<?php if ( in_array( 'bounce_rate', $metrics, true ) ) : ?>
 								<option value="bounce_rate"><?php esc_html_e( 'Bounce Rate', 'wpmudev' ); ?></option>
 							<?php endif; ?>
 							<?php if ( in_array( 'exit_rate', $metrics, true ) ) : ?>
 								<option value="exit_rate"><?php esc_html_e( 'Exit Rate', 'wpmudev' ); ?></option>
-							<?php endif; ?>
-							<?php if ( in_array( 'page_time', $metrics, true ) ) : ?>
-								<option value="page_time"><?php esc_html_e( 'Time on Page', 'wpmudev' ); ?></option>
-							<?php endif; ?>
-							<?php if ( in_array( 'gen_time', $metrics, true ) ) : ?>
-								<option value="gen_time"><?php esc_html_e( 'Generation Time', 'wpmudev' ); ?></option>
 							<?php endif; ?>
 						</select>
 					</div>
@@ -284,17 +277,17 @@ $metrics = WPMUDEV_Dashboard::$site->get_metrics_on_analytics();
 							<tr>
 								<th><?php esc_html_e( 'Author', 'wpmudev' ); ?></th>
 								<th class="wpmudui-table-views data-pageviews wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The number of times this page was visited.', 'wpmudev' ); ?>"><?php esc_html_e( 'Pageviews', 'wpmudev' ); ?></th>
+								    data-tooltip="<?php esc_attr_e( 'Total number of pages viewed. Repeated views of a single page are counted.', 'wpmudev' ); ?>"><?php esc_html_e( 'Page Views', 'wpmudev' ); ?></th>
 								<th class="wpmudui-table-views data-unique_pageviews wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The number of visits that included this page. If a page was viewed multiple times during one visit, it is only counted once.', 'wpmudev' ); ?>"><?php esc_html_e( 'Unique Pageviews', 'wpmudev' ); ?></th>
+								    data-tooltip="<?php esc_attr_e( 'The number of visits that included this page. If a page was viewed multiple times during one visit, it is only counted once.', 'wpmudev' ); ?>"><?php esc_html_e( 'Unique Page Views', 'wpmudev' ); ?></th>
+								<th class="wpmudui-table-views data-page_time wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
+								    data-tooltip="<?php esc_attr_e( 'The average amount of time visitors spent on a page.', 'wpmudev' ); ?>"><?php esc_html_e( 'Visit Time', 'wpmudev' ); ?></th>
+								<th class="wpmudui-table-views data-visits wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
+								    data-tooltip="<?php esc_attr_e( 'The number of time visitors entered your site through this page, from any source (e.g. search, direct, referral, etc.).', 'wpmudev' ); ?>"><?php esc_html_e( 'Entrances', 'wpmudev' ); ?></th>
 								<th class="wpmudui-table-views data-bounce_rate wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The percentage of visits that only had a single pageview. This means, that the visitor left the website directly from the entrance page.', 'wpmudev' ); ?>"><?php esc_html_e( 'Bounce Rate', 'wpmudev' ); ?></th>
+								    data-tooltip="<?php esc_attr_e( 'Single-page sessions. The percentage of visitors who left the website after their first page.', 'wpmudev' ); ?>"><?php esc_html_e( 'Bounce Rate', 'wpmudev' ); ?></th>
 								<th class="wpmudui-table-views data-exit_rate wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
 								    data-tooltip="<?php esc_attr_e( 'Number of exits divided by page views. Indicates percentage of exits from a specified page or average across your site.', 'wpmudev' ); ?>"><?php esc_html_e( 'Exit Rate', 'wpmudev' ); ?></th>
-								<th class="wpmudui-table-views data-page_time wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The average amount of time visitors spent on a page.', 'wpmudev' ); ?>"><?php esc_html_e( 'Time on Page', 'wpmudev' ); ?></th>
-								<th class="wpmudui-table-views data-gen_time wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The average time it took to generate a page. Includes server generation time + visitors time to download the page from the server.', 'wpmudev' ); ?>"><?php esc_html_e( 'Gen. Time', 'wpmudev' ); ?></th>
 							</tr>
 							</thead>
 
@@ -309,17 +302,17 @@ $metrics = WPMUDEV_Dashboard::$site->get_metrics_on_analytics();
 									<?php if ( isset( $author['unique_pageviews'] ) ) : ?>
 										<td class="wpmudui-table-views data-unique_pageviews" data-sort="<?php echo esc_attr( $author['unique_pageviews']['sort'] ); ?>"><?php echo esc_html( $author['unique_pageviews']['value'] ); ?></td>
 									<?php endif; ?>
+									<?php if ( isset( $author['page_time'] ) ) : ?>
+										<td class="wpmudui-table-views data-page_time" data-sort="<?php echo esc_attr( $author['page_time']['sort'] ); ?>"><?php echo esc_html( $author['page_time']['value'] ); ?></td>
+									<?php endif; ?>
+									<?php if ( isset( $author['visits'] ) ) : ?>
+										<td class="wpmudui-table-views data-visits" data-sort="<?php echo esc_attr( $author['visits']['sort'] ); ?>"><?php echo esc_html( $author['visits']['value'] ); ?></td>
+									<?php endif; ?>
 									<?php if ( isset( $author['bounce_rate'] ) ) : ?>
 										<td class="wpmudui-table-views data-bounce_rate" data-sort="<?php echo esc_attr( $author['bounce_rate']['sort'] ); ?>"><?php echo esc_html( $author['bounce_rate']['value'] ); ?></td>
 									<?php endif; ?>
 									<?php if ( isset( $author['exit_rate'] ) ) : ?>
 										<td class="wpmudui-table-views data-exit_rate" data-sort="<?php echo esc_attr( $author['exit_rate']['sort'] ); ?>"><?php echo esc_html( $author['exit_rate']['value'] ); ?></td>
-									<?php endif; ?>
-									<?php if ( isset( $author['page_time'] ) ) : ?>
-										<td class="wpmudui-table-views data-page_time" data-sort="<?php echo esc_attr( $author['page_time']['sort'] ); ?>"><?php echo esc_html( $author['page_time']['value'] ); ?></td>
-									<?php endif; ?>
-									<?php if ( isset( $author['gen_time'] ) ) : ?>
-										<td class="wpmudui-table-views data-gen_time" data-sort="<?php echo esc_attr( $author['gen_time']['sort'] ); ?>"><?php echo esc_html( $author['gen_time']['value'] ); ?></td>
 									<?php endif; ?>
 								</tr>
 							<?php } ?>
@@ -374,22 +367,22 @@ $metrics = WPMUDEV_Dashboard::$site->get_metrics_on_analytics();
 						<label class="wpmudui-label" for="wpmudui-analytics-sites-type"><?php esc_html_e( 'data for', 'wpmudev' ); ?></label>
 						<select id="wpmudui-analytics-sites-type" class="wpmudui-select wpmudui-analytics-column-filter">
 							<?php if ( in_array( 'pageviews', $metrics, true ) ) : ?>
-								<option value="pageviews"><?php esc_html_e( 'Pageviews', 'wpmudev' ); ?></option>
+								<option value="pageviews"><?php esc_html_e( 'Page Views', 'wpmudev' ); ?></option>
 							<?php endif; ?>
 							<?php if ( in_array( 'unique_pageviews', $metrics, true ) ) : ?>
-								<option value="unique_pageviews" selected><?php esc_html_e( 'Unique Pageviews', 'wpmudev' ); ?></option>
+								<option value="unique_pageviews" selected><?php esc_html_e( 'Unique Page Views', 'wpmudev' ); ?></option>
+							<?php endif; ?>
+							<?php if ( in_array( 'page_time', $metrics, true ) ) : ?>
+								<option value="page_time"><?php esc_html_e( 'Visit Time', 'wpmudev' ); ?></option>
+							<?php endif; ?>
+							<?php if ( in_array( 'visits', $metrics, true ) ) : ?>
+								<option value="visits"><?php esc_html_e( 'Entrances', 'wpmudev' ); ?></option>
 							<?php endif; ?>
 							<?php if ( in_array( 'bounce_rate', $metrics, true ) ) : ?>
 								<option value="bounce_rate"><?php esc_html_e( 'Bounce Rate', 'wpmudev' ); ?></option>
 							<?php endif; ?>
 							<?php if ( in_array( 'exit_rate', $metrics, true ) ) : ?>
 								<option value="exit_rate"><?php esc_html_e( 'Exit Rate', 'wpmudev' ); ?></option>
-							<?php endif; ?>
-							<?php if ( in_array( 'page_time', $metrics, true ) ) : ?>
-								<option value="page_time"><?php esc_html_e( 'Time on Page', 'wpmudev' ); ?></option>
-							<?php endif; ?>
-							<?php if ( in_array( 'gen_time', $metrics, true ) ) : ?>
-								<option value="gen_time"><?php esc_html_e( 'Generation Time', 'wpmudev' ); ?></option>
 							<?php endif; ?>
 						</select>
 					</div>
@@ -402,17 +395,17 @@ $metrics = WPMUDEV_Dashboard::$site->get_metrics_on_analytics();
 							<tr>
 								<th><?php esc_html_e( 'Site domain/name', 'wpmudev' ); ?></th>
 								<th class="wpmudui-table-views data-pageviews wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The number of times this page was visited.', 'wpmudev' ); ?>"><?php esc_html_e( 'Pageviews', 'wpmudev' ); ?></th>
+								    data-tooltip="<?php esc_attr_e( 'Total number of pages viewed. Repeated views of a single page are counted.', 'wpmudev' ); ?>"><?php esc_html_e( 'Page Views', 'wpmudev' ); ?></th>
 								<th class="wpmudui-table-views data-unique_pageviews wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The number of visits that included this page. If a page was viewed multiple times during one visit, it is only counted once.', 'wpmudev' ); ?>"><?php esc_html_e( 'Unique Pageviews', 'wpmudev' ); ?></th>
+								    data-tooltip="<?php esc_attr_e( 'The number of visits that included this page. If a page was viewed multiple times during one visit, it is only counted once.', 'wpmudev' ); ?>"><?php esc_html_e( 'Unique Page Views', 'wpmudev' ); ?></th>
+								<th class="wpmudui-table-views data-page_time wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
+								    data-tooltip="<?php esc_attr_e( 'The average amount of time visitors spent on a page.', 'wpmudev' ); ?>"><?php esc_html_e( 'Visit Time', 'wpmudev' ); ?></th>
+								<th class="wpmudui-table-views data-visits wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
+								    data-tooltip="<?php esc_attr_e( 'The number of time visitors entered your site through this page, from any source (e.g. search, direct, referral, etc.).', 'wpmudev' ); ?>"><?php esc_html_e( 'Entrances', 'wpmudev' ); ?></th>
 								<th class="wpmudui-table-views data-bounce_rate wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The percentage of visits that only had a single pageview. This means, that the visitor left the website directly from the entrance page.', 'wpmudev' ); ?>"><?php esc_html_e( 'Bounce Rate', 'wpmudev' ); ?></th>
+								    data-tooltip="<?php esc_attr_e( 'Single-page sessions. The percentage of visitors who left the website after their first page.', 'wpmudev' ); ?>"><?php esc_html_e( 'Bounce Rate', 'wpmudev' ); ?></th>
 								<th class="wpmudui-table-views data-exit_rate wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
 								    data-tooltip="<?php esc_attr_e( 'Number of exits divided by page views. Indicates percentage of exits from a specified page or average across your site.', 'wpmudev' ); ?>"><?php esc_html_e( 'Exit Rate', 'wpmudev' ); ?></th>
-								<th class="wpmudui-table-views data-page_time wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The average amount of time visitors spent on a page.', 'wpmudev' ); ?>"><?php esc_html_e( 'Time on Page', 'wpmudev' ); ?></th>
-								<th class="wpmudui-table-views data-gen_time wpmudui-tooltip wpmudui-tooltip-top wpmudui-tooltip-top-right wpmudui-tooltip-constrained"
-								    data-tooltip="<?php esc_attr_e( 'The average time it took to generate a page. Includes server generation time + visitors time to download the page from the server.', 'wpmudev' ); ?>"><?php esc_html_e( 'Gen. Time', 'wpmudev' ); ?></th>
 							</tr>
 							</thead>
 
@@ -427,17 +420,17 @@ $metrics = WPMUDEV_Dashboard::$site->get_metrics_on_analytics();
 									<?php if ( isset( $site['unique_pageviews'] ) ) : ?>
 										<td class="wpmudui-table-views data-unique_pageviews" data-sort="<?php echo esc_attr( $site['unique_pageviews']['sort'] ); ?>"><?php echo esc_html( $site['unique_pageviews']['value'] ); ?></td>
 									<?php endif; ?>
+									<?php if ( isset( $site['page_time'] ) ) : ?>
+										<td class="wpmudui-table-views data-page_time" data-sort="<?php echo esc_attr( $site['page_time']['sort'] ); ?>"><?php echo esc_html( $site['page_time']['value'] ); ?></td>
+									<?php endif; ?>
+									<?php if ( isset( $site['visits'] ) ) : ?>
+										<td class="wpmudui-table-views data-visits" data-sort="<?php echo esc_attr( $site['visits']['sort'] ); ?>"><?php echo esc_html( $site['visits']['value'] ); ?></td>
+									<?php endif; ?>
 									<?php if ( isset( $site['bounce_rate'] ) ) : ?>
 										<td class="wpmudui-table-views data-bounce_rate" data-sort="<?php echo esc_attr( $site['bounce_rate']['sort'] ); ?>"><?php echo esc_html( $site['bounce_rate']['value'] ); ?></td>
 									<?php endif; ?>
 									<?php if ( isset( $site['exit_rate'] ) ) : ?>
 										<td class="wpmudui-table-views data-exit_rate" data-sort="<?php echo esc_attr( $site['exit_rate']['sort'] ); ?>"><?php echo esc_html( $site['exit_rate']['value'] ); ?></td>
-									<?php endif; ?>
-									<?php if ( isset( $site['page_time'] ) ) : ?>
-										<td class="wpmudui-table-views data-page_time" data-sort="<?php echo esc_attr( $site['page_time']['sort'] ); ?>"><?php echo esc_html( $site['page_time']['value'] ); ?></td>
-									<?php endif; ?>
-									<?php if ( isset( $site['gen_time'] ) ) : ?>
-										<td class="wpmudui-table-views data-gen_time" data-sort="<?php echo esc_attr( $site['gen_time']['sort'] ); ?>"><?php echo esc_html( $site['gen_time']['value'] ); ?></td>
 									<?php endif; ?>
 								</tr>
 							<?php } ?>

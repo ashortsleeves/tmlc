@@ -1,5 +1,6 @@
 import Scanner from '../utils/scanner';
 import Fetcher from '../utils/fetcher';
+import { getString } from '../utils/helpers';
 
 export const BATCH_SIZE = 3000;
 
@@ -75,8 +76,9 @@ export class OrphanedScanner extends Scanner {
 	 */
 	onFinish() {
 		super.onFinish();
-		window.setTimeout( () => {
-			location.reload();
-		}, 1000 );
+
+		window.SUI.closeModal();
+		document.getElementById( 'count-ao-orphaned' ).innerHTML = '0';
+		window.WPHB_Admin.notices.show( getString( 'successAoOrphanedPurge' ) );
 	}
 }

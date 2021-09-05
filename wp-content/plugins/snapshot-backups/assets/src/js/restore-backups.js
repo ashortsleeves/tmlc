@@ -144,7 +144,7 @@
 						setTimeout( function() {
 							clear_auth_context_check_and_continue();
 							$root.removeClass( 'snapshot4-bound' );
-							$root.find( '.wp-auth-check-close' ).click();
+							$root.find( '.wp-auth-check-close' ).trigger('click');
 						} );
 					}
 					/* <-- DEFENDER 2FA BUG */
@@ -239,6 +239,7 @@
 				set_restoration_step(backup_id, false);
 				var notice = $('<span></span>').html(snapshot_messages.trigger_restore_error.replace('%s', response.data.failed_stage));
 				notice.find('.snapshot-view-log').data('backupId', backup_id);
+				notice.find('.snapshot-ftp-restoration-hub').data('backupId', backup_id);
 				jQuery(window).trigger('snapshot:show_top_notice', ['error', notice]);
 
 				$('.button-create-backup').prop('disabled', false);
@@ -272,6 +273,7 @@
 
 					var notice = $('<span></span>').html(snapshot_messages.trigger_restore_generic_error);
 					notice.find('.snapshot-view-log').data('backupId', backup_id);
+					notice.find('.snapshot-ftp-restoration-hub').data('backupId', backup_id);
 					jQuery(window).trigger('snapshot:show_top_notice', ['error', notice]);
 
 					$('.button-create-backup').prop('disabled', false);
@@ -497,6 +499,11 @@
 				if (e && e.preventDefault) e.preventDefault();
 				$(this).trigger('snapshot:close_notice');
 				$(window).trigger('snapshot:view_log', [true, $(this).data('backupId')]);
+			});
+			$('.snapshot-page-backups').on('click', '.snapshot-ftp-restoration-hub', function (e) {
+				if (e && e.preventDefault) e.preventDefault();
+				$(this).trigger('snapshot:close_notice');
+				window.open(snapshot_urls.hub_backup_tab + '?ftp-restore=' + $(this).data('backupId'), '_blank');
 			});
 			$('.snapshot-page-backups').on('click', '.view-log-in-modal', function (e) {
 				if (e && e.preventDefault) e.preventDefault();

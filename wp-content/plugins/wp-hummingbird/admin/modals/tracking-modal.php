@@ -33,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<?php endif; ?>
 
 				<button class="sui-button-icon sui-button-float--right" data-modal-close="" onclick="window.WPHB_Admin.dashboard.skipSetup()">
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text"><?php esc_attr_e( 'Close this modal', 'wphb' ); ?></span>
 				</button>
 
@@ -62,7 +62,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<?php esc_html_e( 'Allow usage data tracking', 'wphb' ); ?>
 							</span>
 							<span class="sui-tooltip sui-tooltip-constrained" data-tooltip="<?php esc_html_e( 'Help us improve Hummingbird by letting our product designers gain insight into what features need improvement. We don’t track any personalized data, it’s all basic stuff.', 'wphb' ); ?>">
-								<i class="sui-icon-info" aria-hidden="true"></i>
+								<span class="sui-icon-info" aria-hidden="true"></span>
 							</span>
 						</label>
 						<span id="tracking-description-modal" class="sui-description">
@@ -70,7 +70,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							printf(
 								/* translators: %1$s - <a>, %2$s - </a> */
 								esc_html__( 'You can read about what data will be collected %1$shere%2$s.', 'wphb' ),
-								'<a href="https://premium.wpmudev.org/docs/privacy/our-plugins/#usage-tracking" target="_blank">',
+								'<a href="https://wpmudev.com/docs/privacy/our-plugins/#usage-tracking" target="_blank">',
 								'</a>'
 							);
 							?>

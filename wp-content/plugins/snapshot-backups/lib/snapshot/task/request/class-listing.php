@@ -38,6 +38,7 @@ class Listing extends Task {
 
 		if ( ! empty( $args['force_refresh'] ) ) {
 			delete_transient( 'snapshot_listed_backups' );
+			delete_transient( 'snapshot_current_stats' );
 			$backups = false;
 		} else {
 			$backups = get_transient( 'snapshot_listed_backups' );
@@ -65,9 +66,10 @@ class Listing extends Task {
 			if ( is_array( $backups ) ) {
 				foreach ( $backups as $backup ) {
 					$result[] = array(
-						'backup_id'  => $backup['snapshot_id'],
-						'created_at' => strtotime( $backup['created_at'] ),
-						'type'       => $backup['type'],
+						'backup_id'      => $backup['snapshot_id'],
+						'created_at'     => strtotime( $backup['created_at'] ),
+						'type'           => $backup['type'],
+						'tpd_exp_status' => isset( $backup['tpd_exp_status'] ) ? $backup['tpd_exp_status'] : array(),
 					);
 				}
 			}
@@ -83,8 +85,6 @@ class Listing extends Task {
 		$backups_info = array();
 
 		if ( is_array( $backups ) ) {
-			$schedule_info = Model\Schedule::get_schedule_info();
-
 			$backups = $request_model->sort_backups( $backups );
 
 			// Build the backup row for displaying in the backup list.
@@ -96,7 +96,7 @@ class Listing extends Task {
 					continue;
 				}
 
-				$backups_info[] = $request_model->get_backup_info( $backup, $schedule_info );
+				$backups_info[] = $request_model->get_backup_info( $backup );
 			}
 		}
 

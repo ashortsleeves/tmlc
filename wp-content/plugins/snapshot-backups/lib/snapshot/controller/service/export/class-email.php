@@ -11,6 +11,7 @@ use WPMUDEV\Snapshot4\Controller;
 use WPMUDEV\Snapshot4\Task;
 use WPMUDEV\Snapshot4\Model;
 use WPMUDEV\Snapshot4\Helper\Log;
+use WPMUDEV\Snapshot4\Helper\Settings;
 
 /**
  * Export backup service actions handling controller class
@@ -88,6 +89,39 @@ class Email extends Controller\Service {
 		/* translators: %s - export failure code */
 		Log::error( sprintf( __( 'The backup export has failed: %s.', 'snapshot' ), $failure_code ), array(), $backup_id );
 
+		$this->send_email_notifications( Task\Backup\Fail::ERROR_EXPORT_FAILED, time(), null, $backup_id, $failure_code );
+
 		return $this->send_response_success( true, $request );
+	}
+
+	/**
+	 * Send email when a backup export fails
+	 *
+	 * @param string $service_error     Service's backup error message.
+	 * @param int    $timestamp         Error time.
+	 * @param string $backup_type       Type of backup ("scheduled" or "manual").
+	 * @param string $backup_id         Backup ID.
+	 * @param string $error_message     Error message (export_status).
+	 */
+	protected function send_email_notifications( $service_error, $timestamp, $backup_type, $backup_id, $error_message ) {
+		$service_error = apply_filters( 'snapshot_custom_service_error', $service_error );
+
+		$email_settings = Settings::get_email_settings()['email_settings'];
+		if ( ! $email_settings['on_fail_send'] || ! $email_settings['notify_on_fail'] ) {
+			return;
+		}
+		$recipients = $email_settings['on_fail_recipients'];
+
+		$task = new Task\Backup\Fail();
+		$task->apply(
+			array(
+				'recipients'    => $recipients,
+				'service_error' => $service_error,
+				'timestamp'     => $timestamp,
+				'backup_type'   => $backup_type,
+				'backup_id'     => $backup_id,
+				'error_message' => $error_message,
+			)
+		);
 	}
 }

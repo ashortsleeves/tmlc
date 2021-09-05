@@ -1,8 +1,6 @@
-/* global wphbPerformanceStrings */
-
 import Scanner from '../utils/scanner';
 import Fetcher from '../utils/fetcher';
-import { getLink } from '../utils/helpers';
+import { getString, getLink } from '../utils/helpers';
 
 class PerfScanner extends Scanner {
 	/**
@@ -48,7 +46,7 @@ class PerfScanner extends Scanner {
 		);
 
 		if ( 3 === progress ) {
-			progressStatus.innerHTML = wphbPerformanceStrings.scanRunning;
+			progressStatus.innerHTML = getString( 'scanRunning' );
 		}
 
 		if ( 73 === progress ) {
@@ -60,11 +58,11 @@ class PerfScanner extends Scanner {
 				this.updateProgressBar( this.getProgress() );
 			}, 1000 );
 
-			progressStatus.innerHTML = wphbPerformanceStrings.scanAnalyzing;
+			progressStatus.innerHTML = getString( 'scanAnalyzing' );
 		}
 
 		if ( 99 === progress ) {
-			progressStatus.innerHTML = wphbPerformanceStrings.scanWaiting;
+			progressStatus.innerHTML = getString( 'scanWaiting' );
 			clearInterval( this.timer );
 			this.timer = false;
 		}
@@ -79,12 +77,12 @@ class PerfScanner extends Scanner {
 
 		if ( 100 === progress ) {
 			const loader = document.querySelector(
-				'.wphb-performance-scan-modal .sui-progress-block i.sui-icon-loader'
+				'.wphb-performance-scan-modal .sui-progress-block span.sui-icon-loader'
 			);
 			loader.classList.remove( 'sui-icon-loader', 'sui-loading' );
 			loader.classList.add( 'sui-icon-check' );
 
-			progressStatus.innerHTML = wphbPerformanceStrings.scanComplete;
+			progressStatus.innerHTML = getString( 'scanComplete' );
 			clearInterval( this.timer );
 			this.timer = false;
 		}

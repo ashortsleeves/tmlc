@@ -24,14 +24,14 @@
 	}
 
 	function copy_api_key() {
-		$('#snapshot-api-key').select();
+		$('#snapshot-api-key').trigger('select');
 		document.execCommand('copy');
 		document.getSelection().removeAllRanges();
 		jQuery(window).trigger('snapshot:show_top_notice', ['success', snapshot_messages.api_key_copied, 3000, false]);
 	}
 
 	function copy_site_id() {
-		$('#snapshot-site-id').select();
+		$('#snapshot-site-id').trigger('select');
 		document.execCommand('copy');
 		document.getSelection().removeAllRanges();
 		jQuery(window).trigger('snapshot:show_top_notice', ['success', snapshot_messages.site_id_copied, 3000, false]);
@@ -66,7 +66,8 @@
 				if (data.success) {
 					jQuery(window).trigger('snapshot:show_top_notice', ['success', snapshot_messages.reset_settings_success, 3000, false]);
 					// Select "Keep" in Data & Settings => Uninstall
-					$('#snapshot-settings-save-tab-2 input[name=remove_on_uninstall][value=0]').click();
+					$('#snapshot-settings-save-tab-2 input[name=remove_on_uninstall][value=0]').trigger('click');
+					$('#snapshot-remove-options-notice').hide();
 				} else {
 					jQuery(window).trigger('snapshot:show_top_notice', ['error', snapshot_messages.reset_settings_error]);
 				}
@@ -121,8 +122,14 @@
 			$('.snapshot-page-main .snapshot-vertical-api-key').on('click', toggle_navbar_api_key);
 			$('.snapshot-page-main .snapshot-vertical-data-and-settings').on('click', toggle_navbar_data_and_settings);
 
-			$('.snapshot-page-main .sui-mobile-nav #undefined-option-api-key').on('click', toggle_navbar_api_key);
-			$('.snapshot-page-main .sui-mobile-nav #undefined-option-data-and-settings').on('click', toggle_navbar_data_and_settings);
+			$('.snapshot-page-main .sui-mobile-nav').on('change', function () {
+				var option = $(this).val();
+				if (option === 'api-key') {
+					toggle_navbar_api_key();
+				} else if (option === 'data-and-settings') {
+					toggle_navbar_data_and_settings();
+				}
+			});
 
 			$('#snapshot-settings-copy-api-key').on('click', copy_api_key);
 			$('#snapshot-settings-copy-site-id').on('click', copy_site_id);
@@ -132,6 +139,18 @@
 
 			$('#snapshot-settings-save-tab-1').on('submit', save_settings);
 			$('#snapshot-settings-save-tab-2').on('submit', save_settings);
+
+			if ($('input[type=radio][name=remove_on_uninstall]:checked').val() === '1') {
+				$('#snapshot-remove-options-notice').show();
+			}
+			$('input[type=radio][name=remove_on_uninstall]').change(function() {
+				if ($(this).val() === '0') {
+					$('#snapshot-remove-options-notice').hide();
+				}
+				else if ($(this).val() === '1') {
+					$('#snapshot-remove-options-notice').show();
+				}
+			});
 		}
 	});
 

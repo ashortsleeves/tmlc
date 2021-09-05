@@ -1,6 +1,6 @@
 <?php
 /**
- * Purge orphaned Asset Optimization data in Site Health module.
+ * Purge orphaned Asset Optimization data in Plugin Health module.
  *
  * @package Hummingbird
  *
@@ -26,16 +26,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="sui-box">
 			<div class="sui-box-header sui-flatten sui-content-center sui-spacing-top--60">
 				<button type="button" class="sui-button-icon sui-button-float--right" data-modal-close>
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text">
 						<?php esc_html_e( 'Close this dialog window', 'wphb' ); ?>
 					</span>
 				</button>
 				<h3 class="sui-box-title sui-lg" id="site-health-orphaned-modal-title">
-					<?php esc_html_e( 'Delete orphaned meta data?', 'wphb' ); ?>
+					<?php esc_html_e( 'Delete Orphaned Metadata?', 'wphb' ); ?>
 				</h3>
 				<p class="sui-description" id="site-health-orphaned-modal-description">
-					<?php esc_html_e( 'The Orphaned asset optimization meta data includes the data in the wp_postmeta related to asset optimization. Do you want to delete it?', 'wphb' ); ?>
+					<?php esc_html_e( 'The orphaned asset optimization metadata includes the data in the wp_postmeta table. Do you want to delete it?', 'wphb' ); ?>
 				</p>
 			</div>
 
@@ -43,9 +43,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="sui-notice sui-notice-warning sui-no-margin-bottom">
 					<div class="sui-notice-content">
 						<div class="sui-notice-message">
-							<i class="sui-notice-icon sui-icon-info" aria-hidden="true"></i>
+							<span class="sui-notice-icon sui-icon-info" aria-hidden="true"></span>
 							<p>
-								<?php esc_html_e( 'Note, Besides data related to asset optimization, meta data may include any other data related to another plugin, if there is a match in post ID. We recommend you to have a current backup, just in case.', 'wphb' ); ?>
+								<?php esc_html_e( 'Note: Besides the data related to asset optimization, the metadata that will be deleted may also include other data related to another plugin - provided there is a match in the post ID. Due to this potential overlap, we recommend that you have an up-to-date backup available, just in case.', 'wphb' ); ?>
 							</p>
 						</div>
 					</div>
@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="sui-notice sui-notice-error sui-margin-top sui-no-margin-bottom sui-hidden" id="site-health-orphanned-speed">
 					<div class="sui-notice-content">
 						<div class="sui-notice-message">
-							<i class="sui-notice-icon sui-icon-info" aria-hidden="true"></i>
+							<span class="sui-notice-icon sui-icon-info" aria-hidden="true"></span>
 							<p>
 								<?php esc_html_e( 'Hummingbird detected high CPU usage, removing data at a slower speed.', 'wphb' ); ?>
 							</p>
@@ -66,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<div class="sui-progress-block">
 						<div class="sui-progress">
 						<span class="sui-progress-icon" aria-hidden="true">
-							<i class="sui-icon-loader sui-loading"></i>
+							<span class="sui-icon-loader sui-loading"></span>
 						</span>
 							<div class="sui-progress-text">
 								<span>0%</span>
@@ -76,7 +76,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							</div>
 						</div>
 						<button class="sui-button-icon sui-tooltip" type="button" data-tooltip="<?php esc_attr_e( 'Cancel', 'wphb' ); ?>" data-modal-close>
-							<i class="sui-icon-close" aria-hidden="true"></i>
+							<span class="sui-icon-close" aria-hidden="true"></span>
 						</button>
 					</div>
 

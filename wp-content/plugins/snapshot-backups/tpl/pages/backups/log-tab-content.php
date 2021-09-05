@@ -18,7 +18,7 @@ $empty_logs_text = sprintf( __( '%s, you don\'t have any log history yet. Once y
 <div class="sui-box-body logs-empty" style="<?php echo count( $logs ) || $loading ? 'display: none;' : ''; ?>">
 	<div class="sui-message">
 		<img src="<?php echo esc_attr( $assets->get_asset( 'img/snapshot-dashboard-hero-backups.svg' ) ); ?>"
-			class="sui-image"
+			class="sui-image snapshot-no-backups-hero <?php echo ! empty( $is_branding_hidden ) ? esc_html( 'snapshot-hidden-branding' ) : esc_html( '' ); ?>"
 			aria-hidden="true" />
 
 		<div class="sui-message-content">
@@ -36,9 +36,14 @@ $empty_logs_text = sprintf( __( '%s, you don\'t have any log history yet. Once y
 	</div>
 	<table class="sui-table sui-table-flushed sui-accordion">
 		<thead>
-			<tr>
+			<tr class="sui-hidden-xs">
 				<th><?php esc_html_e( 'Date', 'snapshot' ); ?></th>
-				<th><?php esc_html_e( 'Destination', 'snapshot' ); ?></th>
+				<th><?php esc_html_e( 'Storage', 'snapshot' ); ?></th>
+				<th><?php esc_html_e( 'Export Destination', 'snapshot' ); ?></th>
+				<th style="width: 50px;"></th>
+			</tr>
+			<tr class="sui-hidden-sm sui-hidden-md sui-hidden-lg">
+				<th colspan="4" style="height: 0;"></th>
 			</tr>
 		</thead>
 		<tbody class="log-rows">
@@ -70,7 +75,7 @@ $empty_logs_text = sprintf( __( '%s, you don\'t have any log history yet. Once y
 	<div class="sui-message">
 
 		<div class="sui-message-content">
-			<p><i class="sui-icon-loader sui-loading" aria-hidden="true"></i> <?php esc_html_e( 'Loading logs...', 'snapshot' ); ?></p>
+			<p><span class="sui-icon-loader sui-loading" aria-hidden="true"></span> <?php esc_html_e( 'Loading logs...', 'snapshot' ); ?></p>
 		</div>
 
 	</div>

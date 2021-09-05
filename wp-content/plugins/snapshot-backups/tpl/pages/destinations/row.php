@@ -51,8 +51,8 @@ switch ( $tpd_type ) {
 		</div>
 	</td>
 
-	<td class="sui-hidden-xs sui-hidden-sm snapshot-destination-path"><i class="sui-icon-folder sui-md" aria-hidden="true"></i><span><?php echo esc_html( $tpd_path ); ?></span></td>
-	<td class="sui-hidden-xs sui-hidden-sm"><?php echo esc_html( $schedule ); ?></td>
+	<td class="sui-hidden-xs sui-hidden-sm snapshot-destination-path"><span class="sui-icon-folder sui-md" aria-hidden="true"></span><span><?php echo esc_html( $tpd_path ); ?></span></td>
+	<td class="sui-hidden-xs sui-hidden-sm"><span class="sui-icon-loader sui-loading snapshot-loading-schedule" aria-hidden="true"></span><span class="destination-schedule-text"></span></td>
 	<td class="sui-hidden-xs sui-hidden-sm backup-count">0</td>
 
 	<td colspan="5" class="sui-table-item-title first-child sui-hidden-md sui-hidden-lg mobile-row">
@@ -60,12 +60,12 @@ switch ( $tpd_type ) {
 		<div class="sui-row destination-cells">
 			<div class="sui-col-xs-6">
 				<div class="sui-table-item-title"><?php esc_html_e( 'Directory', 'snapshot' ); ?></div>
-				<div class="sui-table-item-title destination-path"><i class="sui-icon-folder sui-md" aria-hidden="true"></i><span><?php echo esc_html( $tpd_path ); ?></span></div>
+				<div class="sui-table-item-title destination-path"><span class="sui-icon-folder sui-md" aria-hidden="true"></span><span><?php echo esc_html( $tpd_path ); ?></span></div>
 			</div>
 
 			<div class="sui-col-xs-6">
 				<div class="sui-table-item-title"><?php esc_html_e( 'Schedule', 'snapshot' ); ?></div>
-				<div class="sui-table-item-title"><?php echo esc_html( $schedule ); ?></div>
+				<div class="sui-table-item-title"><span class="sui-icon-loader sui-loading snapshot-loading-schedule" aria-hidden="true"></span><span class="destination-schedule-text"></span></div>
 			</div>
 
 			<div class="sui-col-xs-6">
@@ -85,13 +85,13 @@ switch ( $tpd_type ) {
 			</div>
 			<div class="sui-dropdown">
 				<button class="sui-button-icon sui-dropdown-anchor">
-					<i class="sui-icon-widget-settings-config" aria-hidden="true"></i>
+					<span class="sui-icon-widget-settings-config" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text"><?php esc_html_e( 'Destination actions', 'snapshot' ); ?></span>
 				</button>
 				<ul>
-					<li class="destination-edit"><button><i class="sui-icon-pencil" aria-hidden="true"></i> <?php esc_html_e( 'Edit destination', 'snapshot' ); ?></button></li>
-					<li class="destination-view"><a href="<?php echo esc_attr( $view_url ); ?>" target="_blank" rel="noopener noreferrer"><i class="sui-icon-link" aria-hidden="true"></i> <?php esc_html_e( 'View Directory', 'snapshot' ); ?></a></li>
-					<li class="destination-delete"><button class="sui-option-red"><i class="sui-icon-trash" aria-hidden="true"></i> <?php esc_html_e( 'Delete', 'snapshot' ); ?></button></li>
+					<li class="destination-edit"><button><span class="sui-icon-pencil" aria-hidden="true"></span> <?php esc_html_e( 'Edit destination', 'snapshot' ); ?></button></li>
+					<li class="destination-view"><a href="<?php echo esc_attr( $view_url ); ?>" target="_blank" rel="noopener noreferrer"><span class="sui-icon-link" aria-hidden="true"></span> <?php esc_html_e( 'View Directory', 'snapshot' ); ?></a></li>
+					<li class="destination-delete"><button class="sui-option-red"><span class="sui-icon-trash" aria-hidden="true"></span> <?php esc_html_e( 'Delete', 'snapshot' ); ?></button></li>
 				</ul>
 			</div>
 		</div>

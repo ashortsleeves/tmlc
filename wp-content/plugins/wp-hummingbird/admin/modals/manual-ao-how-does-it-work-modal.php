@@ -24,11 +24,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="sui-box" id="manual-ao-hdiw-modal-header-wrap">
 			<div class="sui-box-header sui-flatten sui-content-center sui-spacing-top--60 ">
 				<span class="sui-button-icon sui-button-float--left sui-tooltip sui-tooltip-right" id="manual-ao-hdiw-modal-expand" data-tooltip="<?php esc_attr_e( 'Expand', 'wphb' ); ?>">
-					<i class="sui-icon-arrows-out sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-arrows-out sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text"><?php esc_html_e( 'Expand', 'wphb' ); ?></span>
 				</span>
 				<span class="sui-button-icon sui-button-float--left sui-tooltip sui-tooltip-right" id="manual-ao-hdiw-modal-collapse" data-tooltip="<?php esc_attr_e( 'Collapse', 'wphb' ); ?>">
-					<i class="sui-icon-arrows-in sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-arrows-in sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text"><?php esc_html_e( 'Collapse', 'wphb' ); ?></span>
 				</span>
 
@@ -47,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</span>
 
 				<span class="sui-button-icon sui-button-float--right" id="manual-ao-hdiw-modal-close-btn" data-modal-close="" >
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text"><?php esc_html_e( 'Close this dialog window', 'wphb' ); ?></span>
 				</span>
 			</div>
@@ -92,7 +92,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						printf( /* translators: %1$s - space, %2$s - link */
 							__( '%1$sFor more detailed information, please check out our in-depth <a href="%2$s" target="_blank" >documentation</a>.', 'wphb' ),
 							'&nbsp;',
-							'https://premium.wpmudev.org/docs/wpmu-dev-plugins/hummingbird/#asset-optimization'
+							'https://wpmudev.com/docs/wpmu-dev-plugins/hummingbird/#asset-optimization'
 						);
 					}
 					?>
@@ -110,7 +110,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</div>
 						<div class="sui-accordion-col-auto">
 							<span class="sui-button-icon sui-accordion-open-indicator" aria-label="<?php esc_attr_e( 'Expand item', 'wphb' ); ?>">
-								<i class="sui-icon-chevron-down" aria-hidden="true"></i>
+								<span class="sui-icon-chevron-down" aria-hidden="true"></span>
 							</span>
 						</div>
 					</div>
@@ -136,7 +136,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</div>
 						<div class="sui-accordion-col-auto">
 							<span class="sui-button-icon sui-accordion-open-indicator" aria-label="<?php esc_attr_e( 'Expand item', 'wphb' ); ?>">
-								<i class="sui-icon-chevron-down" aria-hidden="true"></i>
+								<span class="sui-icon-chevron-down" aria-hidden="true"></span>
 							</span>
 						</div>
 					</div>
@@ -145,32 +145,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<div class="sui-box-body">
 								<ol style="list-style-type: none;">
 									<li>
-										<i class="sui-icon-check" aria-hidden="true" style="margin-left: -20px;"></i>
+										<span class="sui-icon-check" aria-hidden="true" style="margin-left: -20px;"></span>
 										<strong><?php esc_html_e( 'Step 1: Run Asset Optimization Scan', 'wphb' ); ?></strong><br>
 										<?php esc_html_e( "The first step is running Hummingbird's Asset Optimization scan. Note, in some cases when styles/scripts are not properly enqueued by themes/plugins, you might notice issues on the front-end. However, these will be resolved during the upcoming steps.", 'wphb' ); ?>
 									</li>
 									<li>
-										<i class="sui-icon-check" aria-hidden="true" style="margin-left: -20px;"></i>
+										<span class="sui-icon-check" aria-hidden="true" style="margin-left: -20px;"></span>
 										<strong><?php esc_html_e( 'Step 2: Bulk Compress And Combine', 'wphb' ); ?></strong><br>
 										<?php esc_html_e( "Next it's time to bulk compress and combine. This step is as simple as selecting the CSS and JS checkboxes above each section, and applying the compress and combine changes in the bulk updating modal. After making the changes and pushing them live, check your site to ensure everything is working as it should. Also, check your console for any JS errors. If you do come across issues, decompress and separate any of the files causing errors - then save and check again.", 'wphb' ); ?>
 									</li>
 									<li>
-										<i class="sui-icon-check" aria-hidden="true" style="margin-left: -20px;"></i>
+										<span class="sui-icon-check" aria-hidden="true" style="margin-left: -20px;"></span>
 										<strong><?php esc_html_e( 'Step 3: Move All Files To The Footer', 'wphb' ); ?></strong><br>
 										<?php esc_html_e( 'Move all asset files to load from the footer, except jQuery, jQuery Migrate, and core theme JavaScript files. If you\'re unsure what files are from your theme - use the "Filter theme and plugin sort" tool. After you\'re done, click "Publish Changes" to push your changes live.', 'wphb' ); ?>
 									</li>
 									<li>
-										<i class="sui-icon-check" aria-hidden="true" style="margin-left: -20px;"></i>
+										<span class="sui-icon-check" aria-hidden="true" style="margin-left: -20px;"></span>
 										<strong><?php esc_html_e( 'Step 4: Defer Some Of The Scripts', 'wphb' ); ?></strong><br>
 										<?php
 										printf(
 											__( 'The next step is deferring the loading of scripts that are not needed to run immediately after a page has loaded (like a form processing or spam protection scripts). Use the "Force load this file after the page is loaded" button %s, which can be found in the "JavaScripts" section.', 'wphb' ),
-											'<i class="sui-icon-defer" aria-hidden="true" style="padding-left:3px;padding-right:3px;border:1px solid #bbb;"></i>'
+											'<span class="sui-icon-defer" aria-hidden="true" style="padding-left:3px;padding-right:3px;border:1px solid #bbb;"></span>'
 										);
 										?>
 									</li>
 									<li>
-										<i class="sui-icon-check" aria-hidden="true" style="margin-left: -20px;"></i>
+										<span class="sui-icon-check" aria-hidden="true" style="margin-left: -20px;"></span>
 										<strong><?php esc_html_e( 'Step 5: Remove Unused CSS', 'wphb' ); ?></strong><br>
 										<?php esc_html_e( 'Before using Hummingbird to remove unused CSS, make sure to disable and/or remove the plugins that load unused CSS. To identify these plugins, check "Code coverage" in Google Chrome dev tools. Check the stylesheet URL to identify the plugin or theme responsible for that CSS file. Look for the plugins that have a lot of stylesheets in the list with a lot of red in code coverage.', 'wphb' ); ?>
 									</li>
@@ -193,7 +193,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</div>
 						<div class="sui-accordion-col-auto">
 							<span class="sui-button-icon sui-accordion-open-indicator" aria-label="<?php esc_attr_e( 'Expand item', 'wphb' ); ?>">
-								<i class="sui-icon-chevron-down" aria-hidden="true"></i>
+								<span class="sui-icon-chevron-down" aria-hidden="true"></span>
 							</span>
 						</div>
 					</div>
@@ -212,7 +212,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</div>
 						<div class="sui-accordion-col-auto">
 							<span class="sui-button-icon sui-accordion-open-indicator" aria-label="<?php esc_attr_e( 'Expand item', 'wphb' ); ?>">
-								<i class="sui-icon-chevron-down" aria-hidden="true"></i>
+								<span class="sui-icon-chevron-down" aria-hidden="true"></span>
 							</span>
 						</div>
 					</div>
@@ -231,13 +231,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<h4><?php esc_html_e( 'Related Articles', 'wphb' ); ?></h4>
 
 					<p class="sui-description">
-						<a href="https://premium.wpmudev.org/docs/wpmu-dev-setting-configurations/wpmu-dev-performance-optimization-guide/" target="_blank">
+						<a href="https://wpmudev.com/docs/wpmu-dev-setting-configurations/wpmu-dev-performance-optimization-guide/" target="_blank">
 							<?php esc_html_e( 'WPMU DEV Performance Optimization Guide', 'wphb' ); ?>
 						</a><br>
-						<a href="https://premium.wpmudev.org/docs/wpmu-dev-plugins/hummingbird/#performance-test" target="_blank">
+						<a href="https://wpmudev.com/docs/wpmu-dev-plugins/hummingbird/#performance-test" target="_blank">
 							<?php esc_html_e( 'How to Measure Page Speed', 'wphb' ); ?>
 						</a><br>
-						<a href="https://premium.wpmudev.org/docs/wpmu-dev-plugins/hummingbird/#caching" target="_blank">
+						<a href="https://wpmudev.com/docs/wpmu-dev-plugins/hummingbird/#caching" target="_blank">
 							<?php esc_html_e( 'Everything You Need To Know About Caching', 'wphb' ); ?>
 						</a>
 					</p>
@@ -246,7 +246,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php
 						printf(
 							__( 'Didn\'t find the answer you were looking for? Check out our detailed <a href="%s" target="_blank" >documentation</a> or contact our support team for further assistance.', 'wphb' ),
-							'https://premium.wpmudev.org/docs/wpmu-dev-plugins/hummingbird/#asset-optimization'
+							'https://wpmudev.com/docs/wpmu-dev-plugins/hummingbird/#asset-optimization'
 						);
 						?>
 					</p>

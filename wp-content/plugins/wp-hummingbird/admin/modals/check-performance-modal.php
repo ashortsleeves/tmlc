@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<div class="sui-progress-block">
 					<div class="sui-progress">
 						<span class="sui-progress-icon" aria-hidden="true">
-							<i class="sui-icon-loader sui-loading"></i>
+							<span class="sui-icon-loader sui-loading"></span>
 						</span>
 						<div class="sui-progress-text">
 							<span>0%</span>

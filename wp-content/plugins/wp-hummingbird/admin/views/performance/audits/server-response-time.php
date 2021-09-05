@@ -82,7 +82,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php
 						printf( /* translators: %1$s - opening a tag, %2$s - closing a tag */
 							esc_html__( 'Here is the average TTFB behaviour for WPMU DEV hosting that we tested and compared with other hosting providers. Check it out %1$shere%2$s.', 'wphb' ),
-							'<a href="https://premium.wpmudev.org/wpmu-dev-hosting-vs/?utm_source=hummingbird&utm_medium=plugin&utm_campaign=hummingbird_test_response_time_hosting_ttfb_comparison_link" target="_blank">',
+							'<a href="https://wpmudev.com/wpmu-dev-hosting-vs/?utm_source=hummingbird&utm_medium=plugin&utm_campaign=hummingbird_test_response_time_hosting_ttfb_comparison_link" target="_blank">',
 							'</a>'
 						)
 						?>

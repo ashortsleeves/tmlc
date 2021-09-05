@@ -18,7 +18,7 @@
 		<div class="sui-box">
 			<div class="sui-box-header sui-flatten sui-content-center sui-spacing-top--60">
 				<button class="sui-button-icon sui-button-float--right" data-modal-close="">
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 					<span class="sui-screen-reader-text"><?php esc_html_e( 'Close', 'snapshot' ); ?></span>
 				</button>
 
@@ -30,7 +30,7 @@
 			<div class="sui-box-footer sui-flatten sui-content-center">
 				<button class="sui-button sui-button-ghost" data-modal-close=""><?php esc_html_e( 'Cancel', 'snapshot' ); ?></button>
 				<button class="sui-button sui-button-ghost sui-button-red" id="snapshot-settings-reset-settings">
-					<i class="sui-icon-undo" aria-hidden="true"></i>
+					<span class="sui-icon-undo" aria-hidden="true"></span>
 					<?php esc_html_e( 'Reset', 'snapshot' ); ?>
 				</button>
 			</div>

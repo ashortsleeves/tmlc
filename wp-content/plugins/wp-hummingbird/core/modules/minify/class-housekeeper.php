@@ -36,7 +36,7 @@ class Housekeeper {
 	 * Clear all minified and expired groups
 	 *
 	 * Sometimes minification module will not clear them by itself because they
-	 * blong to a plugin or theme that is deactivated so minification won't get them anymore.
+	 * belong to a plugin or theme that is deactivated so minification won't get them anymore.
 	 * This cron job will clear the expired files once a day
 	 */
 	public static function clear_expired_groups() {
@@ -64,9 +64,7 @@ class Housekeeper {
 	 * @since 2.0.0
 	 */
 	private static function maybe_clear_page_cache() {
-		$caching_enabled    = Settings::get_setting( 'enabled', 'page_cache' );
-		$minify_cdn_enabled = Settings::get_setting( 'use_cdn', 'minify' );
-		if ( $caching_enabled && $minify_cdn_enabled ) {
+		if ( Settings::get_setting( 'enabled', 'page_cache' ) ) {
 			Utils::get_module( 'page_cache' )->clear_cache();
 		}
 	}

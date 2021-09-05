@@ -26,8 +26,8 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 						srcset="<?php echo esc_attr( $assets->get_asset( 'img/modal-requirement-success.png' ) ); ?> 1x, <?php echo esc_attr( $assets->get_asset( 'img/modal-requirement-success@2x.png' ) ); ?> 2x"
 					/>
 				</figure>
-				<button class="sui-button-icon sui-button-float--right" onclick="jQuery(window).trigger('snapshot:close_modal')">
-					<i class="sui-icon-close sui-md" aria-hidden="true"></i>
+				<button class="sui-button-icon sui-button-float--right" data-modal-close>
+					<span class="sui-icon-close sui-md" aria-hidden="true"></span>
 				</button>
 				<h3 class="sui-box-title sui-lg" ><?php esc_html_e( 'Requirement passed', 'snapshot' ); ?></h3>
 				<span class="sui-description"><?php esc_html_e( 'You meet the requirement!', 'snapshot' ); ?></span>
@@ -38,7 +38,7 @@ $assets = new \WPMUDEV\Snapshot4\Helper\Assets();
 				<div class="sui-accordion-item sui-success sui-accordion-item">
 
 					<div class="sui-accordion-item-header">
-						<div class="sui-accordion-item-title"><i aria-hidden="true" class="sui-icon-check-tick sui-success"></i>
+						<div class="sui-accordion-item-title"><span aria-hidden="true" class="sui-icon-check-tick sui-success"></span>
 						<?php esc_html_e( 'PHP version is up to date', 'snapshot' ); ?>
 						</div>
 					</div>

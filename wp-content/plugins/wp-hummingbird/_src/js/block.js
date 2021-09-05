@@ -1,6 +1,5 @@
-/* global wphb */
-
 import Fetcher from './utils/fetcher';
+import { getString } from './utils/helpers';
 
 const { PluginPostStatusInfo } = wp.editPost;
 const { registerPlugin } = wp.plugins;
@@ -20,11 +19,10 @@ const handleClearCache = () => {
 const showNotice = () => {
 	const notices = select( 'core/notices' ).getNotices();
 	if ( ! notices.find( ( notice ) => notice.id === 'wphb-gb-notice' ) ) {
-		dispatch( 'core/notices' ).createNotice(
-			'success',
-			wphb.strings.notice,
-			{ id: 'wphb-gb-notice' }
-		);
+		const text = getString( 'notice' );
+		dispatch( 'core/notices' ).createNotice( 'success', text, {
+			id: 'wphb-gb-notice',
+		} );
 	}
 };
 
@@ -38,7 +36,7 @@ const MyPluginPostStatusInfo = () => (
 	<PluginPostStatusInfo className="wphb-clear-cache">
 		<input
 			type="submit"
-			value={ wphb.strings.button }
+			value={ getString( 'button' ) }
 			onClick={ handleClearCache }
 			className="components-button is-button is-default is-secondary is-large editor-post-trash"
 		/>

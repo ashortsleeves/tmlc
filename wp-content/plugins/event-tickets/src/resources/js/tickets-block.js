@@ -668,7 +668,11 @@ window.tribe.tickets.block = {
 		let number = passedNumber;
 		const format = obj.getCurrencyFormatting();
 
-		if ( 0 === parseInt( format.number_of_decimals ) ) {
+		// If there are no number of decimals and no thousands separator we can return the number.
+		if (
+			0 === parseInt( format.number_of_decimals ) &&
+			'' === format.thousands_sep
+		) {
 			return number;
 		}
 
@@ -1667,6 +1671,7 @@ window.tribe.tickets.block = {
 		obj.modalSelector.submit,
 		function( e ) {
 			e.preventDefault();
+
 			const $button = $( this );
 			const $form = $( obj.modalSelector.form );
 			const $metaForm = $( obj.modalSelector.metaForm );
@@ -1739,7 +1744,7 @@ window.tribe.tickets.block = {
 				tribe_tickets_post_id: obj.postId,
 			};
 
-			$( '#tribe_tickets_block_ar_data' ).val( JSON.stringify( params ) );
+			$form.find( '#tribe_tickets_block_ar_data' ).val( JSON.stringify( params ) );
 
 			$form.submit();
 		}

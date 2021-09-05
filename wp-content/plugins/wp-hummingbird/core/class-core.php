@@ -76,8 +76,6 @@ class Core {
 	/**
 	 * Init integration modules.
 	 *
-	 * TODO: Load only when required.
-	 *
 	 * @since 2.1.0
 	 */
 	private function init_integrations() {
@@ -86,7 +84,7 @@ class Core {
 		new Integration\Gutenberg();
 		new Integration\WPH();
 		new Integration\SiteGround();
-		new Integration\Opcache();
+		Integration\Opcache::get_instance();
 		new Integration\Wpengine();
 		new Integration\WPMUDev();
 	}
@@ -166,19 +164,43 @@ class Core {
 	public function admin_bar_menu( $admin_bar ) {
 		$menu = array();
 
-		$pc_module = Utils::get_module( 'page_cache' );
-		$options   = $pc_module->get_options();
-		if ( $pc_module->is_active() && $options['control'] ) {
-			$menu['wphb-clear-cache'] = array( 'title' => __( 'Clear page cache', 'wphb' ) );
+		$cache_control = Settings::get_setting( 'control', 'settings' );
+		if ( $cache_control && ( ! is_multisite() || ! is_network_admin() ) ) {
+			if ( true === $cache_control ) {
+				$menu['wphb-clear-all-cache'] = array( 'title' => __( 'Clear all cache', 'wphb' ) );
+			} else {
+				$active_cache_modules = Utils::get_active_cache_modules();
+				foreach ( $active_cache_modules as $module => $name ) {
+					if ( ! in_array( $module, $cache_control, true ) ) {
+						continue;
+					}
+
+					if ( 'cloudflare' === $module ) {
+						if ( Utils::get_module( 'cloudflare' )->is_connected() && Utils::get_module( 'cloudflare' )->is_zone_selected() ) {
+							$menu['wphb-clear-cloudflare'] = array( 'title' => __( 'Clear Cloudflare cache', 'wphb' ) );
+						}
+
+						continue;
+					}
+
+					$menu[ 'wphb-clear-cache-' . $module ] = array(
+						'title' => __( 'Clear', 'wphb' ) . ' ' . strtolower( $name ),
+						'meta'  => array(
+							'onclick' => "WPHBGlobal.clearCache(\"{$module}\");",
+						),
+					);
+				}
+			}
 		}
 
-		if ( $pc_module->is_active() && is_multisite() && is_network_admin() ) {
+		if ( is_multisite() && is_network_admin() ) {
 			$menu['wphb-clear-cache-network-wide'] = array( 'title' => __( 'Clear page cache on all subsites', 'wphb' ) );
 		}
 
 		if ( ! is_admin() ) {
-			$avoid_minify = filter_input( INPUT_GET, 'avoid-minify', FILTER_VALIDATE_BOOLEAN );
 			if ( Utils::get_module( 'minify' )->is_active() ) {
+				$avoid_minify = filter_input( INPUT_GET, 'avoid-minify', FILTER_VALIDATE_BOOLEAN );
+
 				$menu['wphb-page-minify'] = array(
 					'title' => $avoid_minify ? __( 'See this page minified', 'wphb' ) : __( 'See this page unminified', 'wphb' ),
 					'href'  => $avoid_minify ? remove_query_arg( 'avoid-minify' ) : add_query_arg( 'avoid-minify', 'true' ),
@@ -210,6 +232,7 @@ class Core {
 					'parent' => $menu_args['id'],
 					'title'  => $tab['title'],
 					'href'   => isset( $tab['href'] ) ? $tab['href'] : '#',
+					'meta'   => isset( $tab['meta'] ) ? $tab['meta'] : '',
 				)
 			);
 		}
@@ -234,6 +257,7 @@ class Core {
 			'wphbGlobal',
 			array(
 				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+				'nonce'   => wp_create_nonce( 'wphb-fetch' ),
 			)
 		);
 	}

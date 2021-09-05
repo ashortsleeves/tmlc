@@ -171,6 +171,7 @@ class Tables extends Task {
 		delete_site_option( Controller\Ajax\Backup::SNAPSHOT_RUNNING_BACKUP );
 		delete_site_option( Controller\Ajax\Backup::SNAPSHOT_RUNNING_BACKUP_STATUS );
 		delete_transient( 'snapshot_listed_backups' );
+		delete_transient( 'snapshot_current_stats' );
 
 		$this->flush_object_cache();
 	}

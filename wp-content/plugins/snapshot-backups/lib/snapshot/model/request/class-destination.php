@@ -131,4 +131,21 @@ class Destination extends Model\Request {
 
 		return $response;
 	}
+
+	/**
+	 * Delete ALL destinations.
+	 *
+	 * @return array|mixed|object API response.
+	 */
+	public function delete_all_destinations() {
+		$method         = 'delete';
+		$this->endpoint = 'tpd_credsls';
+		$path           = $this->get_api_url();
+
+		$data = array();
+
+		$response = $this->request( $path, $data, $method );
+
+		return $response;
+	}
 }

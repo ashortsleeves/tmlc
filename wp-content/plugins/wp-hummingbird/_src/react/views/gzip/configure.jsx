@@ -6,7 +6,7 @@ import React from 'react';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+const { __ } = wp.i18n;
 
 /**
  * Internal dependencies
@@ -72,7 +72,7 @@ export default class GzipConfig extends React.Component {
 		const serverSelect = (
 			<Select
 				selectId="wphb-server-type"
-				label={ __( 'Server type' ) }
+				label={ __( 'Server type', 'wphb' ) }
 				items={ serverList }
 				selected={ this.state.currentServer }
 				onChange={ this.handleServerChange }
@@ -88,8 +88,8 @@ export default class GzipConfig extends React.Component {
 				htaccessWritable={ this.props.data.htaccess_writable }
 				htaccessWritten={ this.props.data.htaccess_written }
 				serverSnippets={ this.props.data.snippets }
-				enableGzip={ this.props.enableGzip }
-				disableGzip={ this.props.disableGzip }
+				enable={ this.props.enableGzip }
+				disable={ this.props.disableGzip }
 				server={ this.props.data.server_name }
 			/>
 		);
@@ -97,21 +97,23 @@ export default class GzipConfig extends React.Component {
 		return (
 			<Box
 				loading={ this.props.loading }
-				title={ __( 'Configure' ) }
+				title={ __( 'Configure', 'wphb' ) }
 				boxClass={ [ 'box-gzip-settings' ] }
 				content={
 					<React.Fragment>
 						<SettingsRow
-							label={ __( 'Server type' ) }
+							label={ __( 'Server type', 'wphb' ) }
 							description={ __(
-								'Choose your server type. If you don’t know this, please contact your hosting provider.'
+								'Choose your server type. If you don’t know this, please contact your hosting provider.',
+								'wphb'
 							) }
 							content={ serverSelect }
 						/>
 						<SettingsRow
 							label={ __( 'Enable compression' ) }
 							description={ __(
-								'Follow the instructions to activate GZip compression for this website.'
+								'Follow the instructions to activate GZip compression for this website.',
+								'wphb'
 							) }
 							content={ serverInstructions }
 						/>

@@ -15,7 +15,7 @@ function defender_init_routes() {
 			'disable_2fa'             => 'disable_2fa',
 			'send_backup_code'        => [ 'send_backup_code', true ]
 		],
-		'security_tweaks'  => [
+		'security_tweaks'   => [
 			'process'                  => 'process',
 			'ignore'                   => 'ignore',
 			'revert'                   => 'revert',
@@ -23,6 +23,7 @@ function defender_init_routes() {
 			'recheck'                  => 'recheck',
 			'bulk'                     => 'bulk_hub',
 			'update_security_reminder' => 'update_security_reminder',
+			'update_autogenerate_flag' => 'update_autogenerate_flag',
 		],
 		'ip_lockout'       => [
 			'update_settings'      => 'save_settings',
@@ -67,7 +68,7 @@ function defender_init_routes() {
 			'confirm_subscribe' => [ 'confirm_subscribe', true ]
 		],
 		'dashboard'        => [
-			'hide_new_features' => 'hide_new_features',
+			'hide_new_features'           => 'hide_new_features',
 		],
 		'settings'         => [
 			'update_settings' => 'save_settings',

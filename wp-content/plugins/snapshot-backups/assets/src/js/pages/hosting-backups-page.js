@@ -3,39 +3,6 @@
  */
 ;(function($) {
 
-	/**
-	 * Tabs in Backups page. Array - [box selector, vertical selector, mobile nav selector].
-	 *
-	 * @type {Object}
-	 */
-	var navbar_tabs = {
-		'backups': ['.snapshot-hosting-backups-backups', '.snapshot-vertical-backups', '#undefined-option-backups'],
-		'settings': ['.snapshot-hosting-backups-settings', '.snapshot-vertical-settings', '#undefined-option-settings'],
-	};
-
-	/**
-	 * Toggles the navbar to show specified tab.
-	 *
-	 * @param {string} tab Tab in Backups page.
-	 */
-	function toggle_navbar(tab) {
-		for (var current_tab in navbar_tabs) {
-			var box_selector = navbar_tabs[current_tab][0];
-			var vertical_selector = navbar_tabs[current_tab][1];
-
-			if (tab === current_tab) {
-				// Toggle to a box.
-				$('.snapshot-page-main').find(box_selector).show();
-				// Make a sidenav active.
-				$('.snapshot-page-main').find(vertical_selector).addClass('current');
-			} else {
-				$('.snapshot-page-main').find(box_selector).hide();
-				$('.snapshot-page-main').find(vertical_selector).removeClass('current');
-			}
-		}
-		return false;
-	}
-
 	function get_hosting_backups() {
 		var deferred = $.Deferred();
 
@@ -93,7 +60,7 @@
 			$('.snapshot-page-hosting-backups .snapshot-last-hosting-backup').text(data.last_backup_time);
 			$('.snapshot-page-hosting-backups .snapshot-next-hosting-backup').text(data.next_backup_time);
 			$('.snapshot-page-hosting-backups .snapshot-hosting-backup-schedule')
-					.append('<i class="sui-icon-lock" style="margin-right: 5px;" aria-hidden="true"></i>')
+					.append('<span class="sui-icon-lock" style="margin-right: 5px;" aria-hidden="true"></span>')
 					.append($('<span></span>').text(data.backup_schedule))
 					.attr('data-tooltip', data.backup_schedule_tooltip)
 			;
@@ -140,15 +107,6 @@
 
 	$(function () {
 		if ( $( '.snapshot-page-hosting-backups' ).length ) {
-			for (var current_tab in navbar_tabs) {
-				var vertical_selector = navbar_tabs[current_tab][1];
-				var mobile_nav_selector = navbar_tabs[current_tab][2];
-				$('.snapshot-page-main').find(vertical_selector)
-					.on('click', toggle_navbar.bind(this, current_tab));
-				$('.snapshot-page-main .sui-mobile-nav').find(mobile_nav_selector)
-					.on('click', toggle_navbar.bind(this, current_tab));
-			}
-
 			$('.snapshot-hosting-backups-backups .reload-backups').on('click', load_hosting_backups);
 			load_hosting_backups();
 

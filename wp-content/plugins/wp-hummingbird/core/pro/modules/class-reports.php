@@ -44,6 +44,8 @@ abstract class Reports extends Module {
 
 		// Process report cron task.
 		add_action( 'wphb_' . $this::$module . '_report', array( $this, 'process_report' ) );
+
+		add_action( 'wphb_load_admin_page_wphb-performance', array( $this, 'add_default_recipient' ) );
 	}
 
 	/**
@@ -274,5 +276,21 @@ abstract class Reports extends Module {
 			}
 		}
 	}
+
+	/**
+	 * Add default recipient for performance reports.
+	 *
+	 * @since 2.7.1
+	 */
+	public function add_default_recipient() {
+		$options = Utils::get_module( 'performance' )->get_options();
+
+		// Add recipient for notifications if none exist.
+		if ( ! isset( $options['reports']['recipients'] ) || empty( $options['reports']['recipients'] ) ) {
+			$options['reports']['recipients'][] = Utils::get_user_for_report();
+			Utils::get_module( 'performance' )->update_options( $options );
+		}
+	}
+
 
 }

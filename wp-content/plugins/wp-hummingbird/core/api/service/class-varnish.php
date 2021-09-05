@@ -46,6 +46,9 @@ class Varnish extends Service {
 	 */
 	public function purge_cache( $path ) {
 		$this->request->set_timeout( 2 );
+		// Try the CURL PURGE/PURGEALL method.
+		$this->request->clear_cache( trailingslashit( $path ) );
+		// Try the remote request PURGE call.
 		return $this->request->purge( trailingslashit( $path ) . '.*' );
 	}
 

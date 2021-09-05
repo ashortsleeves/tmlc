@@ -43,6 +43,9 @@ class Files extends Task\Backup\Zipstream {
 		// Enable output of HTTP headers.
 		$zipstream_options = new \ZipStream\Option\Archive();
 		$zipstream_options->setSendHttpHeaders( true );
+		if ( Settings::get_zipstream_flush_buffer() ) {
+			$zipstream_options->setFlushOutput(true);
+		}
 
 		$this->zipstream_files( $model, $zipstream_options );
 	}
@@ -60,6 +63,15 @@ class Files extends Task\Backup\Zipstream {
 		// Create a new zipstream object.
 		$zip             = new \ZipStream\ZipStream( $model->name_zipstream(), $options );
 		$requested_files = $model->get( 'requested_files' );
+
+		/**
+		 * Filters the requested files at zipstream stage.
+		 *
+		 * @since 4.3.5
+		 *
+		 * @param array $requested_files List of requested files to include in Zip.
+		 */
+		$requested_files = apply_filters( 'snapshot4_zipstream_requested_files', $requested_files );
 
 		foreach ( $requested_files as $file ) {
 			$file_path = trailingslashit( Fs::get_root_path() ) . ltrim( $file, '/' );

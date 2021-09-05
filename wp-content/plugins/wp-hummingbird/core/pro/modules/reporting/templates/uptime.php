@@ -34,7 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								</td>
 								<td class="report-list-item-result" style="border-collapse: collapse !important;font-family: 'Open Sans', Arial, sans-serif;font-size: 22px;font-weight: 600;letter-spacing: -0.42px;line-height: 22px;margin: 0;min-width: 65px;padding: 18px 0;text-align: right;vertical-align: top">
 									<?php echo esc_html( $last_test->availability ); ?>
-									<img src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-up@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-up.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-up@2x.png' ); ?> 2x" style="height: 20px;margin: 0 0 -2px 10px">
+									<img alt="" src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-up@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-up.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-up@2x.png' ); ?> 2x" style="height: 20px;margin: 0 0 -2px 10px">
 								</td>
 							</tr>
 							<tr class="report-list-item" style="border-bottom: 1px solid #F2F2F2;padding: 0;text-align: left;vertical-align: top">
@@ -50,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 									}
 									echo '<span style="font-size: 15px">min</span>';
 									?>
-									<img src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-down@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-down.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-down@2x.png' ); ?> 2x" style="height: 20px;margin: 0 0 -2px 10px">
+									<img alt="" src="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-down@2x.png' ); ?>" srcset="<?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-down.png' ); ?>, <?php echo esc_url( WPHB_DIR_URL . 'core/pro/modules/reporting/templates/images/icon-down@2x.png' ); ?> 2x" style="height: 20px;margin: 0 0 -2px 10px">
 								</td>
 							</tr>
 							<tr class="report-list-item" style="border-bottom: 1px solid #F2F2F2;padding: 0;text-align: left;vertical-align: top">
@@ -76,7 +76,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<td class="report-list-item-result" style="border-collapse: collapse !important;color: #888888;font-family: 'Open Sans', Arial, sans-serif;font-size: 15px;font-weight: 600;letter-spacing: -0.29px;line-height: 22px;margin: 0;min-width: 65px;padding: 18px 0;text-align: right;vertical-align: top">
 									<?php
 									if ( isset( $last_test->up_since ) && false !== $last_test->up_since ) {
-										$gmt_date  = date( 'Y-m-d H:i:s', $last_test->up_since );
+										$gmt_date  = gmdate( 'Y-m-d H:i:s', $last_test->up_since );
 										$site_date = get_date_from_gmt( $gmt_date, get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) );
 										echo esc_html( $site_date );
 									} else {

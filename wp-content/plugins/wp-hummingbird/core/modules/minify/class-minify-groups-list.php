@@ -181,7 +181,7 @@ class Minify_Groups_List {
 	 * Split a group
 	 *
 	 * $new_handles_order is a multidimensional array that
-	 * will tell the function how the new splitted groups must be
+	 * will tell the function how the new split groups must be
 	 *
 	 * for instance:
 	 * Let's say that the group has the following handles:
@@ -200,7 +200,7 @@ class Minify_Groups_List {
 	 *      )
 	 * )
 	 *
-	 * This will delete hte original group and create two new groups with those handles
+	 * This will delete the original group and create two new groups with those handles
 	 *
 	 * The function will keep the groups order instead of adding them at the end of the list
 	 *
@@ -299,7 +299,10 @@ class Minify_Groups_List {
 	}
 
 	/**
-	 * Mark the groups to be processed or not
+	 * Mark the groups to be processed or not.
+	 *
+	 * Groups that need to be processed will have an asset that either requires minification, combine or should be
+	 * served via CDN. Basically, anything that needs to be sent out to our API.
 	 */
 	public function preprocess_groups() {
 		foreach ( $this->get_groups() as $group ) {
@@ -321,7 +324,7 @@ class Minify_Groups_List {
 				// Delete file in case there's one (but is expired).
 				$group->delete_file();
 			} else {
-				// The group won't be processed
+				// The group won't be processed.
 				// Use the original handles and their URLs instead.
 				$this->set_group_status( $group->hash, 'only-handles' );
 			}

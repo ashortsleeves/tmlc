@@ -38,11 +38,16 @@ if ( 'performance' === $module ) {
 	<div class="sui-box-settings-row <?php echo $enabled ? '' : 'wphb-first-of-type'; ?>">
 		<div class="sui-box-settings-col-1">
 			<span class="sui-settings-label">
-				<?php esc_html_e( 'Configure', 'wphb' ); ?>
+				<?php esc_html_e( 'Email Reports', 'wphb' ); ?>
 			</span>
 			<span class="sui-description">
 				<?php esc_html_e( 'Choose from daily, weekly or monthly email reports.', 'wphb' ); ?>
 			</span>
+			<?php if ( 'uptime' === $module && is_network_admin() ) : ?>
+				<span class="sui-description">
+					<?php esc_html_e( 'Note: Scheduled uptime reports are only available for network sites and not subsites. This is because the network sites and subsites are located on the same server, meaning that subsite uptime reports would be redundant.', 'wphb' ); ?>
+				</span>
+			<?php endif; ?>
 		</div>
 		<div class="sui-box-settings-col-2">
 			<div class="sui-form-field">
@@ -81,7 +86,7 @@ if ( 'performance' === $module ) {
 								<input data-id="<?php echo esc_attr( $key ); ?>" type="hidden" id="report-recipient" name="report-recipients[]" value="<?php echo esc_attr( $input_value ); ?>">
 								<span class="sui-recipient-name"><?php echo esc_html( $id['name'] ); ?></span>
 								<span class="sui-recipient-email"><?php echo esc_html( $id['email'] ); ?></span>
-								<button data-id="<?php echo esc_attr( $key ); ?>" type="button" class="sui-button-icon wphb-remove-recipient"><i class="sui-icon-trash" aria-hidden="true"></i></button>
+								<button data-id="<?php echo esc_attr( $key ); ?>" type="button" class="sui-button-icon wphb-remove-recipient"><span class="sui-icon-trash" aria-hidden="true"></span></button>
 							</div>
 						<?php endforeach; ?>
 					<?php else : ?>
@@ -94,12 +99,12 @@ if ( 'performance' === $module ) {
 					<?php endif; ?>
 				</div>
 				<a class="sui-button sui-button-ghost sui-add-recipient" data-modal-open="wphb-add-recipient-modal" data-modal-open-focus="reporting-first-name" data-modal-mask="true">
-					<i class="sui-icon-plus" aria-hidden="true"></i>
+					<span class="sui-icon-plus" aria-hidden="true"></span>
 					<?php esc_html_e( 'Add Recipient', 'wphb' ); ?>
 				</a>
 				<div class="sui-form-field">
 					<label for="report-frequency" class="sui-label"><?php esc_html_e( 'Schedule', 'wphb' ); ?></label>
-					<select name="report-frequency" id="report-frequency">
+					<select name="report-frequency" class="sui-select" data-width="250" id="report-frequency">
 						<option <?php selected( 1, $frequency ); ?> value="1">
 							<?php esc_html_e( 'Daily', 'wphb' ); ?>
 						</option>
@@ -117,7 +122,7 @@ if ( 'performance' === $module ) {
 						<label class="sui-label" for="report-day">
 							<?php esc_html_e( 'Day of the week', 'wphb' ); ?>
 						</label>
-						<select name="report-day" id="report-day">
+						<select name="report-day" class="sui-select" data-width="250" id="report-day">
 							<?php foreach ( \Hummingbird\Core\Utils::get_days_of_week() as $day ) : ?>
 								<option <?php selected( $day, $send_day ); ?> value="<?php echo esc_attr( $day ); ?>">
 									<?php echo esc_html( ucfirst( $day ) ); ?>
@@ -126,10 +131,10 @@ if ( 'performance' === $module ) {
 						</select>
 					</div>
 					<div class="sui-col sui-form-field sui-no-margin-bottom days-container sui-hidden" data-type="month">
-						<label class="sui-label" for="report-day">
+						<label class="sui-label" for="report-day-month">
 							<?php esc_html_e( 'Day of the month', 'wphb' ); ?>
 						</label>
-						<select name="report-day-month" id="report-day">
+						<select name="report-day-month" id="report-day-month" class="sui-select" data-width="250">
 							<?php
 							$days = range( 1, 28 );
 							if ( ! in_array( $send_day, $days ) ) {
@@ -147,7 +152,7 @@ if ( 'performance' === $module ) {
 						<label class="sui-label" for="report-time">
 							<?php esc_html_e( 'Time of day', 'wphb' ); ?>
 						</label>
-						<select name="report-time" id="report-time">
+						<select name="report-time" id="report-time" class="sui-select" data-width="250">
 							<?php foreach ( \Hummingbird\Core\Utils::get_times() as $time ) : ?>
 								<option <?php selected( $time, $send_time ); ?> value="<?php echo esc_attr( $time ); ?>">
 									<?php echo esc_html( strftime( '%I:%M %p', strtotime( $time ) ) ); ?>

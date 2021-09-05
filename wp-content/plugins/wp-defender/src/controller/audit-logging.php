@@ -5,8 +5,8 @@ namespace WP_Defender\Controller;
 use Calotes\Component\Request;
 use Calotes\Component\Response;
 use Calotes\Helper\HTTP;
-use Calotes\Helper\Route;
 use WP_Defender\Component\Audit;
+use WP_Defender\Component\Config\Config_Hub_Helper;
 use WP_Defender\Controller2;
 use WP_Defender\Model\Audit_Log;
 use WP_Defender\Model\Notification\Audit_Report;
@@ -51,17 +51,32 @@ class Audit_Logging extends Controller2 {
 			 * We will schedule the time for flush data into cloud
 			 */
 			if ( ! wp_next_scheduled( 'audit_sync_events' ) ) {
-				wp_schedule_event( time(), 'hourly', 'audit_sync_events' );
+				wp_schedule_event( time() + 15, 'hourly', 'audit_sync_events' );
 			}
 			add_action( 'audit_sync_events', array( &$this, 'sync_events' ) );
+
+			/**
+			 * We will schedule the time to clean up old logs
+			 */
+			if ( ! wp_next_scheduled( 'audit_clean_up_logs' ) ) {
+				wp_schedule_event( time(), 'hourly', 'audit_clean_up_logs' );
+			}
+			add_action( 'audit_clean_up_logs', array( &$this, 'clean_up_audit_logs' ) );
 		}
 	}
 
 	/**
-	 * Sync all the events into cloud, this will happen per hourly basic
+	 * Sync all the events into cloud, this will happen per hourly basis
 	 */
 	public function sync_events() {
 		$this->service->flush();
+	}
+
+	/**
+	 * Clean up all the old logs from the local storage, this will happen per hourly basis
+	 */
+	public function clean_up_audit_logs() {
+		$this->service->audit_clean_up_logs();
 	}
 
 	/**
@@ -259,9 +274,6 @@ class Audit_Logging extends Controller2 {
 		return $text;
 	}
 
-	/**
-	 *
-	 */
 	public function enqueue_assets() {
 		if ( ! $this->is_page_active() ) {
 			return;
@@ -296,7 +308,12 @@ class Audit_Logging extends Controller2 {
 		wp_send_json_success( $this->summary_data() );
 	}
 
-	public function summary_data() {
+	/**
+	 * @param bool $for_hub. Default 'false' because it's displayed on site summary sections.
+	 *
+	 * @return array
+	*/
+	public function summary_data( $for_hub = false) {
 		$date_from   = ( new \DateTime( date( 'Y-m-d', strtotime( '-30 days' ) ) ) )->setTime(
 			0,
 			0,
@@ -310,16 +327,18 @@ class Audit_Logging extends Controller2 {
 		$date_from   = ( new \DateTime( 'now', wp_timezone() ) )->modify( '-24 hours' )->setTime( 0, 0, 0 )->getTimestamp();
 		$day_count   = Audit_Log::count( $date_from, $date_to );
 		if ( is_object( $last ) ) {
-			$last = $this->format_date_time( $last->timestamp );
+			$last = $for_hub
+				? $this->persistent_hub_datetime_format( $last->timestamp )
+				: $this->format_date_time( $last->timestamp );
 		} else {
 			$last = 'n/a';
 		}
 
 		return array(
 			'monthCount' => $month_count,
-			'lastEvent'  => $last,
 			'weekCount'  => $week_count,
-			'dayCount'   => $day_count
+			'dayCount'   => $day_count,
+			'lastEvent'  => $last,
 		);
 	}
 
@@ -341,6 +360,8 @@ class Audit_Logging extends Controller2 {
 		if ( $this->model->validate() ) {
 			$this->model->save();
 		}
+
+		Config_Hub_Helper::set_clear_active_flag();
 
 		return new Response(
 			true,
@@ -480,6 +501,39 @@ class Audit_Logging extends Controller2 {
 			}
 		} else {
 			$strings = array( __( 'Inactive', 'wpdef' ) );
+		}
+
+		return $strings;
+	}
+
+	/**
+	 * @param array $config
+	 * @param bool $is_pro
+	 *
+	 * @return array
+	 */
+	public function config_strings( $config, $is_pro ) {
+		if ( $is_pro ) {
+			if ( $config['enabled'] ) {
+				$strings = array( __( 'Active', 'wpdef' ) );
+				if ( isset( $config['report'] ) && 'enabled' === $config['report'] ) {
+					$strings[] = sprintf(
+					/* translators: option frequency */
+						__( 'Email reports sending %s', 'wpdef' ),
+						$config['frequency']
+					);
+				}
+			} else {
+				$strings = array( __( 'Inactive', 'wpdef' ) );
+			}
+		} else {
+			$strings = array(
+				sprintf(
+				/* translators: ... */
+					__( 'Inactive %s', 'wpdef' ),
+					'<span class="sui-tag sui-tag-pro">Pro</span>'
+				)
+			);
 		}
 
 		return $strings;

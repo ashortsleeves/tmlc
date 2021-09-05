@@ -11,6 +11,7 @@ use WPMUDEV\Snapshot4\Helper\Fs;
 use WPMUDEV\Snapshot4\Helper\Log;
 use WPMUDEV\Snapshot4\Helper\Singleton;
 use WPMUDEV\Snapshot4\Controller;
+use WPMUDEV\Snapshot4\Integrations\Wphse;
 
 /**
  * Main class
@@ -68,6 +69,13 @@ class Main extends Singleton {
 
 		add_action( 'snapshot4_add_empty_index', array( $this, 'add_empty_index' ) );
 
+		// Add a cron to clean up log files older than 50 days.
+		if ( ! wp_next_scheduled( 'snapshot4_clean_log_files' ) ) {
+			wp_schedule_event( time(), 'daily', 'snapshot4_clean_log_files' );
+		}
+
+		add_action( 'snapshot4_clean_log_files', array( $this, 'clean_log_files' ) );
+
 		add_action( 'snapshot4_retry_region_migration', array( $this, 'retry_region_migration' ) );
 
 		// Allow WP Heartbeat API on WP Engine for Snapshot pages.
@@ -86,74 +94,15 @@ class Main extends Singleton {
 				add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_snapshot_scripts' ) );
 			}
 		}
+
+		$this->load_integrations();
 	}
 
 	/**
 	 * Handles local and remote schedules to ensure they're always in agreement.
 	 */
 	public static function handle_schedules() {
-		$stored_schedule = get_site_option( 'wp_snapshot_backup_schedule' );
-
-		if ( isset( $stored_schedule['schedule_id'] ) ) {
-			// We have a schedule in the local db, lets make the service-side schedule like the local one.
-			// @TODO: Refactor this *please*.
-			$request_data['status']             = isset( $stored_schedule['bu_status'] ) ? $stored_schedule['bu_status'] : null;
-			$request_data['schedule_id']        = isset( $stored_schedule['schedule_id'] ) ? $stored_schedule['schedule_id'] : null;
-			$request_data['site_id']            = isset( $stored_schedule['site_id'] ) ? $stored_schedule['site_id'] : null;
-			$request_data['frequency']          = isset( $stored_schedule['bu_frequency'] ) ? $stored_schedule['bu_frequency'] : null;
-			$request_data['files']              = isset( $stored_schedule['bu_files'] ) ? $stored_schedule['bu_files'] : null;
-			$request_data['tables']             = isset( $stored_schedule['bu_tables'] ) ? $stored_schedule['bu_tables'] : null;
-			$request_data['time']               = isset( $stored_schedule['bu_time'] ) ? $stored_schedule['bu_time'] : null;
-			$request_data['frequency_weekday']  = isset( $stored_schedule['bu_frequency_weekday'] ) ? $stored_schedule['bu_frequency_weekday'] : null;
-			$request_data['frequency_monthday'] = isset( $stored_schedule['bu_frequency_monthday'] ) ? $stored_schedule['bu_frequency_monthday'] : null;
-
-			$schedule_model = new Model\Schedule( $request_data );
-			$request_model  = new Model\Request\Schedule();
-
-			$reset_schedule_args                   = array();
-			$reset_schedule_args['request_model']  = $request_model;
-			$reset_schedule_args['schedule_model'] = $schedule_model;
-			$reset_schedule_args['action']         = 'update';
-
-			$task = new Task\Request\Schedule();
-
-			$task->apply( $reset_schedule_args );
-		} else {
-			// We have no schedules in the local db, lets ensure we dont have schedules system-side either.
-
-			$request_model = new Model\Request\Schedule();
-			$schedule      = new Model\Schedule( array() );
-			$response      = $request_model->schedule_request( 'get_status_all', $schedule );
-			$response_code = wp_remote_retrieve_response_code( $response );
-
-			if ( 200 === $response_code ) {
-				$all_schedules = json_decode( wp_remote_retrieve_body( $response ), true );
-
-				if ( is_array( $all_schedules ) && isset( $all_schedules[0]['schedule_id'] ) ) {
-					// We have confirmed we have a schedule system-side, lets take its id and delete it please.
-
-					$request_data = array(
-						'schedule_id' => $all_schedules[0]['schedule_id'],
-					);
-
-					// But first, lets completely delete the local entry, to ensure no funny business.
-					delete_site_option( 'wp_snapshot_backup_schedule' );
-
-					// Ok, lets delete the remote schedule too now.
-					$schedule_model = new Model\Schedule( $request_data );
-					$request_model  = new Model\Request\Schedule();
-
-					$reset_schedule_args                   = array();
-					$reset_schedule_args['request_model']  = $request_model;
-					$reset_schedule_args['schedule_model'] = $schedule_model;
-					$reset_schedule_args['action']         = 'hard_delete';
-
-					$task = new Task\Request\Schedule();
-
-					$task->apply( $reset_schedule_args );
-				}
-			}
-		}
+		// @TODO: remove this, since the schedule is now stored only on the API site.
 	}
 
 	/**
@@ -161,6 +110,27 @@ class Main extends Singleton {
 	 */
 	public static function add_empty_index() {
 		Log::check_dir( true );
+	}
+
+	/**
+	 * Cleans up log files older than 50 days.
+	 */
+	public static function clean_log_files() {
+		$dir      = Log::check_dir();
+		$filename = path_join( $dir, 'snapshot-*.log' );
+		$files    = glob( $filename );
+
+		$now         = time();
+		$time_expiry = 60 * 60 * 24 * 50; // 50 days.
+		$time_expiry = apply_filters( 'snapshot_log_expiry', $time_expiry );
+
+		if ( ! empty( $files ) ) {
+			foreach ( $files as $file ) {
+				if ( $now - filemtime( $file ) >= $time_expiry && 'log' === pathinfo( $file, PATHINFO_EXTENSION ) ) {
+					unlink( $file );
+				}
+			}
+		}
 	}
 
 	/**
@@ -184,7 +154,7 @@ class Main extends Singleton {
 		$args                  = $validated_params;
 		$args['request_model'] = new Model\Request\Region();
 
-		$region = $get_task->apply( $args );
+		$result = $get_task->apply( $args );
 
 		if ( $get_task->has_errors() ) {
 			// The request failed, lets repeat in an hour.
@@ -192,6 +162,7 @@ class Main extends Singleton {
 			return;
 		}
 
+		$region = isset( $result['bu_region'] ) ? $result['bu_region'] : null;
 		if ( ! empty( $region ) ) {
 			// Region is set system-side, no need to update it.
 			return;
@@ -281,11 +252,14 @@ class Main extends Singleton {
 			$v3_local = true;
 		}
 
+		$is_branding_hidden = Helper\Assets::is_branding_hidden();
+
 		$out->render(
 			'common/v4-admin-prompt',
 			array(
-				'assets'   => $assets,
-				'v3_local' => $v3_local,
+				'assets'             => $assets,
+				'v3_local'           => $v3_local,
+				'is_branding_hidden' => $is_branding_hidden,
 			)
 		);
 
@@ -330,4 +304,12 @@ class Main extends Singleton {
 		wp_nonce_field( 'snapshot_migrate_region', '_wpnonce-snapshot_migrate_region' );
 	}
 
+	/**
+	 * Load the integrations.
+	 *
+	 * @return void
+	 */
+	public function load_integrations() {
+		new Wphse();
+	}
 }

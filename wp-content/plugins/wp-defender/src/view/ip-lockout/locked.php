@@ -6,7 +6,7 @@
 	<meta http-equiv="Cache-control" content="max-age=0">
 	<title><?php
 		$devman_img = defender_asset_url( '/assets/img/def-stand.svg' );
-		$info       = ( new \WP_Defender\Behavior\WPMUDEV() )->white_label_status();
+		$info       = defender_white_label_status();
 		if ( strlen( $info['hero_image'] ) > 0 ) {
 			$devman_img = $info['hero_image'];
 		}
@@ -48,6 +48,7 @@
 			background-image: url("<?php echo $devman_img ?>");
 			background-repeat: no-repeat;
 			background-size: contain;
+			background-position: center;
 			margin-bottom: 30px;
 		}
 
@@ -70,12 +71,23 @@
 <body>
 <div class="wp-defender">
 	<div class="container">
-		<div class="image"></div>
+	<?php
+		if (
+			( $info['hide_branding'] === false ) ||
+			( $info['hide_branding'] === true && ! empty ( $info['hero_image'] ) )
+		) {
+			echo '<div class="image"></div>';
+		}
+	?>
 		<p><?php echo $message ?></p>
 	</div>
-	<div class="powered"><?php esc_html_e( "Powered by", 'wpdef' ) ?>
-		<strong><?php esc_html_e( "Defender", 'wpdef' ) ?></strong>
-	</div>
+	<?php if ( ! $info['hide_doc_link'] ) { ?>
+		<div class="powered"><?php esc_html_e( "Powered by", 'wpdef' ) ?>
+			<strong><?php esc_html_e( "Defender", 'wpdef' ) ?></strong>
+		</div>
+	<?php
+	}
+	?>
 </div>
 </body>
 </html>

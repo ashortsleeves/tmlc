@@ -44,8 +44,8 @@
 	}
 
 	.sui-accordion-item-body .sui-box-body {
-		p, span, li { color: #888 !important; }
-		i { margin-right: 7px; }
+		p, span:not([class*="sui-icon-"]):not([class*="sui-tag-"]):not([class*="select2-"]), li { color: #888 !important; }
+		[class*="sui-icon-"] { margin-right: 7px; }
 
 		ol {
 			margin-left: 13px;

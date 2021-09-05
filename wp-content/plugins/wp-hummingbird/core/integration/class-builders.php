@@ -23,20 +23,26 @@ class Builders {
 	 * Builders constructor.
 	 */
 	public function __construct() {
-		// Some page builders may fetch content with REST API requests
+		// Some page builders may fetch content with REST API requests.
 		add_action( 'parse_request', array( $this, 'maybe_deactivate_minify_on_rest' ) );
 
 		// Clear cache after layout save.
 		add_action( 'fl_builder_after_save_layout', array( $this, 'beaver_builder_clear_cache' ) );
 
 		/**
-		 * Conrnerstone actions that require to deactivate the minify module.
+		 * Cornerstone actions that require to deactivate the minify module.
 		 * Taken from Cornerstone_Integration_Caching -> __construct().
 		 */
 		add_action( 'cornerstone_load_builder', array( $this, 'deactivate_minify_module' ) );
 		add_action( 'cornerstone_before_boot_app', array( $this, 'deactivate_minify_module' ) );
 		add_action( 'cornerstone_before_custom_endpoint', array( $this, 'deactivate_minify_module' ) );
 		add_action( 'cornerstone_before_load_preview', array( $this, 'deactivate_minify_module' ) );
+
+		// Themeco Pro theme page builder.
+		add_action( 'cornerstone_before_boot_app', array( $this, 'deactivate_minify_module' ) );
+
+		// ACF options pages compatibility.
+		add_action( 'acf/save_post', array( $this, 'purge_page_cache' ) );
 
 		if ( $this->is_tag_div_editor() ) {
 			$this->deactivate_minify_module();
@@ -99,6 +105,25 @@ class Builders {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Purge page cache when ACF options are saved.
+	 *
+	 * @since 2.7.1
+	 *
+	 * @param int|string $post_id  The ID of the post being edited.
+	 */
+	public function purge_page_cache( $post_id ) {
+		if ( defined( 'WPHB_PREVENT_CACHE_CLEAR_ACF' ) && WPHB_PREVENT_CACHE_CLEAR_ACF ) {
+			return;
+		}
+
+		if ( 'options' !== $post_id ) {
+			return;
+		}
+
+		do_action( 'wphb_clear_page_cache' );
 	}
 
 }

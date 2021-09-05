@@ -39,6 +39,7 @@ class Delete extends Task {
 		}
 
 		delete_transient( 'snapshot_listed_backups' );
+		delete_transient( 'snapshot_current_stats' );
 
 		Log::clear( $model->get( 'backup_id' ) );
 

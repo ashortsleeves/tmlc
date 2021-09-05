@@ -59,7 +59,7 @@ class Login_Lockout extends \Calotes\Model\Setting {
 	 * @rule required
 	 * @sanitize sanitize_textarea_field
 	 */
-	public $lockout_message = 'You have been locked out due to too many invalid login attempts.';
+	public $lockout_message = '';
 
 	/**
 	 * The blacklist username, if fail will be ban
@@ -77,11 +77,15 @@ class Login_Lockout extends \Calotes\Model\Setting {
 	 * @var array
 	 */
 	protected $rules = array(
-		array( array( 'enable' ), 'boolean' ),
+		array( array( 'enabled' ), 'boolean' ),
 		array( array( 'attempt', 'timeframe', 'duration' ), 'integer' ),
 		array( array( 'lockout_type' ), 'in', array( 'timeframe', 'permanent' ) ),
 		array( array( 'duration_unit' ), 'in', array( 'seconds', 'minutes', 'hours' ) ),
 	);
+
+	protected function before_load() {
+		$this->lockout_message = __( 'You have been locked out due to too many invalid login attempts.', 'wpdef' );
+	}
 
 	/**
 	 *  Return the blacklisted username as array
@@ -89,6 +93,13 @@ class Login_Lockout extends \Calotes\Model\Setting {
 	 * @return array
 	 */
 	public function get_blacklisted_username() {
+		/**
+		 * Since 2.4.7
+		 */
+		$usernames = apply_filters( 'wp_defender_banned_usernames', $this->username_blacklist );
+		if ( empty( $usernames ) ) {
+			return array();
+		}
 		$usernames = str_replace( PHP_EOL, ' ', $this->username_blacklist );
 		$usernames = explode( ' ', $usernames );
 		$usernames = array_map( 'trim', $usernames );
